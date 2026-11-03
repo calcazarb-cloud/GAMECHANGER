@@ -1,0 +1,600 @@
+<title>Imperia Prototipo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@700&family=Source+Sans+3:wght@500;700&display=swap">
+<style>
+/* Layout: full-screen strategy map with a resource bar on top and a context command tray at the bottom. Single committed parchment-and-bronze look. */
+:root{
+  --ink:#16130e; --panel:rgba(28,23,16,.9); --panel2:rgba(48,39,26,.95); --edge:rgba(230,200,140,.25); --text:#f4ead6; --muted:#c2b08c;
+  --gold:#e7b54a; --food:#e36b4f; --wood:#b98a52; --blue:#4fa3ff; --red:#ff5a4a; --good:#7bd88f;
+  --display:"Cormorant SC","Trajan Pro",Georgia,serif; --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html{box-sizing:border-box;height:100%}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{height:100%;margin:0;background:var(--ink);color:var(--text);font-family:var(--body);overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#app{position:relative;height:100%;max-width:560px;margin:0 auto;overflow:hidden;background:#0c0a07}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.top{position:absolute;left:0;right:0;top:0;display:flex;gap:6px;align-items:center;padding:8px max(8px,env(safe-area-inset-right,0px)) 0 max(8px,env(safe-area-inset-left,0px));pointer-events:none}
+.res{display:flex;gap:8px;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:6px 10px;font:700 14px var(--body);font-variant-numeric:tabular-nums;pointer-events:auto;flex-wrap:wrap}
+.res span{display:flex;align-items:center;gap:4px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.age{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:5px 9px;font:700 14px var(--display);color:var(--gold);white-space:nowrap}
+.sp{flex:1}
+.rb{width:36px;height:36px;border-radius:10px;background:var(--panel);border:1px solid var(--edge);font:700 13px var(--body);pointer-events:auto;padding:0}
+#mini{position:absolute;right:max(8px,env(safe-area-inset-right,0px));top:52px;width:72px;height:129px;border:1px solid var(--edge);border-radius:8px;background:#000}
+#toast{position:absolute;left:50%;top:56px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:6px 14px;font-weight:700;font-size:13px;max-width:calc(100% - 110px);text-align:center;pointer-events:none;transition:opacity .25s}
+.tray{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(12,10,7,.92) 28%);padding:22px max(8px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.btn{background:var(--panel2);border:1px solid var(--edge);border-radius:11px;padding:8px 10px;font:700 13px var(--body);display:flex;align-items:center;gap:6px;min-height:40px}
+.btn img{width:26px;height:26px;object-fit:contain}
+.btn small{font-weight:500;color:var(--muted);font-size:11px}
+.btn.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.btn:disabled{opacity:.42}
+.btn.gold{background:linear-gradient(#f0c766,#c98d24);color:#2a1a04;border:none}
+.btn.warn{border-color:rgba(255,120,90,.6)}
+.info{font-size:12.5px;color:var(--muted);line-height:1.35}
+.info b{color:var(--text)}
+.qbar{height:6px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden;width:100%}.qbar i{display:block;height:100%;background:var(--gold)}
+.cost{font:700 11px var(--body);color:var(--muted);display:flex;gap:4px}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:15;max-height:80%;overflow-y:auto;background:rgba(22,18,12,.98);border-top:1px solid var(--edge);border-radius:16px 16px 0 0;padding:14px max(14px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.sheet header{display:flex;align-items:center;gap:10px}
+.sheet h2{margin:0;flex:1;font:700 22px var(--display);color:var(--gold)}
+.x{width:34px;height:34px;border-radius:50%;background:var(--panel2);border:1px solid var(--edge);font:700 16px var(--body);padding:0}
+.slider{display:grid;grid-template-columns:86px 1fr 74px;gap:8px;align-items:center;font-size:13px}
+.slider b{display:flex;align-items:center;gap:6px}
+.slider input{width:100%;accent-color:var(--gold)}
+.slider span{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.toggle{display:flex;align-items:center;justify-content:space-between;background:var(--panel2);border:1px solid var(--edge);border-radius:12px;padding:10px 12px;font-size:13px}
+.blist{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bitem{display:flex;gap:8px;align-items:center;text-align:left;background:var(--panel2);border:1px solid var(--edge);border-radius:12px;padding:6px 8px}
+.bitem img{width:42px;height:42px;object-fit:contain}
+.bitem b{display:block;font-size:13px}
+.screen{position:absolute;inset:0;z-index:30;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:12px;background:linear-gradient(rgba(12,10,7,.1),rgba(12,10,7,.6) 35%,rgba(12,10,7,.97) 60%),var(--bg,none) center top/auto 58% no-repeat,#0c0a07;
+  padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.wrap{width:100%;max-width:440px;display:flex;flex-direction:column;gap:12px;margin-top:30vh}
+.logo{margin:0;font:700 clamp(40px,12vw,60px)/.9 var(--display);text-align:center;color:#f7dfa4;text-shadow:0 3px 10px rgba(0,0,0,.8);text-wrap:balance}
+.sub{margin:0;text-align:center;color:var(--muted);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.45;color:var(--muted)}
+.card b{color:var(--text)}
+.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.play{width:100%;font:700 24px var(--display);padding:13px;border-radius:14px;border:none;background:linear-gradient(#f0c766,#c98d24);color:#2a1a04;box-shadow:0 4px 0 #7a5212}
+.stats{display:flex;gap:16px;justify-content:center;font:700 22px var(--display)}
+.stats small{display:block;font:700 10px var(--body);letter-spacing:.1em;color:var(--muted);text-transform:uppercase;text-align:center}
+</style>
+
+<div id="app">
+  <canvas id="cv"></canvas>
+  <div class="top" id="topbar" hidden>
+    <div class="res"><span><i class="dot" style="background:var(--food)"></i><b id="rF">0</b></span><span><i class="dot" style="background:var(--wood)"></i><b id="rW">0</b></span><span><i class="dot" style="background:var(--gold)"></i><b id="rG">0</b></span><span>👤<b id="rP">0/0</b></span></div>
+    <div class="age" id="ageL"></div><div class="sp"></div>
+    <button class="rb" id="bPause" aria-label="Pausa">II</button>
+  </div>
+  <canvas id="mini" width="144" height="258" hidden></canvas>
+  <div id="toast" style="opacity:0"></div>
+  <div class="tray" id="tray" hidden></div>
+  <div class="sheet" id="sheet" hidden></div>
+  <div class="screen" id="screen"></div>
+</div>
+
+<script>
+(() => {
+const $=id=>document.getElementById(id);
+const K=1.8, WW=752*K, WH=1344*K;
+const rand=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const TC_COL=['#4fa3ff','#ff5a4a'];
+const SPEED=.85;
+
+/* ---------- Assets ---------- */
+const IMG={}; const NAMES=['map.jpg','key.jpg','tc.webp','house.webp','lumber.webp','mine.webp','barracks.webp','farm.webp','villager.webp','spear.webp','archer.webp','cav.webp','legion.webp','tree.webp','gold.webp'];
+let nload=0; const ready=new Promise(r=>{ for (const n of NAMES){ const im=new Image(); im.onload=im.onerror=()=>{ if(++nload===NAMES.length) r(); }; im.src='assets/'+n; IMG[n.split('.')[0]]=im; } });
+
+/* ---------- Definitions ---------- */
+const UT={
+  villager:{n:'Aldeano', hp:40, spd:38, dmg:3, range:10, cd:1.5, size:24, cost:{f:50}, time:16, cat:'eco'},
+  spear:   {n:'Lancero', hp:60, spd:40, dmg:6, range:12, cd:1.4, size:28, cost:{f:35,w:25}, time:16, cat:'inf', bonus:{cav:3}},
+  archer:  {n:'Arquero', hp:35, spd:40, dmg:5, range:115, cd:1.6, size:28, cost:{w:25,g:40}, time:18, cat:'arc', ranged:true, bonus:{spear:1.5,legion:.6}},
+  cav:     {n:'Caballero', hp:115, spd:68, dmg:9, range:14, cd:1.5, size:38, cost:{f:80,g:60}, time:22, cat:'cav', age:3, bonus:{archer:2}},
+  legion:  {n:'Legionario', hp:135, spd:34, dmg:10, range:12, cd:1.6, size:31, cost:{f:60,g:35}, time:20, cat:'inf', age:3, armorRanged:.5, unique:true},
+};
+const BT={
+  tc:      {n:'Centro urbano', hp:1500, r:58, w:120, cost:{w:9999}, time:120, drop:['food','wood','gold'], pop:10, trains:['villager']},
+  house:   {n:'Casa', hp:320, r:26, w:56, cost:{w:30}, time:14, pop:5, d:'+5 de población'},
+  lumber:  {n:'Aserradero', hp:420, r:30, w:66, cost:{w:100}, time:20, drop:['wood'], d:'Deposita madera cerca del bosque'},
+  mine:    {n:'Campamento minero', hp:420, r:30, w:66, cost:{w:100}, time:20, drop:['gold'], d:'Deposita oro cerca de la mina'},
+  farm:    {n:'Granja', hp:200, r:32, w:70, cost:{w:60}, time:12, food:true, d:'Comida sin fin, 2 granjeros'},
+  barracks:{n:'Cuartel', hp:850, r:44, w:96, cost:{w:150}, time:30, trains:['spear','archer','cav','legion'], d:'Entrena el ejército'},
+};
+const BUILD_LIST=['house','farm','lumber','mine','barracks'];
+const AGE_COST={f:500,g:150}, AGE_TIME=45;
+const JOBS=['food','wood','gold','build'], JN={food:'Comida',wood:'Madera',gold:'Oro',build:'Construir'}, JC={food:'var(--food)',wood:'var(--wood)',gold:'var(--gold)',build:'#9fb7c9'};
+const RATE={food:1,wood:.92,gold:.8};
+
+/* ---------- State ---------- */
+let G=null;
+const P=(x,y)=>({x:x*K,y:y*K});
+function newGame(){
+  G={t:0,E:[],projs:[],parts:[],texts:[],id:1,sel:[],selB:null,over:false,paused:false,
+     team:[{res:{food:320,wood:320,gold:180},plan:{food:40,wood:35,gold:25,build:0},assist:true,age:2,ageT:0,ageUp:false},{res:{food:320,wood:320,gold:180},plan:{food:45,wood:35,gold:20,build:0},assist:true,age:2,ageT:0,ageUp:false,wave:0,next:0}],
+     cam:{x:684,y:2050,z:.9}, place:null, stats:{kills:0,lost:0}};
+  // resources
+  const trees=[[150,1180],[200,1228],[110,1245],[245,1285],[170,1305],[60,1270],[520,1095],[590,1080],[655,1105],[715,1150],[705,1240],[650,1290],
+    [180,30],[245,80],[120,45],[225,150],[40,60],[560,40],[640,60],[715,40],
+    [60,380],[130,420],[200,360],[80,480],[250,440],[560,740],[620,780],[690,720],[600,840],[700,820]];
+  for (const [x,y] of trees) addRes('wood',x,y,160);
+  for (const [x,y] of [[670,925],[110,925],[85,170],[680,165]]) addRes('gold',x,y,1400);
+  for (const [x,y] of [[555,1212],[600,1236],[470,200],[520,232],[575,258]]) addRes('food',x,y,320);
+  // player base
+  const b0=[['tc',380,1205],['house',290,1268],['house',462,1278],['lumber',240,1212],['mine',622,968],['barracks',488,1165],['farm',380,1295]];
+  for (const [t,x,y] of b0) addBld(t,0,x*K,y*K,true);
+  const b1=[['tc',375,78],['house',275,40],['house',470,45],['lumber',215,105],['mine',125,215],['barracks',270,150],['farm',380,175]];
+  for (const [t,x,y] of b1) addBld(t,1,x*K,y*K,true);
+  for (const team of [0,1]){
+    const tc=G.E.find(e=>e.kind==='bld'&&e.type==='tc'&&e.team===team);
+    for (let i=0;i<9;i++) addUnit('villager',team,tc.x+rand(-70,70),tc.y+(team?80:-80)+rand(-20,20));
+    for (let i=0;i<3;i++) addUnit('spear',team,tc.x+rand(-60,60),tc.y+(team?140:-150));
+    for (let i=0;i<2;i++) addUnit('archer',team,tc.x+rand(-60,60),tc.y+(team?170:-180));
+  }
+  G.team[1].next=200;
+  resize(); $('topbar').hidden=false; $('tray').hidden=false; $('mini').hidden=false; $('screen').hidden=true;
+  renderTray(); toast('Tus aldeanos trabajan solos. Abre el Plan económico para elegir prioridades.');
+}
+function addRes(rtype,x,y,amt){ const e={id:G.id++,kind:'res',rtype,x:x*K,y:y*K,r:rtype==='gold'?34:rtype==='wood'?24:20,amount:amt,max:amt,prio:false,team:-1}; G.E.push(e); return e; }
+function addBld(type,team,x,y,done){ const D=BT[type]; const e={id:G.id++,kind:'bld',type,D,team,x,y,r:D.r,hp:done?D.hp:1,maxHp:D.hp,done,prog:done?1:0,queue:[],qT:0,repeat:null,rally:null,atk:0,farmers:0}; G.E.push(e); return e; }
+function addUnit(type,team,x,y){ const D=UT[type]; const e={id:G.id++,kind:'unit',type,D,team,x,y,r:D.size*.36,hp:D.hp,maxHp:D.hp,state:'idle',job:null,manual:false,target:null,tx:x,ty:y,carry:{k:null,n:0},atk:0,face:1,flash:0,am:false,idleT:0,bob:Math.random()*6}; G.E.push(e); return e; }
+const units=team=>G.E.filter(e=>e.kind==='unit'&&e.team===team&&e.hp>0);
+const blds=team=>G.E.filter(e=>e.kind==='bld'&&e.team===team&&e.hp>0);
+function popOf(team){ return units(team).length + blds(team).reduce((a,b)=>a+b.queue.filter(q=>UT[q]).length*0,0); }
+function capOf(team){ return Math.min(120, blds(team).filter(b=>b.done&&b.D.pop).reduce((a,b)=>a+b.D.pop,0)); }
+function canPay(team,c){ const r=G.team[team].res; return (r.food>=(c.f||0))&&(r.wood>=(c.w||0))&&(r.gold>=(c.g||0)); }
+function pay(team,c){ const r=G.team[team].res; r.food-=c.f||0; r.wood-=c.w||0; r.gold-=c.g||0; }
+function refund(team,c){ const r=G.team[team].res; r.food+=c.f||0; r.wood+=c.w||0; r.gold+=c.g||0; }
+function costTxt(c){ return [c.f?`<span style="color:var(--food)">${c.f}</span>`:'',c.w?`<span style="color:var(--wood)">${c.w}</span>`:'',c.g?`<span style="color:var(--gold)">${c.g}</span>`:''].join(' '); }
+
+/* ---------- Economy AI (both teams use it) ---------- */
+function planner(team){
+  const T=G.team[team], vs=units(team).filter(u=>u.type==='villager'&&!u.manual);
+  const sites=blds(team).filter(b=>!b.done).length;
+  if (T.assist) assist(team);
+  const plan={...T.plan}; if (!sites){ const b=plan.build; plan.build=0; const s=plan.food+plan.wood+plan.gold||1; for (const k of ['food','wood','gold']) plan[k]+=b*plan[k]/s; }
+  const N=vs.length, want={}; let tot=0;
+  for (const k of JOBS){ want[k]=Math.floor(N*plan[k]/100); tot+=want[k]; }
+  const order=JOBS.slice().sort((a,b)=>(N*plan[b]/100%1)-(N*plan[a]/100%1)); let i=0; while (tot<N){ want[order[i%4]]++; tot++; i++; }
+  if (sites && want.build===0 && N>2) { want.build=1; const big=['food','wood','gold'].sort((a,b)=>want[b]-want[a])[0]; want[big]--; }
+  const have={food:0,wood:0,gold:0,build:0}; for (const v of vs) if (v.job) have[v.job]++;
+  const free=vs.filter(v=>!v.job);
+  for (const k of JOBS){ let extra=have[k]-want[k]; if (extra>0){ const c=vs.filter(v=>v.job===k).sort((a,b)=>a.carry.n-b.carry.n); for (let j=0;j<extra;j++){ c[j].job=null; free.push(c[j]); have[k]--; } } }
+  for (const k of JOBS) while (have[k]<want[k] && free.length){ const v=free.pop(); setJob(v,k); have[k]++; }
+}
+function assist(team){
+  const T=G.team[team]; if (team===1) return;
+  const pop=units(team).length, cap=capOf(team), sites=blds(team).filter(b=>!b.done).length;
+  let p={food:42,wood:33,gold:25,build:0};
+  if (sites) p.build=15;
+  if (T.age<3 && T.res.food>=AGE_COST.f*.7) { p.gold+=8; p.food-=8; }
+  if (cap-pop<=2) { p.wood+=8; p.food-=8; }
+  const s=p.food+p.wood+p.gold+p.build; for (const k in p) p[k]=Math.round(p[k]*100/s);
+  T.plan=p;
+}
+function setJob(v,k){ v.job=k; v.state='idle'; v.target=null; }
+function nearestNode(v,rtype){
+  let best=null, bd=1e9;
+  for (const e of G.E){
+    if (e.kind==='res' && e.rtype===rtype && e.amount>0){ const lim=rtype==='food'?4:6; const n=G.E.filter(u=>u.kind==='unit'&&u.target===e).length; if (n>=lim) continue; let d=dist(v,e); if (e.prio && v.team===0) d*=.35; if (d<bd){bd=d;best=e;} }
+    else if (rtype==='food' && e.kind==='bld' && e.type==='farm' && e.done && e.team===v.team && e.hp>0){ const n=G.E.filter(u=>u.kind==='unit'&&u.target===e).length; if (n>=2) continue; const d=dist(v,e)*.9; if (d<bd){bd=d;best=e;} }
+  }
+  return best;
+}
+function nearestDrop(v,k){ let best=null,bd=1e9; for (const b of blds(v.team)){ if (!b.done||!b.D.drop||!b.D.drop.includes(k)) continue; const d=dist(v,b); if (d<bd){bd=d;best=b;} } return best; }
+function nearestSite(v){ let best=null,bd=1e9; for (const b of blds(v.team)){ if (b.done) continue; const d=dist(v,b); if (d<bd){bd=d;best=b;} } return best; }
+
+/* ---------- Units ---------- */
+function moveTo(u,x,y,dt,stop){ const dx=x-u.x, dy=y-u.y, d=Math.hypot(dx,dy); if (d<=(stop||3)) return true; const s=Math.min(d,u.D.spd*dt); u.x+=dx/d*s; u.y+=dy/d*s; if (Math.abs(dx)>1) u.face=dx>0?1:-1; return false; }
+function enemyNear(u,R){ let best=null,bd=R; for (const e of G.E){ if (e.hp<=0||e.team===u.team||e.team<0||(e.kind!=='unit'&&e.kind!=='bld')) continue; const d=dist(u,e)-(e.kind==='bld'?e.r:0); if (d<bd){bd=d;best=e;} } return best; }
+function hit(t,dmg,src){
+  if (t.hp<=0) return;
+  let m=1; if (src && src.D && src.D.bonus && t.kind==='unit') m=src.D.bonus[t.type]||1;
+  if (src && src.D && src.D.ranged && t.D && t.D.armorRanged) m*=t.D.armorRanged;
+  if (t.kind==='bld' && src && src.type!=='tc') m*= src.type==='villager'?.4:.6;
+  t.hp-=dmg*m; t.flash=.12;
+  if (t.kind==='unit' && t.state!=='attack' && !t.target && t.D.cat!=='eco' && src && src.hp>0) { t.target=src; t.state='attack'; }
+  if (t.team===1 && t.kind==='bld' && src) G.team[1].underAttack=G.t;
+  if (t.team===0 && src && src.team===1) G.alarm=G.t;
+  if (t.hp<=0) die(t,src);
+}
+function die(t,src){
+  t.hp=0;
+  burst(t.x,t.y,t.kind==='bld'?'#8a7a66':'#b33', t.kind==='bld'?30:10, t.kind==='bld'?90:50);
+  if (t.kind==='unit'){ if (t.team===1) G.stats.kills++; else G.stats.lost++; }
+  if (t.kind==='bld'){ if (t.type==='tc') return endGame(t.team===1); if (!t.done && t.team===0) {} }
+  G.sel=G.sel.filter(e=>e!==t); if (G.selB===t) G.selB=null;
+}
+function updUnit(u,dt){
+  u.flash=Math.max(0,u.flash-dt); u.atk-=dt; u.bob+=dt*8;
+  const D=u.D;
+  // combat
+  if (u.target && (u.target.hp<=0 || (u.target.kind==='res'&&u.target.amount<=0))) { u.target=null; if (u.state==='attack') u.state='idle'; }
+  if (u.state==='attack' && u.target){
+    const t=u.target, R=D.range+u.r+(t.kind==='bld'?t.r:t.r);
+    if (dist(u,t)>R) moveTo(u,t.x,t.y,dt,R-2);
+    else if (u.atk<=0){ u.atk=D.cd; u.face=t.x>u.x?1:-1; if (D.ranged) G.projs.push({x:u.x,y:u.y-14,t,dmg:D.dmg,src:u,spd:320}); else { hit(t,D.dmg,u); burst(t.x,t.y-8,'#ddd',3,30); } }
+    return;
+  }
+  if (u.type==='villager') return updVillager(u,dt);
+  // military
+  if (u.state==='move'){ if (u.am){ const e=enemyNear(u,130); if (e){ u.target=e; u.state='attack'; return; } } if (moveTo(u,u.tx,u.ty,dt,4)) { u.state='idle'; } return; }
+  const e=enemyNear(u,D.ranged?150:120); if (e){ u.target=e; u.state='attack'; }
+}
+function updVillager(v,dt){
+  if (v.state==='move'){ if (moveTo(v,v.tx,v.ty,dt,4)){ v.state='idle'; v.idleT=0; } return; }
+  if (v.state==='flee'){ if (moveTo(v,v.tx,v.ty,dt,10)) v.state='idle'; return; }
+  const job=v.job;
+  if (!job){ v.idleT+=dt; return; }
+  if (job==='build'){
+    let s=v.target&&v.target.kind==='bld'&&!v.target.done&&v.target.hp>0?v.target:null;
+    if (!s){ s=nearestSite(v); v.target=s; }
+    if (!s){ if (v.manual){ v.manual=false; } v.job=null; return; }
+    if (dist(v,s)>s.r+v.r+6){ moveTo(v,s.x,s.y,dt,s.r+v.r+4); return; }
+    s.prog+=dt/s.D.time*SPEED*1.6; s.hp=Math.min(s.maxHp,s.hp+s.maxHp*dt/s.D.time*1.6);
+    if (Math.random()<.1) burst(s.x+rand(-s.r,s.r)*.6,s.y-rand(0,s.r),'#d9b36b',1,20);
+    if (s.prog>=1){ s.prog=1; s.done=true; s.hp=Math.max(s.hp,s.maxHp*.98); if (s.team===0) toast(s.D.n+' terminado'); v.target=null; if (v.manual){ v.manual=false; v.job=null; } }
+    return;
+  }
+  // gather
+  if (v.carry.n>=10 || (v.carry.k && v.carry.k!==job && v.carry.n>0)){
+    const dp=nearestDrop(v,v.carry.k); if (!dp) return;
+    if (dist(v,dp)>dp.r+v.r+6){ moveTo(v,dp.x,dp.y,dt,dp.r+v.r+4); return; }
+    G.team[v.team].res[v.carry.k]+=v.carry.n; if (v.team===0) text(dp.x,dp.y-dp.r-10,'+'+Math.round(v.carry.n),v.carry.k==='food'?'#ff9a80':v.carry.k==='wood'?'#e0b07a':'#ffd36a'); v.carry={k:null,n:0}; return;
+  }
+  let n=v.target;
+  const ok = n && ((n.kind==='res'&&n.amount>0&&n.rtype===job)||(n.kind==='bld'&&n.type==='farm'&&n.hp>0&&job==='food'));
+  if (!ok){ n=nearestNode(v,job); v.target=n; if (!n){ v.idleT+=dt; return; } }
+  if (dist(v,n)>n.r+v.r+4){ moveTo(v,n.x,n.y,dt,n.r+v.r+2); return; }
+  const amt=RATE[job]*dt*SPEED*(v.team===1?.92:1)*(G.team[v.team].age>=3?1.15:1);
+  if (n.kind==='res'){ const a=Math.min(amt,n.amount); n.amount-=a; v.carry.k=job; v.carry.n+=a; if (n.amount<=0){ n.hp=0; v.target=null; } }
+  else { v.carry.k='food'; v.carry.n+=amt*.85; }
+  v.face=n.x>v.x?1:-1;
+  if (Math.random()<.04) burst(n.x+rand(-8,8),n.y-6,job==='wood'?'#a77b45':job==='gold'?'#ffd36a':'#e8c060',2,25);
+}
+
+/* ---------- Buildings ---------- */
+function updBld(b,dt){
+  b.flash=Math.max(0,(b.flash||0)-dt);
+  if (!b.done) return;
+  if (b.type==='tc'){ b.atk-=dt; if (b.atk<=0){ const e=enemyNear(b,190); if (e && e.kind==='unit'){ b.atk=1.6; G.projs.push({x:b.x,y:b.y-60,t:e,dmg:7,src:b,spd:340,arrow:true}); } } }
+  const T=G.team[b.team];
+  if (b.queue.length){
+    const q=b.queue[0];
+    if (q==='age'){ b.qT+=dt*SPEED; if (b.qT>=AGE_TIME){ b.queue.shift(); b.qT=0; T.age=3; T.ageUp=false; if (b.team===0){ toast('¡Entraste en la Edad del Hierro! Caballería y legionarios disponibles.'); renderTray(); } } return; }
+    if (units(b.team).length>=capOf(b.team)){ if (b.team===0 && !b.popWarn){ b.popWarn=true; toast('Población al límite: construye casas'); } return; }
+    b.popWarn=false;
+    b.qT+=dt*SPEED;
+    if (b.qT>=UT[q].time){ b.qT=0; b.queue.shift(); const u=addUnit(q,b.team,b.x+rand(-20,20),b.y+(b.team?b.r+16:-b.r-16)+rand(-8,8));
+      if (q!=='villager' && b.rally){ u.tx=b.rally.x+rand(-24,24); u.ty=b.rally.y+rand(-24,24); u.state='move'; u.am=true; }
+      if (q==='villager' && b.rally){ u.tx=b.rally.x; u.ty=b.rally.y; u.state='move'; }
+      if (b.repeat && canPay(b.team,UT[b.repeat].cost)){ pay(b.team,UT[b.repeat].cost); b.queue.push(b.repeat); }
+      if (b.team===0) renderTray(true); }
+  }
+}
+function train(b,type){ const D=UT[type]; if (D.age && G.team[b.team].age<D.age) return false; if (b.queue.length>=6) return false; if (!canPay(b.team,D.cost)) { if (b.team===0) toast('No alcanzan los recursos'); return false; } pay(b.team,D.cost); b.queue.push(type); return true; }
+function ageUp(b){ const T=G.team[b.team]; if (T.age>=3||T.ageUp) return; if (!canPay(b.team,AGE_COST)) { if (b.team===0) toast('Necesitas 500 de comida y 150 de oro'); return; } pay(b.team,AGE_COST); T.ageUp=true; b.queue.unshift('age'); b.qT=0; }
+function canPlace(type,x,y,team){
+  const r=BT[type].r; if (x<r||y<r||x>WW-r||y>WH-r) return false;
+  for (const e of G.E){ if (e.hp<=0&&e.kind!=='res') continue; if (e.kind==='res'&&e.amount<=0) continue; if (e.kind==='unit') continue; if (Math.hypot(e.x-x,e.y-y)<e.r+r+6) return false; }
+  return true;
+}
+function placeBld(type,team,x,y){ const D=BT[type]; if (!canPay(team,D.cost)||!canPlace(type,x,y,team)) return null; pay(team,D.cost); return addBld(type,team,x,y,false); }
+
+/* ---------- Enemy commander (computer) ---------- */
+function aiTick(){
+  const T=G.team[1], us=units(1), vs=us.filter(u=>u.type==='villager'), army=us.filter(u=>u.type!=='villager'), bs=blds(1), tc=bs.find(b=>b.type==='tc'), bar=bs.find(b=>b.type==='barracks'&&b.done);
+  if (!tc) return;
+  const pop=us.length, cap=capOf(1), sites=bs.filter(b=>!b.done).length;
+  T.plan = sites ? {food:40,wood:33,gold:15,build:12} : {food:46,wood:34,gold:20,build:0};
+  if (T.age<3 && G.t>180) T.plan={food:48,wood:20,gold:32,build:sites?10:0};
+  const spot=(type)=>{ for (let i=0;i<30;i++){ const a=rand(0,Math.PI*2), d=rand(140,260); const x=tc.x+Math.cos(a)*d, y=clamp(tc.y+Math.abs(Math.sin(a))*d,60,600); if (canPlace(type,x,y,1)) return {x,y}; } return null; };
+  if (cap-pop<=3 && cap<120 && !bs.some(b=>b.type==='house'&&!b.done) && T.res.wood>=30){ const s=spot('house'); if (s) placeBld('house',1,s.x,s.y); }
+  const foodNodes=G.E.filter(e=>e.kind==='res'&&e.rtype==='food'&&e.amount>0&&e.y<900).length, farms=bs.filter(b=>b.type==='farm').length;
+  if (foodNodes<2 && farms<Math.ceil(vs.length/4) && T.res.wood>=60 && sites<2){ const s=spot('farm'); if (s) placeBld('farm',1,s.x,s.y); }
+  if (vs.length<20 && tc.queue.length<1) train(tc,'villager');
+  if (T.age<3 && !T.ageUp && G.t>200 && canPay(1,AGE_COST)) ageUp(tc);
+  if (bar && bar.queue.length<2){
+    const pl=units(0); const pc=pl.filter(u=>u.type==='cav').length, pa=pl.filter(u=>u.type==='archer').length, pi=pl.filter(u=>u.D.cat==='inf').length;
+    let pick = pc>pa && pc>=pi ? 'spear' : pa>pi ? (T.age>=3?'cav':'spear') : (T.age>=3?(Math.random()<.5?'legion':'cav'):'archer');
+    if (!train(bar,pick)) train(bar, T.age>=3?'legion':'spear');
+    if (!bar.rally) bar.rally={x:tc.x,y:tc.y+170};
+  }
+  // defend
+  const threat=units(0).find(u=>u.D.cat!=='eco' && dist(u,tc)<480);
+  if (threat){ for (const a of army) if (a.state!=='attack'){ a.target=threat; a.state='attack'; } return; }
+  // attack waves
+  const need=7+T.wave*3;
+  if (G.t>=T.next && army.length>=need){
+    const ptc=blds(0).find(b=>b.type==='tc'); if (!ptc) return;
+    T.wave++; T.next=G.t+110;
+    for (const a of army){ a.tx=ptc.x+rand(-60,60); a.ty=ptc.y+rand(-60,60); a.state='move'; a.am=true; a.target=null; }
+    toast('⚔ ¡El enemigo ataca tu ciudad! Oleada '+T.wave); G.alarm=G.t;
+  }
+}
+
+/* ---------- Main loop ---------- */
+let plannerT=0, aiT=0;
+function update(dt){
+  G.t+=dt;
+  plannerT-=dt; if (plannerT<=0){ plannerT=1; planner(0); planner(1); }
+  aiT-=dt; if (aiT<=0){ aiT=2; aiTick(); }
+  for (const e of G.E){ if (e.hp<=0 && e.kind!=='res') continue; if (e.kind==='unit') updUnit(e,dt*SPEED); else if (e.kind==='bld') updBld(e,dt); if (G.over) return; }
+  // separation
+  const us=G.E.filter(e=>e.kind==='unit'&&e.hp>0);
+  for (let i=0;i<us.length;i++) for (let j=i+1;j<us.length;j++){ const a=us[i], b=us[j], dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy), m=a.r+b.r; if (d<m&&d>0){ const p=(m-d)/2; a.x-=dx/d*p; a.y-=dy/d*p; b.x+=dx/d*p; b.y+=dy/d*p; } }
+  for (const u of us){ for (const b of G.E){ if (b.kind!=='bld'||b.hp<=0) continue; const d=dist(u,b), m=b.r*.8+u.r; if (d<m&&d>0 && !(u.target===b)){ u.x=b.x+(u.x-b.x)/d*m; u.y=b.y+(u.y-b.y)/d*m; } } u.x=clamp(u.x,8,WW-8); u.y=clamp(u.y,8,WH-8); }
+  for (const p of G.projs){ const t=p.t; if (t.hp<=0){ p.done=true; continue; } const dx=t.x-p.x, dy=(t.y-12)-p.y, d=Math.hypot(dx,dy), s=p.spd*dt; p.a=Math.atan2(dy,dx); if (d<=s+3){ p.done=true; hit(t,p.dmg,p.src); } else { p.x+=dx/d*s; p.y+=dy/d*s; } }
+  G.projs=G.projs.filter(p=>!p.done);
+  G.E=G.E.filter(e=>!(e.kind==='unit'&&e.hp<=0) && !(e.kind==='res'&&e.amount<=0));
+  for (const p of G.parts){ p.l-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; } G.parts=G.parts.filter(p=>p.l>0);
+  for (const x of G.texts) x.a+=dt; G.texts=G.texts.filter(x=>x.a<1);
+  G.sel=G.sel.filter(e=>e.hp>0); if (G.selB && G.selB.hp<=0) G.selB=null;
+}
+function burst(x,y,c,n,s){ for (let i=0;i<n;i++){ const a=Math.random()*6.28, v=rand(.3,1)*s; G.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-10,l:rand(.3,.8),c}); } if (G.parts.length>500) G.parts.splice(0,100); }
+function text(x,y,t,c){ G.texts.push({x,y,t,c,a:0}); }
+let toastT=0; function toast(m){ const el=$('toast'); el.textContent=m; el.style.opacity=1; clearTimeout(toastT); toastT=setTimeout(()=>el.style.opacity=0,Math.max(2400,m.length*55)); }
+
+/* ---------- Rendering ---------- */
+const cv=$('cv'), ctx=cv.getContext('2d'); let SW=0,SH=0,DPR=1;
+function resize(){ const r=$('app').getBoundingClientRect(); SW=r.width; SH=r.height; DPR=Math.min(2,devicePixelRatio||1); cv.width=SW*DPR; cv.height=SH*DPR; }
+new ResizeObserver(resize).observe($('app'));
+const minZ=()=>Math.max(SW/WW, .3);
+function clampCam(){ const c=G.cam; c.z=clamp(c.z,minZ(),1.5); const hw=SW/2/c.z, hh=SH/2/c.z; c.x=clamp(c.x,Math.min(hw,WW/2),Math.max(WW-hw,WW/2)); c.y=clamp(c.y,Math.min(hh-60/c.z,WH/2),Math.max(WH-hh+140/c.z,WH/2)); }
+const toWorld=(sx,sy)=>({x:(sx-SW/2)/G.cam.z+G.cam.x, y:(sy-SH/2)/G.cam.z+G.cam.y});
+function sprite(name,x,y,w,alpha,flip){ const im=IMG[name]; const h=w*(im.naturalHeight/im.naturalWidth||1); ctx.save(); ctx.globalAlpha=alpha??1; ctx.translate(x,y); if (flip) ctx.scale(-1,1); ctx.drawImage(im,-w/2,-h*.78,w,h); ctx.restore(); return h; }
+function bar(x,y,w,r,c){ ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillRect(x-w/2-1,y-1,w+2,5); ctx.fillStyle=c; ctx.fillRect(x-w/2,y,w*clamp(r,0,1),3); }
+function draw(){
+  clampCam(); const c=G.cam;
+  ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#0c0a07'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.setTransform(DPR*c.z,0,0,DPR*c.z,DPR*(SW/2-c.x*c.z),DPR*(SH/2-c.y*c.z));
+  ctx.drawImage(IMG.map,0,0,WW,WH);
+  const objs=G.E.filter(e=>e.hp>0||e.kind==='res').sort((a,b)=>a.y-b.y);
+  // selection rings below
+  for (const e of G.sel){ ctx.strokeStyle='#7bd88f'; ctx.lineWidth=2/c.z; ctx.beginPath(); ctx.ellipse(e.x,e.y+2,e.r+5,(e.r+5)*.5,0,0,7); ctx.stroke(); }
+  if (G.selB){ const b=G.selB; ctx.strokeStyle='#7bd88f'; ctx.lineWidth=2.5/c.z; ctx.beginPath(); ctx.ellipse(b.x,b.y,b.r+10,(b.r+10)*.55,0,0,7); ctx.stroke(); if (b.rally){ ctx.setLineDash([6/c.z,6/c.z]); ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(b.rally.x,b.rally.y); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle='#7bd88f'; ctx.beginPath(); ctx.arc(b.rally.x,b.rally.y,5/c.z+2,0,7); ctx.fill(); } }
+  for (const e of objs){
+    if (e.kind==='res'){
+      if (e.rtype==='wood') sprite('tree',e.x,e.y+8,58);
+      else if (e.rtype==='gold') sprite('gold',e.x,e.y+12,76);
+      else { ctx.fillStyle='rgba(170,30,50,.85)'; for (let i=0;i<7;i++){ const a=i*.9, rr=e.r*.6*(i%3+1)/3; ctx.beginPath(); ctx.arc(e.x+Math.cos(a)*rr,e.y+Math.sin(a)*rr*.6,3.2,0,7); ctx.fill(); } ctx.strokeStyle='rgba(120,200,90,.4)'; ctx.lineWidth=1; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.r,e.r*.6,0,0,7); ctx.stroke(); }
+      if (e.prio){ ctx.fillStyle='#e7b54a'; ctx.fillRect(e.x+e.r*.4,e.y-e.r-26,2,22); ctx.beginPath(); ctx.moveTo(e.x+e.r*.4+2,e.y-e.r-26); ctx.lineTo(e.x+e.r*.4+16,e.y-e.r-20); ctx.lineTo(e.x+e.r*.4+2,e.y-e.r-14); ctx.fill(); }
+      if (e.amount<e.max && (c.z>.8 || e.prio)) bar(e.x,e.y+e.r*.6+4,28,e.amount/e.max,e.rtype==='gold'?'#ffd36a':e.rtype==='wood'?'#c49a62':'#ff8a70');
+    } else if (e.kind==='bld'){
+      ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(e.x,e.y+4,e.r*1.05,e.r*.5,0,0,7); ctx.fill();
+      const h=sprite(e.type,e.x,e.y+e.r*.35,e.D.w*(e.type==='tc'&&G.team[e.team].age>=3?1.08:1),e.done?1:.45+.5*e.prog);
+      ctx.fillStyle=TC_COL[e.team]; const fy=e.y+e.r*.35-h*.78; ctx.fillRect(e.x-e.D.w*.32,fy-2,2,16); ctx.beginPath(); ctx.moveTo(e.x-e.D.w*.32+2,fy-2); ctx.lineTo(e.x-e.D.w*.32+14,fy+3); ctx.lineTo(e.x-e.D.w*.32+2,fy+8); ctx.fill();
+      if (e.flash>0){ ctx.globalAlpha=.25; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(e.x,e.y-e.r*.3,e.r,e.r*.7,0,0,7); ctx.fill(); ctx.globalAlpha=1; }
+      if (!e.done) bar(e.x,e.y-h*.5,e.D.w*.6,e.prog,'#e7b54a');
+      else if (e.hp<e.maxHp || G.selB===e) bar(e.x,e.y-h*.62,e.D.w*.55,e.hp/e.maxHp,TC_COL[e.team]);
+      if (e.queue.length && e.done) bar(e.x,e.y+e.r*.55+6,e.D.w*.5,e.queue[0]==='age'?e.qT/AGE_TIME:e.qT/UT[e.queue[0]].time,'#fff');
+    } else {
+      const D=e.D;
+      ctx.fillStyle='rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(e.x,e.y+1,e.r*1.3,e.r*.6,0,0,7); ctx.fill();
+      ctx.strokeStyle=TC_COL[e.team]; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(e.x,e.y+1,e.r*1.1,e.r*.52,0,0,7); ctx.stroke();
+      const moving=(e.state==='move'||e.state==='flee'); const by=moving?Math.abs(Math.sin(e.bob))*1.5:0;
+      sprite(e.type,e.x,e.y-by+2,D.size,1,e.face<0);
+      if (e.flash>0){ ctx.globalAlpha=.4; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(e.x,e.y-D.size*.4,e.r,0,7); ctx.fill(); ctx.globalAlpha=1; }
+      if (e.carry.n>0){ ctx.fillStyle=e.carry.k==='food'?'#ff8a70':e.carry.k==='wood'?'#c49a62':'#ffd36a'; ctx.fillRect(e.x+e.r*.6,e.y-D.size*.55,5,5); }
+      if (e.team===1){ ctx.fillStyle='#ff5a4a'; ctx.beginPath(); ctx.moveTo(e.x,e.y-D.size*.98); ctx.lineTo(e.x+4,e.y-D.size*.98-6); ctx.lineTo(e.x-4,e.y-D.size*.98-6); ctx.fill(); }
+      if (e.hp<e.maxHp || G.sel.includes(e)) bar(e.x,e.y-D.size*.92,18,e.hp/e.maxHp,e.team?'#ff6a5a':'#7bd88f');
+    }
+  }
+  if (G.place){ const p=G.place, ok=canPlace(p.type,p.x,p.y,0); ctx.globalAlpha=.6; sprite(p.type,p.x,p.y+BT[p.type].r*.35,BT[p.type].w); ctx.globalAlpha=1; ctx.strokeStyle=ok?'#7bd88f':'#ff5a4a'; ctx.lineWidth=3/c.z; ctx.beginPath(); ctx.ellipse(p.x,p.y,BT[p.type].r,BT[p.type].r*.55,0,0,7); ctx.stroke(); }
+  ctx.strokeStyle='#f3e2b0'; ctx.lineWidth=1.6;
+  for (const p of G.projs){ const a=p.a||0; ctx.beginPath(); ctx.moveTo(p.x-Math.cos(a)*9,p.y-Math.sin(a)*9); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+  for (const p of G.parts){ ctx.globalAlpha=clamp(p.l*2,0,1); ctx.fillStyle=p.c; ctx.fillRect(p.x-1.5,p.y-1.5,3,3); } ctx.globalAlpha=1;
+  ctx.font='700 12px "Source Sans 3",sans-serif'; ctx.textAlign='center';
+  for (const x of G.texts){ ctx.globalAlpha=1-x.a; ctx.fillStyle=x.c; ctx.fillText(x.t,x.x,x.y-x.a*18); } ctx.globalAlpha=1;
+  if (drag && drag.mode==='box'){ const a=drag.w0, b=drag.w1; ctx.strokeStyle='#7bd88f'; ctx.lineWidth=1.5/c.z; ctx.fillStyle='rgba(123,216,143,.12)'; ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y)); ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y)); }
+  drawMini();
+}
+const mini=$('mini'), mc=mini.getContext('2d');
+function drawMini(){
+  const k=mini.width/WW; mc.drawImage(IMG.map,0,0,mini.width,mini.height);
+  for (const e of G.E){ if (e.kind==='res'||e.hp<=0) continue; mc.fillStyle=TC_COL[e.team]; const s=e.kind==='bld'?5:2.4; mc.fillRect(e.x*k-s/2,e.y*k-s/2,s,s); }
+  const c=G.cam, hw=SW/2/c.z, hh=SH/2/c.z; mc.strokeStyle='#fff'; mc.lineWidth=2; mc.strokeRect((c.x-hw)*k,(c.y-hh)*k,hw*2*k,hh*2*k);
+}
+mini.addEventListener('pointerdown',e=>{ e.stopPropagation(); const r=mini.getBoundingClientRect(); G.cam.x=(e.clientX-r.left)/r.width*WW; G.cam.y=(e.clientY-r.top)/r.height*WH; });
+
+/* ---------- Input: one finger selects, two fingers move and zoom ---------- */
+const pts=new Map(); let drag=null, lastTap={t:0,type:null}, pinch=null;
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{
+  if (!G||G.over) return; cv.setPointerCapture(e.pointerId);
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const r=$('app').getBoundingClientRect(), sx=e.clientX-r.left, sy=e.clientY-r.top;
+  if (pts.size===2){ drag=null; const [a,b]=[...pts.values()]; pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mx:(a.x+b.x)/2,my:(a.y+b.y)/2}; return; }
+  if (e.button===2 || e.button===1){ drag={mode:'pan',sx,sy,cx:G.cam.x,cy:G.cam.y,btn:e.button}; return; }
+  drag={mode:'pending',sx,sy,t:performance.now(),w0:toWorld(sx,sy),w1:toWorld(sx,sy)};
+});
+cv.addEventListener('pointermove',e=>{
+  if (!pts.has(e.pointerId)) return; pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const r=$('app').getBoundingClientRect(), sx=e.clientX-r.left, sy=e.clientY-r.top;
+  if (pinch && pts.size>=2){ const [a,b]=[...pts.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y), mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    const before=toWorld(mx-r.left,my-r.top); G.cam.z*=d/pinch.d; clampCam(); const after=toWorld(mx-r.left,my-r.top); G.cam.x+=before.x-after.x; G.cam.y+=before.y-after.y;
+    G.cam.x-=(mx-pinch.mx)/G.cam.z; G.cam.y-=(my-pinch.my)/G.cam.z; pinch={d,mx,my}; return; }
+  if (!drag) return;
+  if (drag.mode==='pan'){ G.cam.x=drag.cx-(sx-drag.sx)/G.cam.z; G.cam.y=drag.cy-(sy-drag.sy)/G.cam.z; return; }
+  if (drag.mode==='pending' && Math.hypot(sx-drag.sx,sy-drag.sy)>12) drag.mode=G.place?'ghost':'box';
+  if (drag.mode==='box') drag.w1=toWorld(sx,sy);
+  if (drag.mode==='ghost'){ const w=toWorld(sx,sy); G.place.x=w.x; G.place.y=w.y-40/G.cam.z; }
+});
+const endPtr=e=>{
+  if (!pts.has(e.pointerId)) return; pts.delete(e.pointerId);
+  if (pinch){ if (pts.size<2) pinch=null; drag=null; return; }
+  if (!drag) return;
+  const r=$('app').getBoundingClientRect(), sx=e.clientX-r.left, sy=e.clientY-r.top;
+  if (drag.mode==='pending'){ if (e.button===2) command(toWorld(sx,sy)); else tap(toWorld(sx,sy)); }
+  else if (drag.mode==='pan' && drag.btn===2 && Math.hypot(sx-drag.sx,sy-drag.sy)<6) command(toWorld(sx,sy));
+  else if (drag.mode==='box') boxSelect(drag.w0,drag.w1);
+  else if (drag.mode==='ghost') renderTray();
+  drag=null;
+};
+cv.addEventListener('pointerup',endPtr); cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('wheel',e=>{ e.preventDefault(); const r=$('app').getBoundingClientRect(); const before=toWorld(e.clientX-r.left,e.clientY-r.top); G.cam.z*=e.deltaY<0?1.12:.89; clampCam(); const after=toWorld(e.clientX-r.left,e.clientY-r.top); G.cam.x+=before.x-after.x; G.cam.y+=before.y-after.y; },{passive:false});
+const keys={}; addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; if (e.key==='Escape'){ G&&(G.place=null,G.sel=[],G.selB=null); renderTray(); } }); addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+function keyPan(dt){ const s=520*dt/G.cam.z; if (keys.a||keys.arrowleft) G.cam.x-=s; if (keys.d||keys.arrowright) G.cam.x+=s; if (keys.w||keys.arrowup) G.cam.y-=s; if (keys.s||keys.arrowdown) G.cam.y+=s; }
+
+function pick(w){
+  const tol=10/G.cam.z; let best=null,bd=1e9;
+  for (const e of G.E){ if (e.kind!=='unit'||e.hp<=0) continue; const d=Math.hypot(e.x-w.x,(e.y-e.D.size*.35)-w.y); if (d<e.r+12+tol && d<bd){bd=d;best=e;} }
+  if (best) return best;
+  for (const e of G.E){ if (e.kind==='bld'&&e.hp>0){ if (Math.abs(e.x-w.x)<e.r*1.05 && w.y<e.y+e.r*.6 && w.y>e.y-e.r*1.6) return e; } }
+  for (const e of G.E){ if (e.kind==='res'&&e.amount>0&&Math.hypot(e.x-w.x,e.y-w.y)<e.r+14+tol) return e; }
+  return null;
+}
+function tap(w){
+  if (G.place){ G.place.x=w.x; G.place.y=w.y; renderTray(); return; }
+  const h=pick(w), now=performance.now();
+  if (h && h.kind==='unit' && h.team===0){
+    if (now-lastTap.t<380 && lastTap.type===h.type){ const c=G.cam, hw=SW/2/c.z, hh=SH/2/c.z; G.sel=units(0).filter(u=>u.type===h.type && Math.abs(u.x-c.x)<hw && Math.abs(u.y-c.y)<hh); }
+    else G.sel=[h];
+    G.selB=null; lastTap={t:now,type:h.type}; renderTray(); return;
+  }
+  if (h && h.kind==='bld' && h.team===0 && !G.sel.length){ G.selB=h; renderTray(); return; }
+  if (G.sel.length){ command(w,h); return; }
+  if (G.selB && G.selB.D.trains && !h){ G.selB.rally={x:w.x,y:w.y}; toast('Punto de reunión marcado'); return; }
+  if (h && h.kind==='res'){ h.prio=!h.prio; toast(h.prio?'Zona prioritaria: los aldeanos irán primero aquí':'Prioridad quitada'); return; }
+  G.sel=[]; G.selB=null; renderTray();
+}
+function command(w,h){
+  if (!G.sel.length) return; h=h===undefined?pick(w):h;
+  const mil=G.sel.filter(u=>u.type!=='villager'), vil=G.sel.filter(u=>u.type==='villager');
+  const enemy=h && h.team===1 && h.hp>0;
+  G.parts.push({x:w.x,y:w.y,vx:0,vy:0,l:.5,c:enemy?'#ff5a4a':'#7bd88f'});
+  mil.forEach((u,i)=>{ if (enemy){ u.target=h; u.state='attack'; } else { const a=i*2.4, rr=8*Math.sqrt(i)*1.6; u.tx=w.x+Math.cos(a)*rr; u.ty=w.y+Math.sin(a)*rr; u.state='move'; u.am=true; u.target=null; } });
+  for (const v of vil){
+    if (enemy){ v.target=h; v.state='attack'; continue; }
+    if (h && h.kind==='res'){ v.manual=true; v.job=h.rtype; v.target=h; v.state='idle'; continue; }
+    if (h && h.kind==='bld' && h.team===0 && !h.done){ v.manual=true; v.job='build'; v.target=h; v.state='idle'; continue; }
+    if (h && h.kind==='bld' && h.team===0 && h.type==='farm'){ v.manual=true; v.job='food'; v.target=h; v.state='idle'; continue; }
+    v.manual=true; v.job=null; v.target=null; v.tx=w.x+rand(-12,12); v.ty=w.y+rand(-12,12); v.state='move';
+  }
+}
+function boxSelect(a,b){
+  const x0=Math.min(a.x,b.x), x1=Math.max(a.x,b.x), y0=Math.min(a.y,b.y), y1=Math.max(a.y,b.y);
+  const inBox=units(0).filter(u=>u.x>=x0&&u.x<=x1&&u.y>=y0&&u.y<=y1);
+  const mil=inBox.filter(u=>u.type!=='villager');
+  G.sel = mil.length ? mil : inBox; G.selB=null; renderTray();
+}
+
+/* ---------- Tray (bottom commands) ---------- */
+let trayKey='';
+function renderTray(soft){
+  const tr=$('tray'); if (!G) return;
+  const T=G.team[0], us0=units(0), k=JSON.stringify([us0.filter(u=>u.type==='villager'&&!u.job&&u.state==='idle').length, ['inf','arc','cav'].map(c=>us0.filter(u=>u.D.cat===c).length), canPay(0,AGE_COST), G.sel.map(e=>e.id),G.selB&&G.selB.id,G.place&&G.place.type,T.age,T.ageUp,G.selB&&G.selB.queue.length,G.selB&&G.selB.repeat]);
+  if (soft && k===trayKey) return; trayKey=k;
+  let h='';
+  if (G.place){
+    const D=BT[G.place.type];
+    h=`<div class="info">Coloca <b>${D.n}</b>: toca o arrastra en el mapa · ${costTxt(D.cost)}</div><div class="row"><button class="btn gold" id="pOk">✓ Construir aquí</button><button class="btn" id="pNo">✕ Cancelar</button></div>`;
+  } else if (G.selB){
+    const b=G.selB, D=b.D;
+    h=`<div class="info"><b>${D.n}</b> · ${Math.ceil(b.hp)}/${b.maxHp}${b.done?'':' · en construcción '+Math.round(b.prog*100)+'%'}${D.trains?' · toca el mapa para marcar el punto de reunión':''}</div>`;
+    if (b.done && D.trains){
+      h+=`<div class="row">${D.trains.map(u=>{ const U=UT[u], lock=U.age&&T.age<U.age; return `<button class="btn" data-train="${u}" ${lock?'disabled':''}><img alt="" src="${IMG[u].src}"><span>${U.n}<br><small class="cost">${lock?'Edad del Hierro':costTxt(U.cost)}</small></span></button>`; }).join('')}</div>`;
+      h+=`<div class="row">${b.queue.length?`<span class="info">Cola: ${b.queue.map(q=>q==='age'?'Edad':UT[q].n).join(', ')}</span>`:''}<button class="btn ${b.repeat?'on':''}" id="rep">⟳ Repetir ${b.repeat?UT[b.repeat].n:'último'}</button></div>`;
+      if (b.type==='tc') h+=`<div class="row"><button class="btn gold" id="age" ${T.age>=3||T.ageUp?'disabled':''}>${T.age>=3?'Edad del Hierro alcanzada':T.ageUp?'Avanzando de edad…':'Avanzar a la Edad del Hierro'} <small class="cost">${T.age<3&&!T.ageUp?costTxt(AGE_COST):''}</small></button></div>`;
+    }
+    h+=`<div class="row"><button class="btn" id="close">✕ Cerrar</button></div>`;
+  } else if (G.sel.length){
+    const vil=G.sel.filter(u=>u.type==='villager').length, mil=G.sel.length-vil;
+    const counts={}; for (const u of G.sel) counts[u.D.n]=(counts[u.D.n]||0)+1;
+    h=`<div class="info"><b>${G.sel.length} seleccionados</b> · ${Object.entries(counts).map(([n,c])=>c+' '+n.toLowerCase()).join(', ')} · toca el mapa para dar la orden</div><div class="row">`;
+    if (vil) h+=`<button class="btn" id="build">🔨 Construir</button><button class="btn" id="plan2">↺ Volver al plan</button>`;
+    if (mil) h+=`<button class="btn" id="retreat">⟲ Retirada</button><button class="btn" id="stop">■ Detener</button>`;
+    h+=`<button class="btn" id="desel">✕</button></div>`;
+  } else {
+    const idle=units(0).filter(u=>u.type==='villager'&&!u.job&&u.state==='idle').length;
+    const cnt=c=>units(0).filter(u=>u.type!=='villager'&&(c==='all'||u.D.cat===c)).length;
+    h=`<div class="row"><button class="btn gold" id="plan">⚖ Plan económico</button><button class="btn" id="build">🔨 Construir</button>${idle?`<button class="btn warn" id="idle">💤 ${idle} sin trabajo</button>`:''}</div>
+      <div class="row"><button class="btn" data-grp="all">⚔ Todo ${cnt('all')}</button><button class="btn" data-grp="inf"><img alt="" src="${IMG.spear.src}">${cnt('inf')}</button><button class="btn" data-grp="arc"><img alt="" src="${IMG.archer.src}">${cnt('arc')}</button><button class="btn" data-grp="cav"><img alt="" src="${IMG.cav.src}">${cnt('cav')}</button><button class="btn" id="home">🏛</button></div>`;
+  }
+  tr.innerHTML=h;
+  const on=(id,f)=>{ const el=$(id); if (el) el.onclick=f; };
+  on('pOk',()=>{ const p=G.place; const b=placeBld(p.type,0,p.x,p.y); if (!b){ toast(canPay(0,BT[p.type].cost)?'No se puede construir ahí':'No alcanza la madera'); return; } const vil=G.sel.filter(u=>u.type==='villager'); for (const v of vil){ v.manual=true; v.job='build'; v.target=b; v.state='idle'; } G.place=null; toast(vil.length?'Tus aldeanos van a construir':'Los constructores del plan irán a construir'); renderTray(); });
+  on('pNo',()=>{ G.place=null; renderTray(); });
+  on('close',()=>{ G.selB=null; renderTray(); });
+  on('desel',()=>{ G.sel=[]; renderTray(); });
+  on('plan',openPlan); on('build',openBuild);
+  on('plan2',()=>{ for (const u of G.sel) if (u.type==='villager'){ u.manual=false; u.job=null; u.state='idle'; } toast('Aldeanos devueltos al plan económico'); G.sel=[]; renderTray(); });
+  on('retreat',()=>{ const tc=blds(0).find(b=>b.type==='tc'); for (const u of G.sel){ u.tx=tc.x+rand(-60,60); u.ty=tc.y-90+rand(-20,20); u.state='move'; u.am=false; u.target=null; } });
+  on('stop',()=>{ for (const u of G.sel){ u.state='idle'; u.target=null; } });
+  on('idle',()=>{ const v=units(0).filter(u=>u.type==='villager'&&!u.job&&u.state==='idle'); G.sel=v; if (v[0]){ G.cam.x=v[0].x; G.cam.y=v[0].y; } renderTray(); });
+  on('home',()=>{ const tc=blds(0).find(b=>b.type==='tc'); if (tc){ G.cam.x=tc.x; G.cam.y=tc.y-100; } });
+  on('rep',()=>{ const b=G.selB; b.repeat = b.repeat ? null : (b.lastT||b.D.trains[0]); renderTray(); });
+  on('age',()=>{ ageUp(G.selB); renderTray(); });
+  for (const el of tr.querySelectorAll('[data-train]')) el.onclick=()=>{ const b=G.selB; if (train(b,el.dataset.train)){ b.lastT=el.dataset.train; if (b.repeat) b.repeat=el.dataset.train; } renderTray(); };
+  for (const el of tr.querySelectorAll('[data-grp]')) el.onclick=()=>{ const g=el.dataset.grp; G.sel=units(0).filter(u=>u.type!=='villager'&&(g==='all'||u.D.cat===g)); G.selB=null; if (G.sel[0]){ const cx=G.sel.reduce((a,u)=>a+u.x,0)/G.sel.length, cy=G.sel.reduce((a,u)=>a+u.y,0)/G.sel.length; G.cam.x=cx; G.cam.y=cy; } renderTray(); };
+}
+function sheet(html){ const s=$('sheet'); s.innerHTML=html; s.hidden=false; const x=s.querySelector('.x'); if (x) x.onclick=()=>s.hidden=true; }
+function openPlan(){
+  const T=G.team[0];
+  const vs=units(0).filter(u=>u.type==='villager');
+  const cnt=k=>vs.filter(v=>v.job===k).length;
+  sheet(`<header><h2>Plan económico</h2><button class="x" aria-label="Cerrar">×</button></header>
+    <p class="info">Elige cómo repartir a tus <b>${vs.length} aldeanos</b>. Tocar un recurso sin nada seleccionado lo marca como <b>zona prioritaria</b>.</p>
+    ${JOBS.map(k=>`<div class="slider"><b><i class="dot" style="background:${JC[k]}"></i>${JN[k]}</b><input type="range" min="0" max="100" step="5" value="${Math.round(T.plan[k])}" data-k="${k}" id="sl-${k}" aria-label="${JN[k]}"><span id="sv-${k}">${Math.round(T.plan[k])}% · ${cnt(k)}</span></div>`).join('')}
+    <label class="toggle"><span><b>Asistente de economía</b><br><small class="info">El juego ajusta el plan solo según lo que necesitas.</small></span><input type="checkbox" id="assist" ${T.assist?'checked':''}></label>`);
+  for (const el of document.querySelectorAll('#sheet input[type=range]')) el.oninput=()=>{
+    T.assist=false; $('assist').checked=false;
+    const k=el.dataset.k, v=+el.value, others=JOBS.filter(j=>j!==k), rest=others.reduce((a,j)=>a+T.plan[j],0)||1;
+    T.plan[k]=v; for (const j of others) T.plan[j]=Math.max(0,(100-v)*T.plan[j]/rest);
+    for (const j of JOBS){ if (j!==k) $('sl-'+j).value=Math.round(T.plan[j]); $('sv-'+j).textContent=Math.round(T.plan[j])+'% · '+cnt(j); }
+    planner(0);
+  };
+  $('assist').onchange=e=>{ T.assist=e.target.checked; if (T.assist){ assist(0); openPlan(); } };
+}
+function openBuild(){
+  const T=G.team[0];
+  sheet(`<header><h2>Construir</h2><button class="x" aria-label="Cerrar">×</button></header>
+    <div class="blist">${BUILD_LIST.map(k=>{ const D=BT[k]; return `<button class="bitem" data-b="${k}" ${canPay(0,D.cost)?'':'disabled'}><img alt="" src="${IMG[k].src}"><span><b>${D.n}</b><small class="cost">${costTxt(D.cost)}</small><small class="info">${D.d}</small></span></button>`; }).join('')}</div>`);
+  for (const el of document.querySelectorAll('#sheet [data-b]')) el.onclick=()=>{ const c=toWorld(SW/2,SH/2-40); G.place={type:el.dataset.b,x:c.x,y:c.y}; $('sheet').hidden=true; renderTray(); };
+}
+$('bPause').onclick=()=>{ if (!G||G.over) return; G.paused=!G.paused; $('bPause').textContent=G.paused?'▶':'II'; toast(G.paused?'Pausa':'Continúa'); };
+
+/* ---------- HUD + screens ---------- */
+function hud(){
+  const T=G.team[0]; $('rF').textContent=Math.floor(T.res.food); $('rW').textContent=Math.floor(T.res.wood); $('rG').textContent=Math.floor(T.res.gold);
+  const pop=units(0).length, cap=capOf(0); $('rP').textContent=pop+'/'+cap; $('rP').style.color=pop>=cap?'var(--red)':'';
+  const s=Math.floor(G.t); $('ageL').textContent=(T.age>=3?'Hierro':'Bronce')+' · '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+}
+function showStart(){
+  const s=$('screen'); s.style.setProperty('--bg',`url("${IMG.key.src}")`); s.hidden=false;
+  s.innerHTML=`<div class="wrap"><h1 class="logo">Imperia</h1><p class="sub">Prototipo · partida rápida contra la computadora · Edad del Bronce</p>
+    <div class="card"><ul>
+      <li><b>Dos dedos</b> mueven el mapa y hacen zoom. <b>Un dedo arrastrando</b> selecciona tropas.</li>
+      <li><b>Toca</b> una tropa para elegirla, <b>doble toque</b> elige todas las de ese tipo, y luego <b>toca el mapa</b> para mandarlas.</li>
+      <li>Tus aldeanos trabajan solos. Usa el <b>Plan económico</b> para decidir cuánto va a comida, madera, oro y construcción.</li>
+      <li>Avanza a la <b>Edad del Hierro</b> desde el Centro urbano para desbloquear caballería y legionarios.</li>
+      <li>Gana quien destruya el <b>Centro urbano</b> rival. En computadora: rueda para zoom, clic derecho para mandar.</li>
+    </ul></div><button class="play" id="go">Jugar</button></div>`;
+  $('go').onclick=()=>newGame();
+}
+function endGame(won){
+  G.over=true;
+  setTimeout(()=>{ const s=$('screen'); s.hidden=false; const t=Math.floor(G.t);
+    s.innerHTML=`<div class="wrap"><h1 class="logo" style="color:${won?'#f7dfa4':'#ff8a7a'}">${won?'Victoria':'Derrota'}</h1><p class="sub">${won?'Destruiste el Centro urbano rival':'Tu Centro urbano cayó'} · ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</p>
+      <div class="stats"><div><small>Enemigos</small>${G.stats.kills}</div><div><small>Perdidos</small>${G.stats.lost}</div><div><small>Edad</small>${G.team[0].age>=3?'Hierro':'Bronce'}</div></div>
+      <button class="play" id="go">Jugar otra vez</button></div>`;
+    $('go').onclick=()=>newGame(); },1200);
+}
+let last=performance.now(), trayT=0;
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  if (G){ keyPan(dt); if (!G.paused&&!G.over) update(dt); draw(); hud(); trayT-=dt; if (trayT<=0){ trayT=.5; renderTray(true); } }
+  requestAnimationFrame(loop);
+}
+resize(); ready.then(()=>{ showStart(); requestAnimationFrame(loop); });
+window.__im={ get G(){return G;}, step(n){ for(let i=0;i<n&&G&&!G.over;i++) update(1/30); }, newGame, tap:(x,y)=>tap({x,y}), command:(x,y)=>command({x,y}), placeBld, train, ageUp, units, blds };
+})();
+</script>
