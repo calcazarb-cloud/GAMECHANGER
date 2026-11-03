@@ -151,7 +151,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .fbub{position:absolute;left:50%;top:-10px;transform:translateX(-50%);display:flex;align-items:center;gap:4px;background:rgba(255,243,200,.95);color:#3a2205;border-radius:999px;padding:3px 9px 3px 4px;font:700 12px var(--body);box-shadow:0 0 14px rgba(255,194,90,.8);animation:bob 1.2s ease-in-out infinite}
 .fbub.c{background:rgba(225,210,255,.95);color:#24104a;box-shadow:0 0 14px rgba(176,124,255,.8)}
 .fbub img{width:16px;height:16px;border-radius:4px}
-.fplot{position:absolute;width:24%;aspect-ratio:2/1;transform:translate(-50%,-50%);border:none;background:none;padding:0;display:grid;place-items:center}
+.fplot{position:absolute;z-index:1;width:24%;aspect-ratio:2/1;transform:translate(-50%,-50%);border:none;background:none;padding:0;display:grid;place-items:center}
 .fplot span{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:900 22px var(--body);color:#dff6ff;background:rgba(40,120,180,.35);border:2px solid rgba(140,220,255,.7);box-shadow:0 0 14px rgba(95,196,255,.6)}
 .ftop{position:absolute;left:0;right:0;top:0;display:flex;gap:8px;padding:max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px))}
 .fres{position:absolute;left:0;right:0;top:calc(max(10px,env(safe-area-inset-top,0px)) + 64px);display:flex;gap:6px;justify-content:center;padding:0 10px}
@@ -276,7 +276,7 @@ const L = o => typeof o==='string' ? o : (o[LANG] ?? o.es);
 
 /* ---------- Assets ---------- */
 const IMG = {};
-const NAMES = ['map.jpg','base.jpg','base-ground.jpg','b-core.png','b-goldmine.png','b-extractor.png','b-treasury.png','b-forge.png','b-barracks.png','b-tower.png','b-workshop.png','b-scaffold.png','vael-head.png','korr-head.png','foot-b.png','foot-r.png','xbow-b.png','xbow-r.png','brute-b.png','brute-r.png','vael-card.jpg','korr-card.jpg',
+const NAMES = ['map.jpg','base.jpg','base-ground.jpg',...['core','goldmine','extractor','treasury','forge','barracks','tower'].flatMap(k=>['b-'+k+'.webp','b-'+k+'-2.webp','b-'+k+'-3.webp']),'b-workshop.webp','b-scaffold.webp','vael-head.png','korr-head.png','foot-b.png','foot-r.png','xbow-b.png','xbow-r.png','brute-b.png','brute-r.png','vael-card.jpg','korr-card.jpg',
   'it-sword.jpg','it-voidbow.jpg','it-hammer.jpg','it-ruby.jpg','it-sapphire.jpg','it-emerald.jpg','it-crystal.jpg',
   ...[0,1,2,3,4].map(i=>'vael-s'+i+'.jpg'), ...[0,1,2,3,4].map(i=>'korr-s'+i+'.jpg')];
 let loaded = 0;
@@ -936,14 +936,14 @@ const GW=752, GH=1344;
 const PLOTS=[[307,362],[492,428],[177,478],[612,565],[172,715],[558,720],[365,840],[540,944]];
 const CORE_XY=[365,585];
 const BT={
-  core:     {max:10,             w:.40, cost:l=>({g:400*l,  c:25*l}), time:l=>60*l*l},
-  goldmine: {max:10, count:2,    w:.31, cost:l=>({g:150+150*l, c:0}), time:l=>Math.round(20*Math.pow(l+1,1.6)), prod:'g', rate:l=>360*l},
-  extractor:{max:10, count:1,    w:.29, cost:l=>({g:300+250*l, c:0}), time:l=>Math.round(40*Math.pow(l+1,1.6)), prod:'c', rate:l=>30*l},
-  treasury: {max:10, count:1,    w:.29, cost:l=>({g:250+300*l, c:0}), time:l=>Math.round(30*Math.pow(l+1,1.6))},
-  forge:    {max:10, count:1,    w:.29, cost:l=>({g:300+300*l, c:10*l}), time:l=>Math.round(45*Math.pow(l+1,1.6))},
-  barracks: {max:10, count:1,    w:.30, cost:l=>({g:300+280*l, c:8*l}), time:l=>Math.round(45*Math.pow(l+1,1.6))},
-  tower:    {max:10, count:1,    w:.17, cost:l=>({g:280+260*l, c:8*l}), time:l=>Math.round(40*Math.pow(l+1,1.6))},
-  workshop: {max:1,  count:1,    w:.30, cost:l=>({g:600, c:40}), time:l=>90},
+  core:     {max:10,             w:.36, cost:l=>({g:400*l,  c:25*l}), time:l=>60*l*l},
+  goldmine: {max:10, count:2,    w:.27, cost:l=>({g:150+150*l, c:0}), time:l=>Math.round(20*Math.pow(l+1,1.6)), prod:'g', rate:l=>360*l},
+  extractor:{max:10, count:1,    w:.25, cost:l=>({g:300+250*l, c:0}), time:l=>Math.round(40*Math.pow(l+1,1.6)), prod:'c', rate:l=>30*l},
+  treasury: {max:10, count:1,    w:.25, cost:l=>({g:250+300*l, c:0}), time:l=>Math.round(30*Math.pow(l+1,1.6))},
+  forge:    {max:10, count:1,    w:.25, cost:l=>({g:300+300*l, c:10*l}), time:l=>Math.round(45*Math.pow(l+1,1.6))},
+  barracks: {max:10, count:1,    w:.26, cost:l=>({g:300+280*l, c:8*l}), time:l=>Math.round(45*Math.pow(l+1,1.6))},
+  tower:    {max:10, count:1,    w:.15, cost:l=>({g:280+260*l, c:8*l}), time:l=>Math.round(40*Math.pow(l+1,1.6))},
+  workshop: {max:1,  count:1,    w:.26, cost:l=>({g:600, c:40}), time:l=>90},
 };
 const BUILDABLE=['goldmine','extractor','treasury','forge','barracks','tower','workshop'];
 function initBase(){
@@ -1006,14 +1006,15 @@ function speedCost(b){ return Math.max(1,Math.ceil((b.job.end-Date.now())/30000)
 let fortToastT=0;
 function fortToast(m){ const el=$('ftoast'); if (!el) return; el.textContent=m; el.style.opacity=1; clearTimeout(fortToastT); fortToastT=setTimeout(()=>{ const e2=$('ftoast'); if (e2) e2.style.opacity=0; },2600); }
 
+function spriteOf(t2,l){ const tier=t2==='workshop'?1:l>=7?3:l>=4?2:1; return 'b-'+t2+(tier>1?'-'+tier:''); }
 function bldHTML(b,idx){
   const D=BT[b.t], [x,y]=idx<0?CORE_XY:PLOTS[idx], building=b.job&&b.lvl===0;
-  const sprite=building?'b-scaffold':'b-'+b.t, pend=pending(b), showB=D.prod && pend>=Math.max(5,D.rate(b.lvl)*.02);
-  return `<button class="fb" data-i="${idx}" style="left:${x/GW*100}%;top:${y/GH*100}%;width:${(building?.30:D.w)*100}%">
-    <img alt="${t('t_'+b.t)}" src="${IMG[sprite+'.png'].src}">
+  const sprite=building?'b-scaffold':spriteOf(b.t,b.lvl), pend=pending(b), showB=D.prod && pend>=Math.max(5,D.rate(b.lvl)*.02);
+  return `<button class="fb" data-i="${idx}" style="left:${x/GW*100}%;top:${y/GH*100}%;width:${(building?.27:D.w*(b.lvl>=7?1.04:1))*100}%;z-index:${y}">
+    <img alt="${t('t_'+b.t)}" src="${IMG[sprite+'.webp'].src}">
     ${b.lvl>0?`<span class="flv">${b.lvl}</span>`:''}
     ${b.job?`<span class="fjob"><i data-end="${b.job.end}" data-dur="${D.time(b.job.to-1)*1000}"></i><em data-end="${b.job.end}"></em></span>`:''}
-    ${b.job&&b.lvl>0?`<img class="fscaf" alt="" src="${IMG['b-scaffold.png'].src}">`:''}
+    ${b.job&&b.lvl>0?`<img class="fscaf" alt="" src="${IMG['b-scaffold.webp'].src}">`:''}
     ${D.prod?`<span class="fbub ${D.prod==='c'?'c':''}" ${showB?'':'hidden'}>${D.prod==='c'?`<img alt="" src="${IMG['it-crystal.jpg'].src}">`:'<i class="coin"></i>'}<b data-pend="${idx}">${Math.floor(pend)}</b></span>`:''}
   </button>`;
 }
@@ -1065,7 +1066,7 @@ function costHTML(c){ return `<i class="coin"></i>${c.g}${c.c?` <img alt="" src=
 function openB(i){
   const b=i<0?P.base.core:P.base.plots[i], D=BT[b.t];
   const busy=!!b.job, why=busy?'':canStart(b.t,b.lvl), nl=b.lvl+1, c=D.cost(b.lvl);
-  let body=`<header><img class="sthumb" alt="" src="${IMG['b-'+b.t+'.png'].src}"><h2>${t('t_'+b.t)} <em class="lvtag">${t('level',{n:b.lvl})}</em></h2><button class="x" aria-label="${t('close')}">×</button></header>`;
+  let body=`<header><img class="sthumb" alt="" src="${IMG[spriteOf(b.t,Math.max(1,b.lvl))+'.webp'].src}"><h2>${t('t_'+b.t)} <em class="lvtag">${t('level',{n:b.lvl})}</em></h2><button class="x" aria-label="${t('close')}">×</button></header>`;
   if (b.lvl>0) body+=`<p class="note">${effectText(b.t,b.lvl)}</p>`;
   if (busy){
     body+=`<div class="jobbox"><b>${t('building')}</b> · <span data-left="${b.job.end}">${fmtT((b.job.end-Date.now())/1000)}</span></div>
@@ -1083,7 +1084,7 @@ function openB(i){
 function openPlot(i){
   const rows=BUILDABLE.map(k=>{ const D=BT[k], have=P.base.plots.filter(p=>p&&p.t===k).length, c=D.cost(0);
     const why = have>=D.count ? t('limit',{n:D.count}) : canStart(k,0);
-    return `<div class="item"><img alt="" src="${IMG['b-'+k+'.png'].src}" style="object-fit:contain;background:rgba(0,0,0,.3)"><div><b>${t('t_'+k)}</b><span>${effectText(k,1)}</span>${why?`<span class="warn2">${why}</span>`:''}</div>
+    return `<div class="item"><img alt="" src="${IMG['b-'+k+'.webp'].src}" style="object-fit:contain;background:rgba(0,0,0,.3)"><div><b>${t('t_'+k)}</b><span>${effectText(k,1)}</span>${why?`<span class="warn2">${why}</span>`:''}</div>
       <button class="buy" data-k="${k}" ${why?'disabled':''}>${costHTML(c)}<br>${fmtT(D.time(0))}</button></div>`; }).join('');
   sheetOpen('p'+i,`<header><h2>${t('chooseBuild')}</h2><button class="x" aria-label="${t('close')}">×</button></header><div class="items">${rows}</div>`);
   for (const bt of document.querySelectorAll('#fsheet .buy')) bt.onclick=()=>{ const k=bt.dataset.k; const nb={t:k,lvl:0,job:null,last:Date.now()}; if (canStart(k,0)) return; P.base.plots[i]=nb; startJob(nb); showBase(); };
