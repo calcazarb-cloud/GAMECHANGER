@@ -138,6 +138,41 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .search{margin-top:30vh;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
 .spin{width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.12);border-top-color:var(--gold);animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+.fort{position:relative;width:100%;max-width:520px;margin:-18px auto 0;min-height:100%}
+.fview{position:relative;width:100%;aspect-ratio:752/1344;background:center/100% 100% no-repeat}
+.fb{position:absolute;transform:translate(-50%,-64%);padding:0;border:none;background:none;filter:drop-shadow(0 10px 8px rgba(0,0,0,.55))}
+.fb>img:first-child{width:100%;display:block}
+.fb:active{filter:brightness(1.2) drop-shadow(0 10px 8px rgba(0,0,0,.55))}
+.flv{position:absolute;left:50%;bottom:4%;transform:translateX(-50%);background:var(--gold);color:#2a1800;font:900 11px/1 var(--display);border-radius:7px;padding:3px 6px;border:1px solid rgba(0,0,0,.4)}
+.fscaf{position:absolute;left:8%;bottom:0;width:55%;opacity:.95}
+.fjob{position:absolute;left:5%;right:5%;top:-6px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.fjob i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,#5fe39a,#bfffd6);align-self:flex-start;width:0;box-shadow:0 0 0 2px rgba(0,0,0,.6)}
+.fjob em{font:700 11px var(--body);font-style:normal;background:rgba(5,6,14,.85);border-radius:6px;padding:2px 6px;white-space:nowrap}
+.fbub{position:absolute;left:50%;top:-10px;transform:translateX(-50%);display:flex;align-items:center;gap:4px;background:rgba(255,243,200,.95);color:#3a2205;border-radius:999px;padding:3px 9px 3px 4px;font:700 12px var(--body);box-shadow:0 0 14px rgba(255,194,90,.8);animation:bob 1.2s ease-in-out infinite}
+.fbub.c{background:rgba(225,210,255,.95);color:#24104a;box-shadow:0 0 14px rgba(176,124,255,.8)}
+.fbub img{width:16px;height:16px;border-radius:4px}
+.fplot{position:absolute;width:24%;aspect-ratio:2/1;transform:translate(-50%,-50%);border:none;background:none;padding:0;display:grid;place-items:center}
+.fplot span{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:900 22px var(--body);color:#dff6ff;background:rgba(40,120,180,.35);border:2px solid rgba(140,220,255,.7);box-shadow:0 0 14px rgba(95,196,255,.6)}
+.ftop{position:absolute;left:0;right:0;top:0;display:flex;gap:8px;padding:max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px))}
+.fres{position:absolute;left:0;right:0;top:calc(max(10px,env(safe-area-inset-top,0px)) + 64px);display:flex;gap:6px;justify-content:center;padding:0 10px}
+.res{display:flex;align-items:center;gap:5px;background:var(--panel);border:1px solid var(--edge);border-radius:999px;padding:4px 10px 4px 5px;font-variant-numeric:tabular-nums}
+.res b{font-size:14px}.res small{color:var(--muted);font-size:11px}
+.res img{width:18px;height:18px;border-radius:4px}
+.ham{width:18px;text-align:center;color:var(--gold)}
+.fbot{position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom,0px));width:min(520px,100%);display:flex;gap:10px;padding:0 max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));z-index:5}
+.fhero{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:6px 12px 6px 6px;text-align:left;font:900 15px var(--display)}
+.fhero img{width:40px;height:40px;border-radius:50%;border:2px solid var(--blue)}
+.fhero small{display:block;font:700 10px var(--body);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.fgo{flex:1;padding:12px}
+.toast2{position:absolute;left:50%;top:calc(max(10px,env(safe-area-inset-top,0px)) + 104px);transform:translateX(-50%);background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:7px 14px;font-weight:700;font-size:13px;text-align:center;max-width:calc(100% - 24px);pointer-events:none;transition:opacity .25s;z-index:6}
+#fsheet{position:fixed;left:50%;transform:translateX(-50%);width:min(520px,100%);z-index:10}
+.sthumb{width:48px;height:48px;object-fit:contain}
+.lvtag{font:700 12px var(--body);color:var(--gold);font-style:normal;margin-left:6px}
+.buy.wide,.up.wide{width:100%;padding:12px;font-size:14px;justify-content:center}
+.buy img{width:16px;height:16px;border-radius:3px;vertical-align:-3px}
+.jobbox{background:var(--panel2);border:1px solid var(--edge);border-radius:12px;padding:10px;font-size:14px}
+.warn2{display:block;color:var(--gold);font-size:11.5px;margin-top:2px}
+.item .buy{flex-direction:column;line-height:1.3;min-width:86px}
 </style>
 
 <div id="app">
@@ -180,9 +215,9 @@ const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
 const TC = ['#5fc4ff','#ff5f5f'];
 
 /* ---------- Profile (persists per device) ---------- */
-const DEF_PROFILE = {lvl:1, xp:0, crystals:150, wins:0, games:0, b:{core:1,forge:0,wall:0}, lang:null, hero:'vael'};
-function loadProfile(){ try { const p=JSON.parse(localStorage.getItem('rk-profile')||'null'); if (p) return {...DEF_PROFILE, ...p, b:{...DEF_PROFILE.b, ...(p.b||{})}}; } catch(e){} return JSON.parse(JSON.stringify(DEF_PROFILE)); }
-function saveProfile(){ try { localStorage.setItem('rk-profile', JSON.stringify(P)); } catch(e){} }
+const DEF_PROFILE = {lvl:1, xp:0, wins:0, games:0, lang:null, hero:'vael', base:null};
+function loadProfile(){ try { const p=JSON.parse(localStorage.getItem('rk-profile2')||'null'); if (p) return {...DEF_PROFILE, ...p}; } catch(e){} return JSON.parse(JSON.stringify(DEF_PROFILE)); }
+function saveProfile(){ try { localStorage.setItem('rk-profile2', JSON.stringify(P)); } catch(e){} }
 const P = loadProfile();
 const acctNeed = l => 100+60*l;
 
@@ -203,7 +238,15 @@ const STR = {
     wavesSoon:'Las tropas salen en 5 segundos', youDied:'Has caído', back:'¡De vuelta a la batalla!', killedHero:'¡Derrotaste a {h}! +{g} oro', towerDown:'Torre enemiga destruida: su Núcleo ya es vulnerable', towerLost:'Perdiste una torre: tu Núcleo es vulnerable',
     sudden:'Muerte súbita: los Núcleos pierden vida', respawnIn:'Reapareces en', respawnShop:'Aprovecha para comprar en la tienda', kd:'{k} / {d} · {cs} tropas',
     paused:'Pausa', resume:'Continuar', leave:'Abandonar partida', victory:'Victoria', defeat:'Derrota', wonSub:'Destruiste el Núcleo rival en {t}', lostSub:'Tu Núcleo cayó en {t}',
-    sKills:'Derrotas', sDeaths:'Caídas', sCs:'Tropas', sLvl:'Nivel', sGold:'Oro', rewards:'Recompensas', rXp:'Experiencia de cuenta', rCr:'Cristales', acctUp:'¡Subiste a nivel de cuenta {n}!', toFortress:'Volver a la fortaleza' },
+    sKills:'Derrotas', sDeaths:'Caídas', sCs:'Tropas', sLvl:'Nivel', sGold:'Oro', rewards:'Recompensas', rXp:'Experiencia de cuenta', rCr:'Cristales', acctUp:'¡Subiste a nivel de cuenta {n}!', toFortress:'Volver a la fortaleza',
+    gold:'Oro', builders:'Constructores', battle:'Batalla', hero:'Héroe', storage:'Almacén', full:'lleno',
+    t_core:'Núcleo', t_goldmine:'Mina de oro', t_extractor:'Extractor de cristal', t_treasury:'Tesoro', t_forge:'Forja', t_barracks:'Cuartel', t_tower:'Torre rúnica', t_workshop:'Taller',
+    e_core:'+{x}% de vida para tu héroe. Los demás edificios pueden llegar hasta el nivel {l}.', e_goldmine:'Produce {r} de oro por hora, aunque no juegues.', e_extractor:'Produce {r} cristales por hora, aunque no juegues.',
+    e_treasury:'Guarda hasta {g} de oro y {c} cristales.', e_forge:'+{x}% de daño para tu héroe en las batallas.', e_barracks:'+{x}% de vida y daño para tus tropas.', e_tower:'+{x}% de vida para tus torres y tu Núcleo.', e_workshop:'Te da un segundo constructor.',
+    next:'Siguiente nivel', build:'Construir', upgradeTo:'Mejorar a nivel {n}', building:'En obras', speed:'Acelerar', collect:'Recoger {n}', emptyPlot:'Parcela vacía', chooseBuild:'Elige qué construir',
+    noBuilder:'Todos los constructores están ocupados', needCoreLvl:'Necesitas el Núcleo a nivel {n}', notEnough:'No tienes suficientes recursos', maxLevel:'Nivel máximo', built:'{b} terminado', limit:'Ya tienes el máximo ({n})',
+    storageFull:'Tu Tesoro está lleno: mejóralo para guardar más', collected:'+{n} {r}', rGold:'oro', rCr:'cristales', attacks:'Ataques a tu base: llegarán con el modo en línea. Tus torres y tu Núcleo te defienden.', welcome:'Mientras no estabas, tus minas produjeron recursos. Tócalas para recogerlos.',
+    rGoldL:'Oro', pickHero:'Elige tu héroe', close:'Cerrar' },
   en:{ loading:'Loading…', testmode:'Test mode: your opponent is a bot', guardian:'Guardian', acctLvl:'Account level {n}', crystals:'Crystals',
     fortress:'Your fortress', heroes:'Hero', findMatch:'Find quick battle', searching:'Searching for an opponent…', found:'Opponent found', foundSub:'{h} · test bot',
     upgrade:'Upgrade', maxed:'Max', needCore:'Upgrade Core first', level:'Lv {n}',
@@ -218,14 +261,22 @@ const STR = {
     wavesSoon:'Troops march out in 5 seconds', youDied:'You fell', back:'Back into battle!', killedHero:'You defeated {h}! +{g} gold', towerDown:'Enemy tower destroyed: their Core is now vulnerable', towerLost:'You lost a tower: your Core is vulnerable',
     sudden:'Sudden death: both Cores are losing health', respawnIn:'Respawning in', respawnShop:'Use the time to buy in the shop', kd:'{k} / {d} · {cs} troops',
     paused:'Paused', resume:'Resume', leave:'Leave match', victory:'Victory', defeat:'Defeat', wonSub:'You destroyed the enemy Core in {t}', lostSub:'Your Core fell in {t}',
-    sKills:'Kills', sDeaths:'Deaths', sCs:'Troops', sLvl:'Level', sGold:'Gold', rewards:'Rewards', rXp:'Account XP', rCr:'Crystals', acctUp:'You reached account level {n}!', toFortress:'Back to the fortress' },
+    sKills:'Kills', sDeaths:'Deaths', sCs:'Troops', sLvl:'Level', sGold:'Gold', rewards:'Rewards', rXp:'Account XP', rCr:'Crystals', acctUp:'You reached account level {n}!', toFortress:'Back to the fortress',
+    gold:'Gold', builders:'Builders', battle:'Battle', hero:'Hero', storage:'Storage', full:'full',
+    t_core:'Core', t_goldmine:'Gold Mine', t_extractor:'Crystal Extractor', t_treasury:'Treasury', t_forge:'Forge', t_barracks:'Barracks', t_tower:'Rune Tower', t_workshop:'Workshop',
+    e_core:'+{x}% hero health. Other buildings can reach level {l}.', e_goldmine:'Produces {r} gold per hour, even while you are away.', e_extractor:'Produces {r} crystals per hour, even while you are away.',
+    e_treasury:'Stores up to {g} gold and {c} crystals.', e_forge:'+{x}% hero damage in battles.', e_barracks:'+{x}% health and damage for your troops.', e_tower:'+{x}% health for your towers and Core.', e_workshop:'Gives you a second builder.',
+    next:'Next level', build:'Build', upgradeTo:'Upgrade to level {n}', building:'Under construction', speed:'Speed up', collect:'Collect {n}', emptyPlot:'Empty plot', chooseBuild:'Choose what to build',
+    noBuilder:'All builders are busy', needCoreLvl:'Requires Core level {n}', notEnough:'Not enough resources', maxLevel:'Max level', built:'{b} finished', limit:'You already have the maximum ({n})',
+    storageFull:'Your Treasury is full: upgrade it to store more', collected:'+{n} {r}', rGold:'gold', rCr:'crystals', attacks:'Attacks on your base arrive with online mode. Your towers and Core defend you.', welcome:'While you were away your mines produced resources. Tap them to collect.',
+    rGoldL:'Gold', pickHero:'Choose your hero', close:'Close' },
 };
 const t = (k,v={}) => (STR[LANG][k] ?? STR.es[k] ?? k).replace(/\{(\w+)\}/g,(_,n)=>v[n]??'');
 const L = o => typeof o==='string' ? o : (o[LANG] ?? o.es);
 
 /* ---------- Assets ---------- */
 const IMG = {};
-const NAMES = ['map.jpg','base.jpg','vael-head.png','korr-head.png','foot-b.png','foot-r.png','xbow-b.png','xbow-r.png','brute-b.png','brute-r.png','vael-card.jpg','korr-card.jpg',
+const NAMES = ['map.jpg','base.jpg','base-ground.jpg','b-core.png','b-goldmine.png','b-extractor.png','b-treasury.png','b-forge.png','b-barracks.png','b-tower.png','b-workshop.png','b-scaffold.png','vael-head.png','korr-head.png','foot-b.png','foot-r.png','xbow-b.png','xbow-r.png','brute-b.png','brute-r.png','vael-card.jpg','korr-card.jpg',
   'it-sword.jpg','it-voidbow.jpg','it-hammer.jpg','it-ruby.jpg','it-sapphire.jpg','it-emerald.jpg','it-crystal.jpg',
   ...[0,1,2,3,4].map(i=>'vael-s'+i+'.jpg'), ...[0,1,2,3,4].map(i=>'korr-s'+i+'.jpg')];
 let loaded = 0;
@@ -284,11 +335,11 @@ let G=null;
 function newMatch(key){
   G = {t:0, ents:[], projs:[], zones:[], parts:[], rings:[], slashes:[], texts:[], nextWave:5, wave:0, over:false, paused:false,
        cam:{x:376,y:1100}, shake:0, stats:{k:0,d:0,cs:0,gold:0}, sudden:false, id:1};
-  const wallMul = 1+.06*P.b.wall;
   for (const team of [0,1]){
     const tw = team===0 ? [[178,760],[580,760]] : [[213,265],[543,265]];
-    for (const [x,y] of tw) addStruct('tower',team,x,y,wallMul);
-    addStruct('core',team,376,team===0?1050:82,wallMul);
+    const tm=bonuses(team).tower;
+    for (const [x,y] of tw) addStruct('tower',team,x,y,tm);
+    addStruct('core',team,376,team===0?1050:82,tm);
   }
   G.me = addHero(key,0);
   G.bot = addHero(key==='vael'?'korr':'vael',1);
@@ -306,7 +357,7 @@ function addStruct(kind,team,x,y,mul){
 function addHero(key,team){
   const d=HEROES[key], s=SPAWN[team];
   const h={id:G.id++, kind:'hero', key, def:d, team, x:s.x, y:s.y, r:d.r, lvl:1, xp:0, points:1, ranks:[1,0,0,0,0], gold:300, items:[],
-    baseHp:.03*(P.b.core-1), baseDmg:.03*P.b.forge,
+    baseHp:bonuses(team).hp, baseDmg:bonuses(team).dmg,
     maxHp:d.hp, hp:d.hp, dmg:d.dmg, range:d.range, atkCd:0, cds:[0,0,0,0,0], face:{x:0,y:team?1:-1}, moving:false, mv:{x:0,y:0},
     dead:false, respawn:0, stun:0, root:0, slow:0, slowT:0, invis:0, haste:0, shield:0, shieldT:0, dr:0, drT:0, crit:false, critMul:2.5,
     markTgt:null, markN:0, dash:null, kb:null, flash:0, aggroT:0, head:IMG[key+'-head.png']};
@@ -564,8 +615,9 @@ function controlBot(b,dt){
 function spawnWave(){
   G.wave++;
   const comp=['foot','foot','xbow']; if (G.wave>=5 && G.wave%3===0) comp.unshift('brute');
-  const mul=1+.05*(G.wave-1);
+  const wmul=1+.05*(G.wave-1);
   for (const team of [0,1]) for (const lane of [0,1]){
+    const mul=wmul*bonuses(team).troop;
     const path=team===0 ? LANES[lane] : LANES[lane].slice().reverse();
     comp.forEach((type,i)=>{ const D=MT[type], p=path[0];
       G.ents.push({id:G.id++, kind:'minion', type, D, team, lane, path, wp:1, x:p[0]+rand(-10,10), y:p[1]+(team===0?1:-1)*i*22, r:type==='brute'?12:9,
@@ -875,40 +927,172 @@ function keyInput(){
 $('btnPause').onclick=()=>{ if (!G||G.over) return; G.paused=true; showPause(); };
 
 /* ---------- Screens ---------- */
-const BLD = [
-  {k:'core',  max:10, cost:l=>120*l},
-  {k:'forge', max:10, cost:l=>80*(l+1)},
-  {k:'wall',  max:10, cost:l=>80*(l+1)},
-];
 function screen(html,bg){ const s=$('screen'); s.innerHTML=(bg?`<div class="bgimg" style="--bg:url('${IMG[bg].src}')"></div>`:'')+html; s.hidden=false; s.scrollTop=0; }
 function langSwitch(){ return `<div class="lang">${['es','en'].map(l=>`<button data-l="${l}" class="${LANG===l?'on':''}">${l.toUpperCase()}</button>`).join('')}</div>`; }
 function bindLang(again){ for (const b of document.querySelectorAll('.lang button')) b.onclick=()=>{ LANG=b.dataset.l; P.lang=LANG; saveProfile(); document.documentElement.lang=LANG; again(); }; }
+
+/* ---------- Fortress: real-time base building ---------- */
+const GW=752, GH=1344;
+const PLOTS=[[307,362],[492,428],[177,478],[612,565],[172,715],[558,720],[365,840],[540,944]];
+const CORE_XY=[365,585];
+const BT={
+  core:     {max:10,             w:.40, cost:l=>({g:400*l,  c:25*l}), time:l=>60*l*l},
+  goldmine: {max:10, count:2,    w:.31, cost:l=>({g:150+150*l, c:0}), time:l=>Math.round(20*Math.pow(l+1,1.6)), prod:'g', rate:l=>360*l},
+  extractor:{max:10, count:1,    w:.29, cost:l=>({g:300+250*l, c:0}), time:l=>Math.round(40*Math.pow(l+1,1.6)), prod:'c', rate:l=>30*l},
+  treasury: {max:10, count:1,    w:.29, cost:l=>({g:250+300*l, c:0}), time:l=>Math.round(30*Math.pow(l+1,1.6))},
+  forge:    {max:10, count:1,    w:.29, cost:l=>({g:300+300*l, c:10*l}), time:l=>Math.round(45*Math.pow(l+1,1.6))},
+  barracks: {max:10, count:1,    w:.30, cost:l=>({g:300+280*l, c:8*l}), time:l=>Math.round(45*Math.pow(l+1,1.6))},
+  tower:    {max:10, count:1,    w:.17, cost:l=>({g:280+260*l, c:8*l}), time:l=>Math.round(40*Math.pow(l+1,1.6))},
+  workshop: {max:1,  count:1,    w:.30, cost:l=>({g:600, c:40}), time:l=>90},
+};
+const BUILDABLE=['goldmine','extractor','treasury','forge','barracks','tower','workshop'];
+function initBase(){
+  if (P.base) return;
+  const now=Date.now();
+  P.base={gold:600, crystals:60, core:{t:'core',lvl:1,job:null}, plots:PLOTS.map(()=>null)};
+  P.base.plots[2]={t:'goldmine',lvl:1,job:null,last:now-25*60*1000};
+  saveProfile();
+}
+const allB = () => [P.base.core, ...P.base.plots.filter(Boolean)];
+function fortLevels(){ const L={core:P.base.core.lvl}; for (const k of BUILDABLE) L[k]=Math.max(0,...P.base.plots.filter(p=>p&&p.t===k).map(p=>p.lvl)); return L; }
+function bonuses(team){ initBase(); const L=fortLevels(), k=team===0?1:.8; return {hp:.03*(L.core-1)*k, dmg:.03*L.forge*k, tower:1+.06*L.tower*k, troop:1+.04*L.barracks*k}; }
+function caps(){ const tl=fortLevels().treasury; return {g:1500+2500*tl, c:200+300*tl}; }
+function buildersTotal(){ return 1+(fortLevels().workshop>=1?1:0); }
+function buildersBusy(){ return allB().filter(b=>b.job).length; }
+function pending(b){ const D=BT[b.t]; if (!D.prod || b.lvl<1) return 0; const r=D.rate(b.lvl); return Math.min(r*2, r*(Date.now()-b.last)/3600000); }
+function fmtT(sec){ sec=Math.max(0,Math.ceil(sec)); const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s2=sec%60; return h?`${h}h ${String(m).padStart(2,'0')}m`:m?`${m}m ${String(s2).padStart(2,'0')}s`:`${s2}s`; }
+function effectText(t2,l){
+  if (l<1) return '';
+  const D=BT[t2], cl=P.base.core.lvl;
+  switch(t2){
+    case 'core': return t('e_core',{x:3*(l-1),l});
+    case 'goldmine': return t('e_goldmine',{r:D.rate(l)});
+    case 'extractor': return t('e_extractor',{r:D.rate(l)});
+    case 'treasury': return t('e_treasury',{g:1500+2500*l,c:200+300*l});
+    case 'forge': return t('e_forge',{x:3*l});
+    case 'barracks': return t('e_barracks',{x:4*l});
+    case 'tower': return t('e_tower',{x:6*l});
+    case 'workshop': return t('e_workshop');
+  }
+}
+function canStart(t2,fromLvl){
+  const D=BT[t2], c=D.cost(fromLvl), cap=caps();
+  if (fromLvl>=D.max) return t('maxLevel');
+  if (t2!=='core' && fromLvl+1>P.base.core.lvl) return t('needCoreLvl',{n:fromLvl+1});
+  if (buildersBusy()>=buildersTotal()) return t('noBuilder');
+  if (P.base.gold<c.g || P.base.crystals<c.c) return t('notEnough');
+  return '';
+}
+function startJob(b){
+  const D=BT[b.t], c=D.cost(b.lvl); P.base.gold-=c.g; P.base.crystals-=c.c;
+  b.job={to:b.lvl+1, end:Date.now()+D.time(b.lvl)*1000}; saveProfile(); sfx('buy');
+}
+function tickBase(){
+  let changed=false; const now=Date.now();
+  for (const b of allB()){ if (b.job && b.job.end<=now){ const wasNew=b.lvl===0; if (BT[b.t].prod && wasNew) b.last=b.job.end; b.lvl=b.job.to; b.job=null; changed=true; fortToast(t('built',{b:t('t_'+b.t)})); } }
+  if (changed) saveProfile();
+  return changed;
+}
+function collect(b){
+  const D=BT[b.t], amt=Math.floor(pending(b)); if (amt<1) return;
+  const key=D.prod==='g'?'gold':'crystals', cap=caps()[D.prod];
+  const room=Math.max(0,cap-P.base[key]); const got=Math.min(room,amt);
+  if (got<=0){ fortToast(t('storageFull')); return; }
+  P.base[key]+=got; const r=D.rate(b.lvl);
+  b.last = Date.now() - (amt-got)/r*3600000; saveProfile(); sfx('coin');
+  fortToast(t('collected',{n:got,r:D.prod==='g'?t('rGold'):t('rCr')})+(got<amt?' · '+t('storageFull'):''));
+}
+function speedCost(b){ return Math.max(1,Math.ceil((b.job.end-Date.now())/30000)); }
+let fortToastT=0;
+function fortToast(m){ const el=$('ftoast'); if (!el) return; el.textContent=m; el.style.opacity=1; clearTimeout(fortToastT); fortToastT=setTimeout(()=>{ const e2=$('ftoast'); if (e2) e2.style.opacity=0; },2600); }
+
+function bldHTML(b,idx){
+  const D=BT[b.t], [x,y]=idx<0?CORE_XY:PLOTS[idx], building=b.job&&b.lvl===0;
+  const sprite=building?'b-scaffold':'b-'+b.t, pend=pending(b), showB=D.prod && pend>=Math.max(5,D.rate(b.lvl)*.02);
+  return `<button class="fb" data-i="${idx}" style="left:${x/GW*100}%;top:${y/GH*100}%;width:${(building?.30:D.w)*100}%">
+    <img alt="${t('t_'+b.t)}" src="${IMG[sprite+'.png'].src}">
+    ${b.lvl>0?`<span class="flv">${b.lvl}</span>`:''}
+    ${b.job?`<span class="fjob"><i data-end="${b.job.end}" data-dur="${D.time(b.job.to-1)*1000}"></i><em data-end="${b.job.end}"></em></span>`:''}
+    ${b.job&&b.lvl>0?`<img class="fscaf" alt="" src="${IMG['b-scaffold.png'].src}">`:''}
+    ${D.prod?`<span class="fbub ${D.prod==='c'?'c':''}" ${showB?'':'hidden'}>${D.prod==='c'?`<img alt="" src="${IMG['it-crystal.jpg'].src}">`:'<i class="coin"></i>'}<b data-pend="${idx}">${Math.floor(pend)}</b></span>`:''}
+  </button>`;
+}
 function showBase(){
-  const need=acctNeed(P.lvl);
-  const card=k=>{ const d=HEROES[k]; return `<button class="hcard ${P.hero===k?'sel':''}" data-k="${k}" style="--img:url('${IMG[k+'-card.jpg'].src}')"><div class="info"><h3>${d.name}</h3><p>${L(d.title)} · ${L(d.role)}</p></div></button>`; };
-  const bld=b=>{ const l=P.b[b.k], capped=b.k!=='core' && l>=P.b.core, max=l>=b.max, c=b.cost(l);
-    return `<div class="bld"><div><b>${t('b_'+b.k)}<em>${t('level',{n:l})}</em></b><p>${t('b_'+b.k+'_d')}</p></div>
-      <button class="up" data-b="${b.k}" ${max||capped||P.crystals<c?'disabled':''}>${max?t('maxed'):capped?t('needCore'):`<img alt="" src="${IMG['it-crystal.jpg'].src}">${c}`}</button></div>`; };
-  screen(`<div class="wrap">
-    <div class="topbar">
+  initBase(); tickBase();
+  const need=acctNeed(P.lvl), cap=caps();
+  screen(`<div class="fort">
+    <div class="fview" style="background-image:url('${IMG['base-ground.jpg'].src}')">
+      ${bldHTML(P.base.core,-1)}
+      ${P.base.plots.map((b,i)=>b?bldHTML(b,i):`<button class="fplot" data-plot="${i}" style="left:${PLOTS[i][0]/GW*100}%;top:${PLOTS[i][1]/GH*100}%" aria-label="${t('emptyPlot')}"><span>+</span></button>`).join('')}
+    </div>
+    <div class="ftop">
       <div class="acct"><div class="lv">${P.lvl}</div><div class="info"><b>${t('guardian')}</b><small>${t('acctLvl',{n:P.lvl})} · ${t('wins',{n:P.wins})}</small><div class="bar xp"><i style="width:${P.xp/need*100}%"></i></div></div></div>
-      <div class="crys" title="${t('crystals')}"><img alt="" src="${IMG['it-crystal.jpg'].src}">${P.crystals}</div>
       ${langSwitch()}
     </div>
-    <div style="height:150px"></div>
-    <h1 class="logo">Rift Keepers</h1>
-    <p class="label">${t('fortress')}</p>
-    ${BLD.map(bld).join('')}
-    <p class="label">${t('heroes')}</p>
-    <div class="cards">${card('vael')}${card('korr')}</div>
-    <button class="play" id="go">${t('findMatch')}</button>
-    <p class="test">${t('testmode')}</p>
-    <div class="rewards" style="font-size:12.5px;color:var(--muted);line-height:1.45"><span>• ${t('how1')}</span><span>• ${t('how2')}</span><span>• ${t('how3')}</span><span>• ${t('how4')}</span></div>
-  </div>`,'base.jpg');
-  for (const b of document.querySelectorAll('.hcard')) b.onclick=()=>{ P.hero=b.dataset.k; saveProfile(); showBase(); };
-  for (const b of document.querySelectorAll('.up')) b.onclick=()=>{ const B=BLD.find(x=>x.k===b.dataset.b), c=B.cost(P.b[B.k]); if (P.crystals<c) return; P.crystals-=c; P.b[B.k]++; saveProfile(); sfx('buy'); showBase(); };
+    <div class="fres">
+      <span class="res"><i class="coin"></i><b id="rGold">${Math.floor(P.base.gold)}</b><small>/${cap.g}</small></span>
+      <span class="res"><img alt="" src="${IMG['it-crystal.jpg'].src}"><b id="rCr">${Math.floor(P.base.crystals)}</b><small>/${cap.c}</small></span>
+      <span class="res"><span class="ham">⚒</span><b id="rBld">${buildersTotal()-buildersBusy()}/${buildersTotal()}</b></span>
+    </div>
+    <div id="ftoast" class="toast2" style="opacity:0"></div>
+    <div class="fbot">
+      <button class="fhero" id="fHero"><img alt="" src="${IMG[P.hero+'-head.png'].src}"><span><small>${t('hero')}</small>${HEROES[P.hero].name}</span></button>
+      <button class="play fgo" id="go">${t('battle')}</button>
+    </div>
+    <div id="fsheet" class="sheet" hidden></div>
+  </div>`);
   bindLang(showBase);
-  $('go').onclick=()=>{ initAudio(); findMatch(); };
+  for (const el of document.querySelectorAll('.fb')) el.onclick=()=>{ const i=+el.dataset.i, b=i<0?P.base.core:P.base.plots[i]; if (BT[b.t].prod && pending(b)>=1 && !b.job){ collect(b); showBase(); return; } openB(i); };
+  for (const el of document.querySelectorAll('.fplot')) el.onclick=()=>openPlot(+el.dataset.plot);
+  $('fHero').onclick=openHeroPick;
+  $('go').onclick=()=>{ initAudio(); stopFort(); findMatch(); };
+  startFort();
+}
+let fortTimer=null;
+function startFort(){ stopFort(); fortTimer=setInterval(()=>{
+  if (!$('rGold')) return stopFort();
+  if (tickBase()){ const open=$('fsheet').hidden?null:$('fsheet').dataset.k; showBase(); if (open) reopen(open); return; }
+  const now=Date.now();
+  for (const i2 of document.querySelectorAll('.fjob i')){ const end=+i2.dataset.end, dur=+i2.dataset.dur; i2.style.width=clamp(100-(end-now)/dur*100,0,100)+'%'; }
+  for (const e of document.querySelectorAll('.fjob em,[data-left]')) e.textContent=fmtT((+(e.dataset.end||e.dataset.left)-now)/1000);
+  for (const bb of document.querySelectorAll('[data-pend]')){ const i3=+bb.dataset.pend, b=i3<0?P.base.core:P.base.plots[i3]; if (!b || !BT[b.t].prod) continue; const pd=pending(b); bb.textContent=Math.floor(pd); bb.parentElement.hidden=!(pd>=Math.max(5,BT[b.t].rate(b.lvl)*.02)); }
+  const sp=document.querySelector('[data-speed]'); if (sp){ const i4=+sp.dataset.speed, b=i4<0?P.base.core:P.base.plots[i4]; if (b.job) sp.querySelector('b').textContent=speedCost(b); }
+},1000); }
+function stopFort(){ if (fortTimer){ clearInterval(fortTimer); fortTimer=null; } }
+function reopen(k){ if (k.startsWith('b')) openB(+k.slice(1)); else if (k.startsWith('p')) openPlot(+k.slice(1)); }
+function sheetOpen(k,html){ const sh=$('fsheet'); sh.dataset.k=k; sh.innerHTML=html; sh.hidden=false; const x=sh.querySelector('.x'); if (x) x.onclick=()=>sh.hidden=true; }
+function costHTML(c){ return `<i class="coin"></i>${c.g}${c.c?` <img alt="" src="${IMG['it-crystal.jpg'].src}">${c.c}`:''}`; }
+function openB(i){
+  const b=i<0?P.base.core:P.base.plots[i], D=BT[b.t];
+  const busy=!!b.job, why=busy?'':canStart(b.t,b.lvl), nl=b.lvl+1, c=D.cost(b.lvl);
+  let body=`<header><img class="sthumb" alt="" src="${IMG['b-'+b.t+'.png'].src}"><h2>${t('t_'+b.t)} <em class="lvtag">${t('level',{n:b.lvl})}</em></h2><button class="x" aria-label="${t('close')}">×</button></header>`;
+  if (b.lvl>0) body+=`<p class="note">${effectText(b.t,b.lvl)}</p>`;
+  if (busy){
+    body+=`<div class="jobbox"><b>${t('building')}</b> · <span data-left="${b.job.end}">${fmtT((b.job.end-Date.now())/1000)}</span></div>
+      <button class="buy wide" id="bSpeed" data-speed="${i}"><img alt="" src="${IMG['it-crystal.jpg'].src}"><b>${speedCost(b)}</b>&nbsp;${t('speed')}</button>`;
+  } else if (b.lvl<D.max){
+    body+=`<p class="label">${t('next')}: ${t('level',{n:nl})}</p><p class="note">${effectText(b.t,nl)}</p>
+      <button class="buy wide" id="bUp" ${why?'disabled':''}>${t('upgradeTo',{n:nl})} · ${costHTML(c)} · ${fmtT(D.time(b.lvl))}</button>${why?`<p class="note warn">${why}</p>`:''}`;
+  } else body+=`<p class="note warn">${t('maxLevel')}</p>`;
+  if (D.prod && b.lvl>0){ const pd=Math.floor(pending(b)); body+=`<button class="up wide" id="bCol" ${pd<1?'disabled':''}>${t('collect',{n:pd})}</button>`; }
+  sheetOpen('b'+i,body);
+  if ($('bUp')) $('bUp').onclick=()=>{ if (canStart(b.t,b.lvl)) return; startJob(b); showBase(); openB(i); };
+  if ($('bSpeed')) $('bSpeed').onclick=()=>{ const sc=speedCost(b); if (P.base.crystals<sc){ fortToast(t('notEnough')); return; } P.base.crystals-=sc; b.job.end=Date.now(); tickBase(); showBase(); openB(i); };
+  if ($('bCol')) $('bCol').onclick=()=>{ collect(b); showBase(); openB(i); };
+}
+function openPlot(i){
+  const rows=BUILDABLE.map(k=>{ const D=BT[k], have=P.base.plots.filter(p=>p&&p.t===k).length, c=D.cost(0);
+    const why = have>=D.count ? t('limit',{n:D.count}) : canStart(k,0);
+    return `<div class="item"><img alt="" src="${IMG['b-'+k+'.png'].src}" style="object-fit:contain;background:rgba(0,0,0,.3)"><div><b>${t('t_'+k)}</b><span>${effectText(k,1)}</span>${why?`<span class="warn2">${why}</span>`:''}</div>
+      <button class="buy" data-k="${k}" ${why?'disabled':''}>${costHTML(c)}<br>${fmtT(D.time(0))}</button></div>`; }).join('');
+  sheetOpen('p'+i,`<header><h2>${t('chooseBuild')}</h2><button class="x" aria-label="${t('close')}">×</button></header><div class="items">${rows}</div>`);
+  for (const bt of document.querySelectorAll('#fsheet .buy')) bt.onclick=()=>{ const k=bt.dataset.k; const nb={t:k,lvl:0,job:null,last:Date.now()}; if (canStart(k,0)) return; P.base.plots[i]=nb; startJob(nb); showBase(); };
+}
+function openHeroPick(){
+  const card=k=>{ const d=HEROES[k]; return `<button class="hcard ${P.hero===k?'sel':''}" data-k="${k}" style="--img:url('${IMG[k+'-card.jpg'].src}')"><div class="info"><h3>${d.name}</h3><p>${L(d.title)} · ${L(d.role)}</p></div></button>`; };
+  sheetOpen('h',`<header><h2>${t('pickHero')}</h2><button class="x" aria-label="${t('close')}">×</button></header><div class="cards">${card('vael')}${card('korr')}</div>
+    <div class="rewards" style="font-size:12.5px;color:var(--muted);line-height:1.45"><span>• ${t('how1')}</span><span>• ${t('how2')}</span><span>• ${t('how3')}</span><span>• ${t('how4')}</span></div><p class="test">${t('attacks')}</p>`);
+  for (const b of document.querySelectorAll('#fsheet .hcard')) b.onclick=()=>{ P.hero=b.dataset.k; saveProfile(); showBase(); openHeroPick(); };
 }
 function findMatch(){
   screen(`<div class="search"><div class="spin"></div><p class="sub" style="font-size:14px">${t('searching')}</p></div>`,'base.jpg');
@@ -926,8 +1110,9 @@ function showPause(){
 function endMatch(won){
   G.over=true;
   const st=G.stats, s=Math.floor(G.t), time=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-  const xp=60+(won?80:0)+st.k*15+Math.floor(st.cs*1.5), cr=40+(won?70:0)+st.k*5+Math.floor(st.cs/2);
-  const before=P.lvl; P.games++; if (won) P.wins++; P.crystals+=cr; P.xp+=xp;
+  const xp=60+(won?80:0)+st.k*15+Math.floor(st.cs*1.5), cr=15+(won?25:0)+st.k*3, gd=120+(won?100:0)+st.cs*4+st.k*20;
+  initBase(); const cap=caps(); const gGot=Math.min(gd,Math.max(0,cap.g-P.base.gold)), cGot=Math.min(cr,Math.max(0,cap.c-P.base.crystals));
+  const before=P.lvl; P.games++; if (won) P.wins++; P.base.gold+=gGot; P.base.crystals+=cGot; P.xp+=xp;
   while (P.xp>=acctNeed(P.lvl)){ P.xp-=acctNeed(P.lvl); P.lvl++; }
   saveProfile();
   setTimeout(()=>{
@@ -935,7 +1120,7 @@ function endMatch(won){
       <p class="sub">${won?t('wonSub',{t:time}):t('lostSub',{t:time})}</p>
       <div class="stats"><div><small>${t('sKills')}</small>${st.k}</div><div><small>${t('sDeaths')}</small>${st.d}</div><div><small>${t('sCs')}</small>${st.cs}</div><div><small>${t('sLvl')}</small>${G.me.lvl}</div><div><small>${t('sGold')}</small>${Math.floor(st.gold)}</div></div>
       <p class="label">${t('rewards')}</p>
-      <div class="rewards"><div class="r"><span>${t('rXp')}</span><span>+${xp}</span></div><div class="r"><span>${t('rCr')}</span><span>+${cr}</span></div>${P.lvl>before?`<div class="r"><span>${t('acctUp',{n:P.lvl})}</span><span></span></div>`:''}</div>
+      <div class="rewards"><div class="r"><span>${t('rXp')}</span><span>+${xp}</span></div><div class="r"><span>${t('rGoldL')}</span><span>+${gGot}${gGot<gd?' ('+t('storage')+' '+t('full')+')':''}</span></div><div class="r"><span>${t('rCr')}</span><span>+${cGot}</span></div>${P.lvl>before?`<div class="r"><span>${t('acctUp',{n:P.lvl})}</span><span></span></div>`:''}</div>
       <button class="play" id="home">${t('toFortress')}</button></div>`, won?'base.jpg':null);
     $('home').onclick=()=>{ G=null; $('hud').hidden=true; showBase(); };
   },1400);
