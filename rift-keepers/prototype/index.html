@@ -31,6 +31,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .bar{position:relative;height:11px;background:rgba(0,0,0,.55);border-radius:6px;overflow:hidden}
 .bar i{position:absolute;inset:0 auto 0 0;width:100%;background:linear-gradient(#7dffa8,#2fbf6a);transition:width .12s}
 .bar.xp{height:5px}.bar.xp i{background:linear-gradient(#ffe08a,#e8a21c)}
+.bar.mp{height:5px}.bar.mp i{background:linear-gradient(#8fc8ff,#2f7fe0)}
 .bar span{position:absolute;inset:0;font-size:9px;font-weight:700;line-height:11px;text-align:center;text-shadow:0 1px 2px #000}
 .slots{display:flex;gap:4px;align-items:center}
 .slot{width:22px;height:22px;border-radius:5px;background:rgba(0,0,0,.5);border:1px solid var(--edge);overflow:hidden}
@@ -139,7 +140,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .spin{width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.12);border-top-color:var(--gold);animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .fort{position:relative;width:100%;max-width:520px;margin:-18px auto 0;min-height:100%}
-.fview{position:relative;width:100%;aspect-ratio:752/1344;background:center/100% 100% no-repeat}
+.fview{position:relative;isolation:isolate;z-index:0;width:100%;aspect-ratio:752/1344;background:center/100% 100% no-repeat}
 .fb{position:absolute;transform:translate(-50%,-64%);padding:0;border:none;background:none;filter:drop-shadow(0 10px 8px rgba(0,0,0,.55))}
 .fb>img:first-child{width:100%;display:block}
 .fb:active{filter:brightness(1.2) drop-shadow(0 10px 8px rgba(0,0,0,.55))}
@@ -173,6 +174,15 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .jobbox{background:var(--panel2);border:1px solid var(--edge);border-radius:12px;padding:10px;font-size:14px}
 .warn2{display:block;color:var(--gold);font-size:11.5px;margin-top:2px}
 .item .buy{flex-direction:column;line-height:1.3;min-width:86px}
+.fdef{position:absolute;z-index:2;transform:translate(-50%,-50%);width:34px;height:34px;padding:0;border-radius:10px;border:2px dashed rgba(255,194,90,.75);background:rgba(40,28,8,.55);color:var(--gold);font:700 16px var(--body);box-shadow:0 0 10px rgba(255,194,90,.35)}
+.fsiege{position:absolute;left:50%;transform:translateX(-50%);top:calc(max(10px,env(safe-area-inset-top,0px)) + 104px);z-index:6;display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:6px 8px 6px 12px;font-size:12.5px;font-weight:700;max-width:calc(100% - 20px);width:max-content;flex-wrap:wrap;justify-content:center;text-align:center}
+.fsiege.alarm{flex-direction:column;border-color:rgba(255,95,95,.7);box-shadow:0 0 24px rgba(255,95,95,.45);padding:10px 12px;animation:pulseR 1.2s ease-in-out infinite}
+.fsiege .row2{display:flex;gap:6px}
+@keyframes pulseR{50%{box-shadow:0 0 34px rgba(255,95,95,.75)}}
+.sm{width:auto!important;padding:7px 10px!important;font-size:12px!important;letter-spacing:0!important;box-shadow:none!important;border-radius:9px!important}
+.play.sm{font:900 13px var(--display)!important}
+.hxp{display:block;width:70px;height:4px;border-radius:2px;background:rgba(0,0,0,.5);margin-top:3px;overflow:hidden}.hxp i{display:block;height:100%;background:linear-gradient(90deg,#ffe08a,#e8a21c)}
+.toast2{top:calc(max(10px,env(safe-area-inset-top,0px)) + 150px)!important}
 </style>
 
 <div id="app">
@@ -182,7 +192,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
     <div class="hudtop">
       <div class="me">
         <div class="top"><button class="por" id="btnInfo" aria-label="Habilidades"><img id="meImg" alt=""><b id="meLvl">1</b><span class="q">?</span></button>
-          <div class="bars"><div class="bar"><i id="meHp"></i><span id="meHpT"></span></div><div class="bar xp"><i id="meXp"></i></div></div></div>
+          <div class="bars"><div class="bar"><i id="meHp"></i><span id="meHpT"></span></div><div class="bar mp"><i id="meMp"></i></div><div class="bar xp"><i id="meXp"></i></div></div></div>
         <div class="slots" id="slots"></div>
       </div>
       <div class="score"><div class="row"><div class="core b"><i id="coreB"></i></div><span id="clock">0:00</span><div class="core r"><i id="coreR"></i></div></div><span id="kd"></span></div>
@@ -212,14 +222,17 @@ const MW = 752, MH = 1344, MAXLVL = 20;
 const rand = (a,b) => a + Math.random()*(b-a);
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
-const TC = ['#5fc4ff','#ff5f5f'];
+const TC = ['#5fc4ff','#ff5f5f','#c58bff'];
 
 /* ---------- Profile (persists per device) ---------- */
-const DEF_PROFILE = {lvl:1, xp:0, wins:0, games:0, lang:null, hero:'vael', base:null};
+const DEF_PROFILE = {lvl:1, xp:0, wins:0, games:0, lang:null, hero:'vael', heroLocked:false, hlvl:1, hxp:0, rating:1000, siegeN:0, siegeAt:0, base:null};
 function loadProfile(){ try { const p=JSON.parse(localStorage.getItem('rk-profile2')||'null'); if (p) return {...DEF_PROFILE, ...p}; } catch(e){} return JSON.parse(JSON.stringify(DEF_PROFILE)); }
 function saveProfile(){ try { localStorage.setItem('rk-profile2', JSON.stringify(P)); } catch(e){} }
 const P = loadProfile();
 const acctNeed = l => 100+60*l;
+const heroNeed = l => 150+80*l;
+const HMAX = 30;
+function giveHeroXp(x){ P.hxp+=x; let up=false; while (P.hlvl<HMAX && P.hxp>=heroNeed(P.hlvl)){ P.hxp-=heroNeed(P.hlvl); P.hlvl++; up=true; } return up; }
 
 /* ---------- Language ---------- */
 let LANG = P.lang || ((navigator.language||'es').toLowerCase().startsWith('es') ? 'es' : 'en');
@@ -246,7 +259,14 @@ const STR = {
     next:'Siguiente nivel', build:'Construir', upgradeTo:'Mejorar a nivel {n}', building:'En obras', speed:'Acelerar', collect:'Recoger {n}', emptyPlot:'Parcela vacía', chooseBuild:'Elige qué construir',
     noBuilder:'Todos los constructores están ocupados', needCoreLvl:'Necesitas el Núcleo a nivel {n}', notEnough:'No tienes suficientes recursos', maxLevel:'Nivel máximo', built:'{b} terminado', limit:'Ya tienes el máximo ({n})',
     storageFull:'Tu Tesoro está lleno: mejóralo para guardar más', collected:'+{n} {r}', rGold:'oro', rCr:'cristales', attacks:'Ataques a tu base: llegarán con el modo en línea. Tus torres y tu Núcleo te defienden.', welcome:'Mientras no estabas, tus minas produjeron recursos. Tócalas para recogerlos.',
-    rGoldL:'Oro', pickHero:'Elige tu héroe', close:'Cerrar' },
+    rGoldL:'Oro', pickHero:'Elige tu héroe', close:'Cerrar',
+    noMana:'No tienes maná suficiente', siegeIn:'Próximo asedio de la Grieta en {t}', siegeNow:'¡La Grieta ataca tu base!', defend:'Defender ahora', autoDefend:'Que defiendan las torres', testSiege:'Adelantar asedio (prueba)',
+    wave:'Oleada {n}/{m}', siegeWon:'Base defendida', siegeLost:'La Grieta saqueó tu base', siegeSub:'Asedio número {n}', stolen:'Oro robado', report:'Informe del asedio',
+    autoWon:'Tus torres defendieron la base sin ti.', autoLost:'La Grieta rompió tus defensas mientras no estabas.', heraldUp:'¡El Heraldo de la Grieta apareció en el centro!', heraldDown:'¡{h} derrotó al Heraldo! +25% de daño por 2 minutos', campUp:'Criaturas de la Grieta aparecieron en el centro del mapa',
+    defSpot:'Espacio de defensa', chooseDef:'Elige una defensa', t_arrow:'Torre de flechas', t_cannon:'Cañón de cristal', t_frost:'Pilón de escarcha', t_trap:'Trampa de púas',
+    e_arrow:'Dispara a un enemigo: {d} de daño.', e_cannon:'Bala explosiva: {d} de daño en área.', e_frost:'{d} de daño en área y ralentiza.', e_trap:'{d} de daño a quien la pisa.',
+    forever:'Elige con cuidado: tu héroe es para siempre y crecerá contigo.', heroLocked:'Tu héroe es para siempre.', heroLvl:'Nivel de héroe {n}', choose:'Elegir a {h}', heroUp:'¡Tu héroe subió a nivel {n}!',
+    rating:'Puntaje', ratingCh:'Puntaje {d} (ahora {r})', strongBonus:'Bono por rival más fuerte', foundSub2:'{h} · puntaje {r} · bot de prueba', rHero:'Experiencia del héroe', siegeWave:'¡Oleada {n}!', siegeBoss:'¡El Heraldo ataca tu base!', defendCore:'Defiende tu Núcleo', enemies:'enemigos' },
   en:{ loading:'Loading…', testmode:'Test mode: your opponent is a bot', guardian:'Guardian', acctLvl:'Account level {n}', crystals:'Crystals',
     fortress:'Your fortress', heroes:'Hero', findMatch:'Find quick battle', searching:'Searching for an opponent…', found:'Opponent found', foundSub:'{h} · test bot',
     upgrade:'Upgrade', maxed:'Max', needCore:'Upgrade Core first', level:'Lv {n}',
@@ -269,14 +289,21 @@ const STR = {
     next:'Next level', build:'Build', upgradeTo:'Upgrade to level {n}', building:'Under construction', speed:'Speed up', collect:'Collect {n}', emptyPlot:'Empty plot', chooseBuild:'Choose what to build',
     noBuilder:'All builders are busy', needCoreLvl:'Requires Core level {n}', notEnough:'Not enough resources', maxLevel:'Max level', built:'{b} finished', limit:'You already have the maximum ({n})',
     storageFull:'Your Treasury is full: upgrade it to store more', collected:'+{n} {r}', rGold:'gold', rCr:'crystals', attacks:'Attacks on your base arrive with online mode. Your towers and Core defend you.', welcome:'While you were away your mines produced resources. Tap them to collect.',
-    rGoldL:'Gold', pickHero:'Choose your hero', close:'Close' },
+    rGoldL:'Gold', pickHero:'Choose your hero', close:'Close',
+    noMana:'Not enough mana', siegeIn:'Next Rift siege in {t}', siegeNow:'The Rift is attacking your base!', defend:'Defend now', autoDefend:'Let the towers defend', testSiege:'Start siege now (test)',
+    wave:'Wave {n}/{m}', siegeWon:'Base defended', siegeLost:'The Rift raided your base', siegeSub:'Siege number {n}', stolen:'Gold stolen', report:'Siege report',
+    autoWon:'Your towers defended the base without you.', autoLost:'The Rift broke your defenses while you were away.', heraldUp:'The Rift Herald appeared in the center!', heraldDown:'{h} defeated the Herald! +25% damage for 2 minutes', campUp:'Rift creatures appeared in the center of the map',
+    defSpot:'Defense spot', chooseDef:'Choose a defense', t_arrow:'Arrow Tower', t_cannon:'Crystal Cannon', t_frost:'Frost Pylon', t_trap:'Spike Trap',
+    e_arrow:'Shoots one enemy: {d} damage.', e_cannon:'Explosive shot: {d} area damage.', e_frost:'{d} area damage and a slow.', e_trap:'{d} damage to anything that steps on it.',
+    forever:'Choose carefully: your hero is yours forever and grows with you.', heroLocked:'Your hero is yours forever.', heroLvl:'Hero level {n}', choose:'Choose {h}', heroUp:'Your hero reached level {n}!',
+    rating:'Rating', ratingCh:'Rating {d} (now {r})', strongBonus:'Stronger opponent bonus', foundSub2:'{h} · rating {r} · test bot', rHero:'Hero XP', siegeWave:'Wave {n}!', siegeBoss:'The Herald attacks your base!', defendCore:'Defend your Core', enemies:'enemies' },
 };
 const t = (k,v={}) => (STR[LANG][k] ?? STR.es[k] ?? k).replace(/\{(\w+)\}/g,(_,n)=>v[n]??'');
 const L = o => typeof o==='string' ? o : (o[LANG] ?? o.es);
 
 /* ---------- Assets ---------- */
 const IMG = {};
-const NAMES = ['map.jpg','base.jpg','base-ground.jpg',...['core','goldmine','extractor','treasury','forge','barracks','tower'].flatMap(k=>['b-'+k+'.webp','b-'+k+'-2.webp','b-'+k+'-3.webp']),'b-workshop.webp','b-scaffold.webp','vael-head.png','korr-head.png','foot-b.png','foot-r.png','xbow-b.png','xbow-r.png','brute-b.png','brute-r.png','vael-card.jpg','korr-card.jpg',
+const NAMES = ['map.jpg','base.jpg','base-ground.jpg',...['core','goldmine','extractor','treasury','forge','barracks','tower'].flatMap(k=>['b-'+k+'.webp','b-'+k+'-2.webp','b-'+k+'-3.webp']),'b-workshop.webp','b-scaffold.webp','r-crawler.webp','r-brute.webp','r-seer.webp','r-breaker.webp','r-herald.webp','d-cannon.webp','d-frost.webp','d-trap.webp','vael-head.png','korr-head.png','foot-b.png','foot-r.png','xbow-b.png','xbow-r.png','brute-b.png','brute-r.png','vael-card.jpg','korr-card.jpg',
   'it-sword.jpg','it-voidbow.jpg','it-hammer.jpg','it-ruby.jpg','it-sapphire.jpg','it-emerald.jpg','it-crystal.jpg',
   ...[0,1,2,3,4].map(i=>'vael-s'+i+'.jpg'), ...[0,1,2,3,4].map(i=>'korr-s'+i+'.jpg')];
 let loaded = 0;
@@ -310,6 +337,13 @@ const MT = {
   xbow: {hp:190, dmg:21, range:105, cd:1.25, spd:50, aggro:135, h:30, ranged:true, gold:18, xp:30},
   brute:{hp:760, dmg:34, range:26, cd:1.3, spd:42, aggro:110, h:38, gold:42, xp:60},
 };
+const RT = {
+  crawler:{hp:150, dmg:14, range:20, cd:.8,  spd:80, aggro:120, h:28, img:'r-crawler', gold:14, xp:22},
+  brute:  {hp:640, dmg:32, range:26, cd:1.3, spd:40, aggro:110, h:44, img:'r-brute',   gold:32, xp:52},
+  seer:   {hp:230, dmg:24, range:120,cd:1.4, spd:46, aggro:150, h:34, img:'r-seer',    gold:20, xp:32, ranged:true},
+  breaker:{hp:560, dmg:60, range:28, cd:1.6, spd:38, aggro:90,  h:40, img:'r-breaker', gold:30, xp:46, structFirst:true},
+  herald: {hp:4200,dmg:85, range:42, cd:1.4, spd:34, aggro:170, h:92, img:'r-herald',  gold:320,xp:420, boss:true},
+};
 const ITEMS = [
   {id:'blade', icon:'it-sword',    cost:450,  n:{es:'Hoja rúnica',en:'Rune Blade'},          d:{es:'+20 de daño',en:'+20 damage'}, fx:{dmg:20}},
   {id:'plate', icon:'it-emerald',  cost:450,  n:{es:'Coraza de esmeralda',en:'Emerald Plate'}, d:{es:'+280 de vida',en:'+280 health'}, fx:{hp:280}},
@@ -331,10 +365,11 @@ function sfx(k){ if (!AC) return; const now=AC.currentTime; if (lastS[k] && now-
   g.gain.setValueAtTime(p[4],now); g.gain.exponentialRampToValueAtTime(.0001,now+p[3]); o.connect(g); g.connect(AC.destination); o.start(now); o.stop(now+p[3]+.02); }
 
 /* ---------- Match state ---------- */
-let G=null;
+let G=null, MATCH={botRating:1000};
 function newMatch(key){
-  G = {t:0, ents:[], projs:[], zones:[], parts:[], rings:[], slashes:[], texts:[], nextWave:5, wave:0, over:false, paused:false,
-       cam:{x:376,y:1100}, shake:0, stats:{k:0,d:0,cs:0,gold:0}, sudden:false, id:1};
+  G = {mode:'duel', t:0, ents:[], projs:[], zones:[], parts:[], rings:[], slashes:[], texts:[], nextWave:5, wave:0, over:false, paused:false,
+       cam:{x:376,y:1100}, shake:0, stats:{k:0,d:0,cs:0,gold:0}, sudden:false, id:1, buff:[0,0], campAt:60, heraldAt:240,
+       botRating:MATCH.botRating, botMul:clamp(.82+(MATCH.botRating-1000)/1600,.68,1.05), botHlvl:Math.max(1,Math.round(P.hlvl+(MATCH.botRating-P.rating)/60))};
   for (const team of [0,1]){
     const tw = team===0 ? [[178,760],[580,760]] : [[213,265],[543,265]];
     const tm=bonuses(team).tower;
@@ -355,13 +390,13 @@ function addStruct(kind,team,x,y,mul){
   G.ents.push(e); return e;
 }
 function addHero(key,team){
-  const d=HEROES[key], s=SPAWN[team];
+  const d=HEROES[key], s=spawnOf(team);
   const h={id:G.id++, kind:'hero', key, def:d, team, x:s.x, y:s.y, r:d.r, lvl:1, xp:0, points:1, ranks:[1,0,0,0,0], gold:300, items:[],
-    baseHp:bonuses(team).hp, baseDmg:bonuses(team).dmg,
+    baseHp:bonuses(team).hp+heroBonus(team), baseDmg:bonuses(team).dmg+heroBonus(team), mana:300, maxMana:300,
     maxHp:d.hp, hp:d.hp, dmg:d.dmg, range:d.range, atkCd:0, cds:[0,0,0,0,0], face:{x:0,y:team?1:-1}, moving:false, mv:{x:0,y:0},
     dead:false, respawn:0, stun:0, root:0, slow:0, slowT:0, invis:0, haste:0, shield:0, shieldT:0, dr:0, drT:0, crit:false, critMul:2.5,
     markTgt:null, markN:0, dash:null, kb:null, flash:0, aggroT:0, head:IMG[key+'-head.png']};
-  recalc(h); h.hp=h.maxHp;
+  recalc(h); h.hp=h.maxHp; h.mana=h.maxMana;
   G.ents.push(h); return h;
 }
 function itemSum(h){ const s={dmg:0,hp:0,spd:0,cdr:0,ls:0,regen:0,as:0}; for (const id of h.items){ const fx=ITEMS.find(i=>i.id===id).fx; for (const k in fx) s[k]+=fx[k]; } return s; }
@@ -370,6 +405,7 @@ function recalc(h){
   h.maxHp=Math.round(h.def.hp*(1+.07*k)*(1+h.baseHp)+it.hp);
   h.dmg=(h.def.dmg*(1+.055*k)+it.dmg)*(1+h.baseDmg);
   h.spdMul=1+it.spd; h.cdrMul=1-Math.min(.4,it.cdr); h.ls=it.ls; h.regen=it.regen; h.asMul=1+it.as;
+  const om=h.maxMana||0; h.maxMana=Math.round(260+22*k); h.mana=Math.min(h.maxMana,(h.mana||h.maxMana)+Math.max(0,h.maxMana-om));
   if (h.maxHp>old) h.hp+=h.maxHp-old; h.hp=Math.min(h.hp,h.maxHp);
 }
 const xpNeed = l => 36+24*l;
@@ -403,10 +439,16 @@ function autoLearn(h){
 const cdOf = (h,i) => { const s=h.def.skills[i]; return s.cd[Math.max(0,h.ranks[i]-1)]*h.cdrMul; };
 
 /* ---------- Helpers ---------- */
-function coreOpen(team){ return G.ents.some(e=>e.kind==='tower'&&e.team===team&&e.dead); }
+const SIEGE_SPAWN={x:365,y:690};
+function spawnOf(team){ return G && G.mode==='siege' ? SIEGE_SPAWN : SPAWN[team]; }
+function heroBonus(team){ const lv = team===0 ? P.hlvl : (G && G.botHlvl) || P.hlvl; return .02*(lv-1); }
+function coreOpen(team){ if (G.mode==='siege') return true; return G.ents.some(e=>e.kind==='tower'&&e.team===team&&e.dead); }
+const isUnit = e => e.kind==='hero'||e.kind==='minion'||e.kind==='neutral';
+const manaCost = (h,i) => h.def.skills[i].ult ? 110 : 40+10*h.ranks[i];
 function targetable(e,byTeam){
   if (!e || e.dead || e.team===byTeam) return false;
   if (e.kind==='hero' && e.invis>0) return false;
+  if (e.untargetable) return false;
   if (e.kind==='core' && !coreOpen(e.team)) return false;
   return true;
 }
@@ -415,11 +457,11 @@ function nearestEnemy(h,range,preferHero){
   const eh=enemyHeroOf(h.team);
   if (preferHero && targetable(eh,h.team) && dist(h,eh)<=range) return eh;
   let best=null, bd=1e9;
-  for (const e of G.ents){ if (e.kind!=='minion'&&e.kind!=='hero') continue; if (!targetable(e,h.team)) continue; const d=dist(h,e); if (d<=range&&d<bd){bd=d;best=e;} }
+  for (const e of G.ents){ if (!isUnit(e)) continue; if (!targetable(e,h.team)) continue; const d=dist(h,e); if (d<=range&&d<bd){bd=d;best=e;} }
   return best;
 }
-function enemiesIn(x,y,r,team){ return G.ents.filter(e=>!e.dead && e.team!==team && (e.kind==='hero'||e.kind==='minion') && Math.hypot(e.x-x,e.y-y)<=r+e.r*.5); }
-function inBase(h){ const s=SPAWN[h.team]; return Math.hypot(h.x-s.x,h.y-s.y)<100; }
+function enemiesIn(x,y,r,team){ return G.ents.filter(e=>!e.dead && e.team!==team && isUnit(e) && Math.hypot(e.x-x,e.y-y)<=r+e.r*.5); }
+function inBase(h){ const s=spawnOf(h.team); return Math.hypot(h.x-s.x,h.y-s.y)<100; }
 function text(x,y,s,col,big){ G.texts.push({x,y,t:s,col,big,life:big?1.2:.8,age:0}); }
 let toastT=0;
 function toast(m){ const el=$('toast'); el.textContent=m; el.style.opacity=1; clearTimeout(toastT); toastT=setTimeout(()=>el.style.opacity=0, Math.max(2200, m.length*55)); }
@@ -432,34 +474,45 @@ function hit(t2,amt,src){
   if (t2.shieldT>0 && t2.shield>0){ const a=Math.min(t2.shield,amt); t2.shield-=a; amt-=a; }
   t2.hp-=amt; t2.flash=.1;
   if (src && src.kind==='hero'){ if (t2.kind==='hero') src.aggroT=2.5; if (src.ls>0) src.hp=Math.min(src.maxHp,src.hp+amt*src.ls); }
+  if (t2.kind==='neutral' && src && isUnit(src) && src.team!==2){ for (const n of G.ents) if (n.kind==='neutral' && !n.dead && n.camp===t2.camp) n.aggro=src; }
   if (amt>=1 && (src===G.me || t2===G.me)) text(t2.x+rand(-6,6), t2.y-t2.r-14, Math.round(amt), t2===G.me?'#ff7a7a':'#ffffff', src===G.me&&amt>t2.maxHp*.12);
   if (t2.hp<=0) die(t2,src);
 }
 function die(v,src){
   v.dead=true; v.hp=0;
-  const foe=enemyHeroOf(v.team), lastHit = src===foe;
+  const foe=v.team===2?null:enemyHeroOf(v.team), lastHit = src===foe;
+  if (v.kind==='neutral'){
+    burst(v.x,v.y,'#c58bff',v.D.boss?70:14,v.D.boss?200:70,.8);
+    const k = src && src.kind==='hero' ? src : null;
+    if (k){ giveGold(k,v.D.gold,v); giveXp(k,v.D.xp); }
+    if (v.D.boss){ G.shake=.6; sfx('tower'); G.heraldAt=G.t+180; if (k){ G.buff[k.team]=G.t+120; toast(t('heraldDown',{h:k.def.name})); } }
+    else if (!G.ents.some(n=>n.kind==='neutral'&&!n.dead&&n.camp===v.camp&&n!==v)) G.campAt=G.t+75;
+    return;
+  }
+  if (v.kind==='building'){ burst(v.x,v.y-20,'#ffb070',30,120,1,4); burst(v.x,v.y-20,'#444',20,60,1.4,6); G.shake=.3; sfx('tower'); G.lostB++; return; }
   if (v.kind==='minion'){
     burst(v.x,v.y,TC[v.team],10,60,.5);
     if (lastHit){ giveGold(foe,v.D.gold,v); giveXp(foe,v.D.xp); if (foe===G.me) G.stats.cs++; }
-    else if (!foe.dead && dist(foe,v)<340){ giveXp(foe,Math.round(v.D.xp*.4)); giveGold(foe,3); }
+    else if (G.mode==='siege') G.stats.cs++;
+    else if (foe && !foe.dead && dist(foe,v)<340){ giveXp(foe,Math.round(v.D.xp*.4)); giveGold(foe,3); }
   } else if (v.kind==='hero'){
     v.respawn=4+v.lvl*1.1; v.dash=null; v.kb=null; v.invis=0;
     burst(v.x,v.y,v.def.col,40,140,.9); burst(v.x,v.y,'#ffffff',14,90,.5);
     G.rings.push({x:v.x,y:v.y,r0:10,r1:90,t:0,life:.6,col:v.def.col,w:5}); sfx('die');
-    const g=220+15*v.lvl, x=110+22*v.lvl, share=lastHit?1:.6;
+    const g=220+15*v.lvl, x=110+22*v.lvl, share=lastHit?1:(src&&src.team===2?0:.6);
     giveGold(foe,Math.round(g*share)); giveXp(foe,Math.round(x*share));
     if (v===G.me){ G.stats.d++; toast(t('youDied')); } else { G.stats.k++; toast(t('killedHero',{h:v.def.name,g:Math.round(g*share)})); }
   } else if (v.kind==='tower'){
     burst(v.x,v.y-20,'#ffb070',60,160,1.1,4); burst(v.x,v.y-20,'#444',30,60,1.6,6);
     G.shake=.5; sfx('tower');
     giveGold(foe,180+(lastHit?120:0),v); giveXp(foe,150+(lastHit?60:0));
-    toast(v.team===1 ? t('towerDown') : t('towerLost'));
+    if (G.mode!=='siege') toast(v.team===1 ? t('towerDown') : t('towerLost'));
   } else if (v.kind==='core'){
     burst(v.x,v.y,TC[v.team],120,240,1.6,5); G.shake=1; sfx('tower');
-    endMatch(v.team===1);
+    if (G.mode==='siege') endSiege(false); else endMatch(v.team===1);
   }
 }
-function stun(e,s){ if (e.kind==='hero'||e.kind==='minion'){ e.stun=Math.max(e.stun||0,s); if (e.dash) e.dash=null; } }
+function stun(e,s){ if (isUnit(e)){ e.stun=Math.max(e.stun||0,s); if (e.dash) e.dash=null; } }
 
 /* ---------- Skills (power scales with rank r) ---------- */
 const moveDirOf = h => h.moving ? h.mv : h.face;
@@ -490,9 +543,10 @@ function cast(h,i){
   if (!s || s.passive || h.dead || h.stun>0) return false;
   if (h.ranks[i]<1){ if (h===G.me) toast(t('learnFirst')); return false; }
   if (h.cds[i]>0) return false;
+  if (h.mana<manaCost(h,i)){ if (h===G.me) toast(t('noMana')); return false; }
   const ok=SK[h.key][i](h,h.ranks[i]);
   if (ok){
-    h.cds[i]=cdOf(h,i); if (h.invis>0 && !(h.key==='vael'&&i===3)) h.invis=0;
+    h.mana-=manaCost(h,i); h.cds[i]=cdOf(h,i); if (h.invis>0 && !(h.key==='vael'&&i===3)) h.invis=0;
     if (h===G.me) sfx('skill');
     if (h.invis<=0 || h.team===0) text(h.x,h.y-h.r-34,L(s.n),h.team===0?'#ffe7a8':'#ffb0b0',true);
   } else if (h===G.me) toast(t('noTarget'));
@@ -501,7 +555,7 @@ function cast(h,i){
 
 /* ---------- Movement ---------- */
 function pushOut(u){
-  for (const s of G.ents){ if ((s.kind!=='tower'&&s.kind!=='core')||s.dead) continue; const d=dist(u,s), m=u.r+s.r*.8; if (d<m&&d>0){ u.x=s.x+(u.x-s.x)/d*m; u.y=s.y+(u.y-s.y)/d*m; } }
+  for (const s of G.ents){ if ((s.kind!=='tower'&&s.kind!=='core'&&s.kind!=='building')||s.dead) continue; const d=dist(u,s), m=u.r+s.r*.8; if (d<m&&d>0){ u.x=s.x+(u.x-s.x)/d*m; u.y=s.y+(u.y-s.y)/d*m; } }
   u.x=clamp(u.x,16,MW-16); u.y=clamp(u.y,16,MH-16);
 }
 function speedOf(u,base){ let s=base*(u.spdMul||1); if (u.slowT>0) s*=1-u.slow; if (u.haste>0) s*=1.3; return s; }
@@ -515,7 +569,7 @@ function moveTowards(u,tx,ty,spd,dt,stopAt){
 function heroAttack(h,tg){
   h.atkCd=h.def.cd/((1+.02*(h.lvl-1))*h.asMul);
   const d0=dist(h,tg)||1; h.face={x:(tg.x-h.x)/d0, y:(tg.y-h.y)/d0};
-  let d=h.dmg*(h.team===1?.82:1);
+  let d=h.dmg*(h.team===1?(G.botMul||.82):1)*(G.buff&&G.buff[h.team]>G.t?1.25:1);
   if (h.key==='vael'){
     if (h.markTgt===tg) h.markN++; else { h.markTgt=tg; h.markN=1; }
     if (h.markN>=3){ d*=1.8; h.markN=0; G.rings.push({x:tg.x,y:tg.y,r0:6,r1:30,t:0,life:.35,col:'#7ff0ff',w:3}); }
@@ -536,15 +590,16 @@ function pickHeroTarget(h){
   return best;
 }
 function updateHero(h,dt){
-  if (h.dead){ h.respawn-=dt; if (h.respawn<=0){ h.dead=false; h.hp=h.maxHp; const s=SPAWN[h.team]; h.x=s.x; h.y=s.y; h.stun=h.root=h.slowT=0; if (h===G.me) toast(t('back')); } return; }
+  if (h.dead){ h.respawn-=dt; if (h.respawn<=0){ h.dead=false; h.hp=h.maxHp; const s=spawnOf(h.team); h.x=s.x; h.y=s.y; h.mana=h.maxMana; h.stun=h.root=h.slowT=0; if (h===G.me) toast(t('back')); } return; }
   for (let i=1;i<5;i++) h.cds[i]=Math.max(0,h.cds[i]-dt);
   h.atkCd-=dt; h.flash=Math.max(0,h.flash-dt); h.aggroT=Math.max(0,h.aggroT-dt);
   h.stun=Math.max(0,h.stun-dt); h.root=Math.max(0,h.root-dt); h.invis=Math.max(0,h.invis-dt); h.haste=Math.max(0,h.haste-dt);
   if (h.slowT>0) h.slowT-=dt; if (h.shieldT>0) h.shieldT-=dt; if (h.drT>0) h.drT-=dt;
   h.gold+=2.5*dt; if (h===G.me) G.stats.gold+=2.5*dt;
   if (h.regen) h.hp=Math.min(h.maxHp,h.hp+h.maxHp*h.regen*dt);
+  h.mana=Math.min(h.maxMana,h.mana+(3+.3*h.lvl)*dt*(inBase(h)?10:1));
   if (inBase(h)) h.hp=Math.min(h.maxHp,h.hp+h.maxHp*.12*dt);
-  const esp=SPAWN[1-h.team]; if (Math.hypot(h.x-esp.x,h.y-esp.y)<95) hit(h,h.maxHp*.2*dt,null);
+  if (G.mode!=='siege'){ const esp=SPAWN[1-h.team]; if (Math.hypot(h.x-esp.x,h.y-esp.y)<95) hit(h,h.maxHp*.2*dt,null); }
   if (h.key==='korr' && G.ents.some(e=>e.kind==='tower'&&!e.dead&&e.team===h.team&&dist(e,h)<210)) h.hp=Math.min(h.maxHp,h.hp+h.maxHp*.025*dt);
   if (h.kb){ h.x+=h.kb.vx*dt; h.y+=h.kb.vy*dt; h.kb.t-=dt; if (h.kb.t<=0) h.kb=null; pushOut(h); return; }
   if (h.dash){
@@ -626,11 +681,11 @@ function spawnWave(){
 }
 function minionTarget(m){
   let best=null, bd=1e9;
-  for (const pass of [0,1,2]){
+  for (const pass of (m.D.structFirst?[1,0,2]:[0,1,2])){
     for (const e of G.ents){
       if (!targetable(e,m.team)) continue;
       if (pass===0 && e.kind!=='minion') continue;
-      if (pass===1 && e.kind!=='tower' && e.kind!=='core') continue;
+      if (pass===1 && e.kind!=='tower' && e.kind!=='core' && e.kind!=='building') continue;
       if (pass===2 && e.kind!=='hero') continue;
       const d=dist(m,e)-e.r; if (d<=m.D.aggro && d<bd){ bd=d; best=e; }
     }
@@ -648,8 +703,9 @@ function updateMinion(m,dt){
     if (d>R){ m.face=Math.sign(tg.x-m.x)||m.face; m.x+=(tg.x-m.x)/d*spd*dt; m.y+=(tg.y-m.y)/d*spd*dt; }
     else if (m.atk<=0){
       m.atk=m.D.cd;
-      if (m.D.ranged) G.projs.push({x:m.x,y:m.y-12,tgt:tg,spd:380,dmg:m.dmg,src:m,col:m.team?'#ff9a7a':'#8fdcff',w:2});
-      else { hit(tg,m.dmg,m); G.slashes.push({x:tg.x,y:tg.y,a:Math.atan2(tg.y-m.y,tg.x-m.x),t:0,life:.16,col:'#dfe6ff',small:true}); }
+      const md=m.dmg*(G.buff&&G.buff[m.team]>G.t?1.25:1);
+      if (m.D.ranged) G.projs.push({x:m.x,y:m.y-12,tgt:tg,spd:380,dmg:md,src:m,col:m.rift?'#e27bff':m.team?'#ff9a7a':'#8fdcff',w:2});
+      else { hit(tg,md,m); G.slashes.push({x:tg.x,y:tg.y,a:Math.atan2(tg.y-m.y,tg.x-m.x),t:0,life:.16,col:'#dfe6ff',small:true}); }
     }
   } else if (m.wp<m.path.length){
     const p=m.path[m.wp], tx=p[0]+m.ox, ty=p[1], d=Math.hypot(tx-m.x,ty-m.y);
@@ -657,35 +713,150 @@ function updateMinion(m,dt){
   }
 }
 
+/* ---------- Rift neutrals (duel) ---------- */
+function spawnNeutral(type,x,y,camp){
+  const D=RT[type], mul=1+.05*Math.floor(G.t/60);
+  const n={id:G.id++, kind:'neutral', type, D, team:2, camp, home:{x,y}, x, y, r:D.boss?26:type==='brute'?14:10, hp:D.hp*mul, maxHp:D.hp*mul, dmg:D.dmg*mul, atk:0, stun:0, slowT:0, slow:0, kb:null, flash:0, face:1, aggro:null, rift:true, img:IMG[D.img+'.webp']};
+  G.ents.push(n); return n;
+}
+function spawnCamp(){ spawnNeutral('crawler',340,585,'camp'); spawnNeutral('crawler',412,585,'camp'); spawnNeutral('seer',376,610,'camp'); toast(t('campUp')); }
+function updateNeutral(n,dt){
+  n.flash=Math.max(0,n.flash-dt); n.atk-=dt; if (n.slowT>0) n.slowT-=dt;
+  if (n.kb){ n.x+=n.kb.vx*dt; n.y+=n.kb.vy*dt; n.kb.t-=dt; if (n.kb.t<=0) n.kb=null; return; }
+  if (n.stun>0){ n.stun-=dt; return; }
+  const a=n.aggro, spd=speedOf(n,n.D.spd);
+  if (a && targetable(a,2) && Math.hypot(n.x-n.home.x,n.y-n.home.y)<260){
+    const R=n.D.range+n.r+a.r, d=dist(n,a);
+    if (d>R){ n.face=Math.sign(a.x-n.x)||n.face; n.x+=(a.x-n.x)/d*spd*dt; n.y+=(a.y-n.y)/d*spd*dt; }
+    else if (n.atk<=0){ n.atk=n.D.cd; if (n.D.ranged) G.projs.push({x:n.x,y:n.y-14,tgt:a,spd:360,dmg:n.dmg,src:n,col:'#e27bff',w:3}); else { hit(a,n.dmg,n); G.slashes.push({x:a.x,y:a.y,a:Math.atan2(a.y-n.y,a.x-n.x),t:0,life:.2,col:'#e27bff'}); if (n.D.boss) G.rings.push({x:a.x,y:a.y,r0:10,r1:60,t:0,life:.4,col:'#c58bff',w:4}); } }
+  } else {
+    n.aggro=null; const d=Math.hypot(n.home.x-n.x,n.home.y-n.y);
+    if (d>6){ n.x+=(n.home.x-n.x)/d*spd*1.4*dt; n.y+=(n.home.y-n.y)/d*spd*1.4*dt; }
+    n.hp=Math.min(n.maxHp,n.hp+n.maxHp*.08*dt);
+  }
+}
+
+/* ---------- Rift sieges (base defense) ---------- */
+const SIEGE_PATHS=[
+  [[650,40],[600,170],[480,290],[420,420],[370,540]],
+  [[-30,575],[60,575],[170,600],[300,595]],
+  [[790,800],[715,800],[620,730],[470,650]],
+  [[375,1400],[375,1090],[375,960],[368,700]],
+];
+const DEF_SPOTS=[[400,275],[590,330],[100,600],[650,860],[270,1010],[470,1035]];
+const DEFSTAT={
+  arrow: {dmg:l=>40+14*l, range:150, cd:.8,  col:'#7fe8ff'},
+  cannon:{dmg:l=>70+26*l, range:140, cd:2.0, col:'#ffb547', splash:55},
+  frost: {dmg:l=>15+6*l,  range:125, cd:1.2, col:'#9fd8ff', splash:45, slow:l=>.32+.03*l},
+  trap:  {dmg:l=>45+18*l, range:0,   cd:1.2, col:'#7fe8ff'},
+};
+function siegePlan(n){
+  const W=[
+    [['crawler',6]],
+    [['crawler',4],['seer',2]],
+    [['brute',2],['breaker',2],['crawler',3]],
+    [['seer',3],['brute',2],['crawler',4]],
+    [['herald',1],['crawler',4],['seer',2],['breaker',1]],
+  ];
+  return W;
+}
+function newSiege(){
+  initBase();
+  const n=P.siegeN, mul=1+.16*n;
+  G = {mode:'siege', t:0, ents:[], projs:[], zones:[], parts:[], rings:[], slashes:[], texts:[], over:false, paused:false, cam:{x:365,y:640}, shake:0,
+       stats:{k:0,d:0,cs:0,gold:0}, id:1, buff:[0,0], sq:[], wave:0, waveAt:4, waves:siegePlan(n), mul, paths:Math.min(4,2+Math.floor(n/2)), lostB:0};
+  const L=fortLevels(), wm=bonuses(0).tower;
+  const core=addStruct('core',0,CORE_XY[0],CORE_XY[1],wm*(1+.15*(L.core-1))); core.sprite=spriteOf('core',P.base.core.lvl); core.sw=BT.core.w; core.shootY=70;
+  P.base.plots.forEach((b,i)=>{ if (!b || b.lvl<1) return; const [x,y]=PLOTS[i]; const hp=500+300*b.lvl;
+    G.ents.push({id:G.id++, kind:'building', team:0, x, y, r:30, hp, maxHp:hp, dmg:0, range:0, cd:1, atk:0, od:0, shield:0, shieldT:0, flash:0, dead:false, sprite:spriteOf(b.t,b.lvl), sw:BT[b.t].w*(b.lvl>=7?1.04:1)}); });
+  (P.base.defs||[]).forEach((d,i)=>{ if (!d || d.lvl<1) return; const [x,y]=DEF_SPOTS[i], S=DEFSTAT[d.t];
+    const e=addStruct('tower',0,x,y,wm); e.dtype=d.t; e.dmg=S.dmg(d.lvl); e.range=S.range||40; e.cd=S.cd; e.dcol=S.col; e.splash=S.splash||0; e.slow=S.slow?S.slow(d.lvl):0;
+    e.sprite=d.t==='arrow'?spriteOf('tower',d.lvl):'d-'+d.t; e.sw=BT[d.t].w; e.shootY=d.t==='arrow'?70:40; if (d.t==='trap'){ e.r=1; e.hp=e.maxHp=1e9; e.untargetable=true; } });
+  G.me=addHero(P.hero,0); G.bot=null;
+  G.me.lvl=8; G.me.points=8; recalc(G.me); G.me.hp=G.me.maxHp; G.me.mana=G.me.maxMana; autoLearn(G.me); G.me.points=0;
+  setupHud(); toast(t('defendCore'));
+}
+function siegeTick(dt){
+  if (G.wave<G.waves.length && G.t>=G.waveAt){
+    const comp=G.waves[G.wave]; G.wave++; G.waveAt=G.t+26;
+    toast(comp.some(c=>c[0]==='herald')?t('siegeBoss'):t('siegeWave',{n:G.wave}));
+    let k=0; for (const [type,cnt] of comp) for (let i=0;i<cnt;i++) G.sq.push({type,at:G.t+k++*.55,path:SIEGE_PATHS[Math.floor(Math.random()*G.paths)]});
+  }
+  while (G.sq.length && G.sq[0].at<=G.t){
+    const q=G.sq.shift(), D=RT[q.type], p=q.path[0];
+    G.ents.push({id:G.id++, kind:'minion', type:q.type, D, team:1, lane:0, path:q.path, wp:1, x:p[0]+rand(-12,12), y:p[1]+rand(-12,12), r:D.boss?26:q.type==='brute'?14:10,
+      hp:D.hp*G.mul, maxHp:D.hp*G.mul, dmg:D.dmg*G.mul, atk:rand(0,.5), stun:0, slowT:0, slow:0, kb:null, flash:0, ox:rand(-14,14), dead:false, face:1, rift:true, img:IMG[D.img+'.webp']});
+  }
+  if (G.wave>=G.waves.length && !G.sq.length && !G.ents.some(e=>e.kind==='minion'&&!e.dead)) endSiege(true);
+}
+function endSiege(won){
+  if (G.over) return; G.over=true;
+  initBase(); const n=P.siegeN+1;
+  let gGot=0, cGot=0, stolen=0; const hx=won?160+40*P.siegeN:60;
+  if (won){ const cap=caps(); gGot=Math.min(200+60*P.siegeN,Math.max(0,cap.g-P.base.gold)); cGot=Math.min(25+10*P.siegeN,Math.max(0,cap.c-P.base.crystals)); P.base.gold+=gGot; P.base.crystals+=cGot; P.siegeN++; }
+  else { stolen=Math.floor(P.base.gold*.15); P.base.gold-=stolen; }
+  const hUp=giveHeroXp(hx); P.siegeAt=Date.now()+SIEGE_EVERY; saveProfile();
+  setTimeout(()=>{
+    screen(`<div class="wrap"><h2 class="result" style="color:${won?'var(--gold)':'var(--red)'}">${won?t('siegeWon'):t('siegeLost')}</h2><p class="sub">${t('siegeSub',{n})}</p>
+      <div class="stats"><div><small>${t('enemies')}</small>${G.stats.cs}</div><div><small>${t('sDeaths')}</small>${G.stats.d}</div><div><small>${t('sLvl')}</small>${G.me.lvl}</div></div>
+      <p class="label">${t('rewards')}</p>
+      <div class="rewards">${won?`<div class="r"><span>${t('rGoldL')}</span><span>+${gGot}</span></div><div class="r"><span>${t('rCr')}</span><span>+${cGot}</span></div>`:`<div class="r"><span>${t('stolen')}</span><span style="color:var(--red)">−${stolen}</span></div>`}
+      <div class="r"><span>${t('rHero')}</span><span>+${hx}</span></div>${hUp?`<div class="r"><span>${t('heroUp',{n:P.hlvl})}</span><span></span></div>`:''}</div>
+      <button class="play" id="home">${t('toFortress')}</button></div>`, won?'base.jpg':null);
+    $('home').onclick=()=>{ G=null; $('hud').hidden=true; showBase(); };
+  },1400);
+}
+const SIEGE_EVERY = 3*60*1000; // prototype: 3 minutes; real game: 4 to 6 hours
+function autoResolveSiege(){
+  const L=fortLevels(); const defs=(P.base.defs||[]).filter(Boolean);
+  const power=L.core*3+defs.reduce((a,d)=>a+d.lvl*2.2,0)+P.hlvl*.6;
+  const threat=5+P.siegeN*2.6; const won=power+rand(0,5)>=threat;
+  let gGot=0,cGot=0,stolen=0;
+  if (won){ const cap=caps(); gGot=Math.min(100+30*P.siegeN,Math.max(0,cap.g-P.base.gold)); cGot=Math.min(12+5*P.siegeN,Math.max(0,cap.c-P.base.crystals)); P.base.gold+=gGot; P.base.crystals+=cGot; P.siegeN++; }
+  else { stolen=Math.floor(P.base.gold*.15); P.base.gold-=stolen; }
+  P.siegeAt=Date.now()+SIEGE_EVERY; saveProfile();
+  return {won,gGot,cGot,stolen};
+}
+
 /* ---------- Structures ---------- */
 function updateStruct(s,dt){
   if (s.dead) return;
   s.flash=Math.max(0,s.flash-dt); if (s.shieldT>0) s.shieldT-=dt; if (s.od>0) s.od-=dt;
   if (G.sudden && s.kind==='core') hit(s,s.maxHp*.006*dt,null);
+  if (!s.dmg) return;
   s.atk-=dt*(s.od>0?2:1);
   if (s.atk>0) return;
+  if (s.dtype==='trap'){ const hitL=enemiesIn(s.x,s.y,38,s.team); if (hitL.length){ s.atk=s.cd; for (const e of hitL) hit(e,s.dmg,s); G.rings.push({x:s.x,y:s.y,r0:8,r1:40,t:0,life:.3,col:'#7fe8ff',w:3}); } return; }
   let tg=null, bd=1e9; const eh=enemyHeroOf(s.team);
   if (targetable(eh,s.team) && eh.aggroT>0 && dist(s,eh)<=s.range) tg=eh;
   if (!tg) for (const e of G.ents){ if (e.kind!=='minion'||!targetable(e,s.team)) continue; const d=dist(s,e); if (d<=s.range&&d<bd){bd=d;tg=e;} }
   if (!tg && targetable(eh,s.team) && dist(s,eh)<=s.range) tg=eh;
   if (!tg) return;
   s.atk=s.cd;
-  G.projs.push({x:s.x,y:s.y-(s.kind==='core'?50:62),tgt:tg,spd:480,dmg:s.dmg*(tg.kind==='hero'?1:1.4),src:s,col:s.od>0?'#ffd27a':TC[s.team],w:5,big:true});
+  G.projs.push({x:s.x,y:s.y-(s.shootY||(s.kind==='core'?50:62)),tgt:tg,spd:480,dmg:s.dmg*(tg.kind==='hero'?1:1.4),src:s,col:s.od>0?'#ffd27a':s.dcol||TC[s.team],w:5,big:true,splash:s.splash,slow:s.slow});
 }
 
 /* ---------- Main update ---------- */
 function update(dt){
   G.t+=dt;
-  if (G.t>=G.nextWave){ spawnWave(); G.nextWave+=20; }
-  if (!G.sudden && G.t>=480){ G.sudden=true; toast(t('sudden')); }
-  for (const e of G.ents){ if (e.dead && e.kind!=='hero') continue; if (e.kind==='hero') updateHero(e,dt); else if (e.kind==='minion') updateMinion(e,dt); else updateStruct(e,dt); if (G.over) return; }
+  if (G.mode==='siege') siegeTick(dt);
+  else {
+    if (G.t>=G.nextWave){ spawnWave(); G.nextWave+=20; }
+    if (!G.sudden && G.t>=480){ G.sudden=true; toast(t('sudden')); }
+    if (G.campAt && G.t>=G.campAt){ G.campAt=0; spawnCamp(); }
+    if (G.heraldAt && G.t>=G.heraldAt){ G.heraldAt=0; spawnNeutral('herald',376,548,'boss'); toast(t('heraldUp')); }
+  }
+  for (const e of G.ents){ if (e.dead && e.kind!=='hero') continue; if (e.kind==='hero') updateHero(e,dt); else if (e.kind==='minion') updateMinion(e,dt); else if (e.kind==='neutral') updateNeutral(e,dt); else updateStruct(e,dt); if (G.over) return; }
   const ms=G.ents.filter(e=>e.kind==='minion'&&!e.dead);
   for (let i=0;i<ms.length;i++) for (let j=i+1;j<ms.length;j++){ const a=ms[i], b=ms[j], dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy), m=a.r+b.r; if (d<m&&d>0){ const p=(m-d)/2; a.x-=dx/d*p; a.y-=dy/d*p; b.x+=dx/d*p; b.y+=dy/d*p; } }
   for (const p of G.projs){
     const tg=p.tgt; if (tg.dead){ p.done=true; continue; }
     const tx=tg.x, ty=tg.y-(tg.kind==='hero'||tg.kind==='minion'?8:30), dx=tx-p.x, dy=ty-p.y, d=Math.hypot(dx,dy), st=p.spd*dt;
     p.a=Math.atan2(dy,dx);
-    if (d<=st+4){ p.done=true; hit(tg,p.dmg,p.src); burst(tx,ty,p.col,p.big?10:4,p.big?90:50,.3); if (p.big) sfx('boom'); }
+    if (d<=st+4){ p.done=true;
+      if (p.splash){ for (const e of enemiesIn(tx,ty,p.splash,p.src.team)){ hit(e,p.dmg,p.src); if (p.slow){ e.slow=p.slow; e.slowT=1.5; } } G.rings.push({x:tx,y:ty,r0:6,r1:p.splash,t:0,life:.35,col:p.col,w:3}); }
+      else { hit(tg,p.dmg,p.src); if (p.slow){ tg.slow=p.slow; tg.slowT=1.5; } }
+      burst(tx,ty,p.col,p.big?10:4,p.big?90:50,.3); if (p.big) sfx('boom'); }
     else { p.x+=dx/d*st; p.y+=dy/d*st; }
   }
   G.projs=G.projs.filter(p=>!p.done);
@@ -700,7 +871,7 @@ function update(dt){
     }
   }
   G.zones=G.zones.filter(z=>z.t<z.dur);
-  G.ents=G.ents.filter(e=>!(e.kind==='minion'&&e.dead));
+  G.ents=G.ents.filter(e=>!((e.kind==='minion'||e.kind==='neutral')&&e.dead));
 }
 function updateFx(dt){
   for (const p of G.parts){ p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx*=1-2*dt; p.vy*=1-2*dt; }
@@ -717,8 +888,10 @@ let SW=0, SH=0, DPR=1, SC=1;
 function resize(){ const r=$('app').getBoundingClientRect(); SW=r.width; SH=r.height; DPR=Math.min(2,window.devicePixelRatio||1); cv.width=SW*DPR; cv.height=SH*DPR; SC=Math.max(SW/430, SH/800); }
 new ResizeObserver(resize).observe($('app'));
 function bar(x,y,w,h,ratio,col){ ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(x-1,y-1,w+2,h+2); ctx.fillStyle=col; ctx.fillRect(x,y,w*clamp(ratio,0,1),h); }
+function drawSprite(s){ const im=IMG[s.sprite+'.webp']; const w=s.sw*752, h=w*(im.naturalHeight/im.naturalWidth||1); ctx.drawImage(im,s.x-w/2,s.y-h*.64,w,h); return h; }
 function drawStruct(s,time){
-  const top=s.kind==='core'?70:84;
+  let top=s.kind==='core'?70:84;
+  if (s.sprite && !s.dead){ const h=drawSprite(s); top=h*.64+6; if (s.dtype==='trap') return; }
   if (s.dead){
     const g=ctx.createRadialGradient(s.x,s.y-10,4,s.x,s.y-10,60); g.addColorStop(0,'rgba(10,8,14,.85)'); g.addColorStop(1,'rgba(10,8,14,0)');
     ctx.fillStyle=g; ctx.beginPath(); ctx.arc(s.x,s.y-10,60,0,7); ctx.fill();
@@ -742,8 +915,9 @@ function drawMinion(m){
   if (m.flash>0){ ctx.globalAlpha=.5; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(m.x,m.y-h/2,m.r,0,7); ctx.fill(); ctx.globalAlpha=1; }
   // last-hit cue: the enemy minion glows gold when your next hit would finish it
   const me=G.me;
-  if (m.team===1 && !me.dead && m.hp<=me.dmg*1.05 && dist(me,m)<me.range+120){ ctx.strokeStyle='rgba(255,194,90,.9)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(m.x,m.y-h/2,m.r+5,0,7); ctx.stroke(); }
-  if (m.hp<m.maxHp) bar(m.x-11,m.y-h-4,22,3,m.hp/m.maxHp,m.team===0?'#7fd6ff':'#ff7a6e');
+  if (m.team!==0 && !me.dead && m.hp<=me.dmg*1.05 && dist(me,m)<me.range+120){ ctx.strokeStyle='rgba(255,194,90,.9)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(m.x,m.y-h/2,m.r+5,0,7); ctx.stroke(); }
+  if (m.D.boss) bar(m.x-36,m.y-h-8,72,6,m.hp/m.maxHp,'#c58bff');
+  else if (m.hp<m.maxHp) bar(m.x-11,m.y-h-4,22,3,m.hp/m.maxHp,m.team===0?'#7fd6ff':m.team===2?'#c58bff':'#ff7a6e');
 }
 function drawHero(h,time){
   if (h.dead) return;
@@ -765,6 +939,7 @@ function drawHero(h,time){
   ctx.restore();
   const w=48, y=h.y-h.r-17;
   bar(h.x-w/2+8,y,w-8,6,h.hp/h.maxHp,own?'#58e08a':'#ff5f5f');
+  if (own){ ctx.fillStyle='#5aa8ff'; ctx.fillRect(h.x-w/2+8,y+7,(w-8)*clamp(h.mana/h.maxMana,0,1),2); }
   if (h.shieldT>0 && h.shield>0){ ctx.fillStyle='rgba(255,220,140,.9)'; ctx.fillRect(h.x-w/2+8,y-3,(w-8)*clamp(h.shield/h.maxHp,0,1),2); }
   ctx.fillStyle='#1a1c30'; ctx.fillRect(h.x-w/2-5,y-3,14,12); ctx.fillStyle='#ffc25a'; ctx.font='700 9px Barlow, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(h.lvl,h.x-w/2+2,y+3);
 }
@@ -782,18 +957,18 @@ function drawZones(time){
 }
 function draw(){
   const time=G.t, me=G.me, vw=SW/SC, vh=SH/SC;
-  const tx=me.dead?SPAWN[0].x:me.x, ty=me.dead?SPAWN[0].y-120:me.y-30;
+  const sp0=spawnOf(0), tx=me.dead?sp0.x:me.x, ty=me.dead?sp0.y-120:me.y-30;
   G.cam.x+=(tx-G.cam.x)*.12; G.cam.y+=(ty-G.cam.y)*.12;
   const cx=vw>=MW?MW/2:clamp(G.cam.x,vw/2,MW-vw/2), cy=vh>=MH?MH/2:clamp(G.cam.y,vh/2,MH-vh/2);
   let sx=0, sy=0; if (G.shake>0){ sx=rand(-1,1)*G.shake*8; sy=rand(-1,1)*G.shake*8; }
   ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#05060c'; ctx.fillRect(0,0,cv.width,cv.height);
   ctx.setTransform(DPR*SC,0,0,DPR*SC,DPR*(SW/2-(cx-sx)*SC),DPR*(SH/2-(cy-sy)*SC));
-  ctx.drawImage(IMG['map.jpg'],0,0,MW,MH);
-  for (const tm of [0,1]){ const s=SPAWN[tm]; ctx.strokeStyle=TC[tm]; ctx.globalAlpha=.35+(tm===0&&inBase(me)?.3:0); ctx.lineWidth=2; ctx.beginPath(); ctx.arc(s.x,s.y,95,0,7); ctx.stroke(); ctx.globalAlpha=1; }
+  ctx.drawImage(IMG[G.mode==='siege'?'base-ground.jpg':'map.jpg'],0,0,MW,MH);
+  if (G.mode==='siege'){ const s=SIEGE_SPAWN; ctx.strokeStyle=TC[0]; ctx.globalAlpha=.4; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(s.x,s.y,95,0,7); ctx.stroke(); ctx.globalAlpha=1; }
+  else for (const tm of [0,1]){ const s=SPAWN[tm]; ctx.strokeStyle=TC[tm]; ctx.globalAlpha=.35+(tm===0&&inBase(me)?.3:0); ctx.lineWidth=2; ctx.beginPath(); ctx.arc(s.x,s.y,95,0,7); ctx.stroke(); ctx.globalAlpha=1; }
   drawZones(time);
-  for (const s of G.ents) if (s.kind==='tower'||s.kind==='core') drawStruct(s,time);
-  const units=G.ents.filter(e=>e.kind==='minion'||e.kind==='hero').sort((a,b)=>a.y-b.y);
-  for (const u of units) u.kind==='minion' ? drawMinion(u) : drawHero(u,time);
+  const layer=G.ents.filter(e=>isUnit(e)||e.kind==='tower'||e.kind==='core'||e.kind==='building').sort((a,b)=>(a.dtype==='trap'?-1e4:a.y)-(b.dtype==='trap'?-1e4:b.y));
+  for (const u of layer) u.kind==='hero' ? drawHero(u,time) : isUnit(u) ? drawMinion(u) : drawStruct(u,time);
   ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.lineCap='round';
   for (const p of G.projs){ const Ln=p.big?22:14, ca=Math.cos(p.a||0), sa=Math.sin(p.a||0); ctx.strokeStyle=p.col; ctx.lineWidth=p.w+3; ctx.globalAlpha=.35; ctx.beginPath(); ctx.moveTo(p.x-ca*Ln,p.y-sa*Ln); ctx.lineTo(p.x,p.y); ctx.stroke();
     ctx.globalAlpha=1; ctx.lineWidth=p.w; ctx.strokeStyle='#fff'; ctx.beginPath(); ctx.moveTo(p.x-ca*Ln*.5,p.y-sa*Ln*.5); ctx.lineTo(p.x,p.y); ctx.stroke(); }
@@ -809,9 +984,10 @@ function draw(){
 const mini=$('mini'), mctx=mini.getContext('2d');
 function drawMini(cx,cy,vw,vh){
   const k=mini.width/MW;
-  mctx.drawImage(IMG['map.jpg'],0,0,mini.width,mini.height);
+  mctx.drawImage(IMG[G.mode==='siege'?'base-ground.jpg':'map.jpg'],0,0,mini.width,mini.height);
   for (const e of G.ents){ if (e.dead) continue; if (e.kind==='hero'&&e.team===1&&e.invis>0) continue;
-    const r=e.kind==='hero'?5:e.kind==='minion'?1.6:e.kind==='core'?6:4.5;
+    if (e.untargetable) continue;
+    const r=e.kind==='hero'?5:e.kind==='minion'||e.kind==='neutral'?(e.D&&e.D.boss?5:1.8):e.kind==='core'?6:4;
     mctx.fillStyle=TC[e.team]; mctx.beginPath(); mctx.arc(e.x*k,e.y*k,r,0,7); mctx.fill(); if (e.kind==='hero'){ mctx.strokeStyle='#fff'; mctx.lineWidth=1.5; mctx.stroke(); } }
   mctx.strokeStyle='rgba(255,255,255,.7)'; mctx.lineWidth=1.5; mctx.strokeRect((cx-vw/2)*k,(cy-vh/2)*k,vw*k,vh*k);
 }
@@ -838,10 +1014,11 @@ function updateHud(){
   setT($('meLvl'),me.lvl);
   $('meHp').style.width=(me.hp/me.maxHp*100)+'%'; setT($('meHpT'),Math.ceil(me.hp)+' / '+me.maxHp);
   $('meXp').style.width=(me.lvl>=MAXLVL?100:me.xp/xpNeed(me.lvl)*100)+'%';
+  $('meMp').style.width=(me.mana/me.maxMana*100)+'%';
   const cB=G.ents.find(e=>e.kind==='core'&&e.team===0), cR=G.ents.find(e=>e.kind==='core'&&e.team===1);
-  $('coreB').style.width=(cB.hp/cB.maxHp*100)+'%'; $('coreR').style.width=(cR.hp/cR.maxHp*100)+'%';
-  const s=Math.floor(G.t); setT($('clock'),Math.floor(s/60)+':'+String(s%60).padStart(2,'0'));
-  setT($('kd'),t('kd',{k:G.stats.k,d:G.stats.d,cs:G.stats.cs}));
+  $('coreB').style.width=(cB.hp/cB.maxHp*100)+'%';
+  if (G.mode==='siege'){ $('coreR').style.width=((G.waves.length-G.wave)/G.waves.length*100)+'%'; setT($('clock'),t('wave',{n:G.wave,m:G.waves.length})); setT($('kd'),G.stats.cs+' '+t('enemies')); }
+  else { $('coreR').style.width=(cR.hp/cR.maxHp*100)+'%'; const s=Math.floor(G.t); setT($('clock'),Math.floor(s/60)+':'+String(s%60).padStart(2,'0')); setT($('kd'),t('kd',{k:G.stats.k,d:G.stats.d,cs:G.stats.cs})); }
   const canShop=me.dead||inBase(me), cheapest=Math.min(...ITEMS.map(i=>i.cost));
   const sb=$('btnShop'); setT(sb, t('shop')+' · '+Math.floor(me.gold)); sb.classList.toggle('dim',!canShop);
   const slotsKey=me.items.join(',');
@@ -851,7 +1028,7 @@ function updateHud(){
     const b=$('sk'+i), sk=me.def.skills[i], r=me.ranks[i], cd=me.cds[i];
     const lock=b.querySelector('.lock'); lock.hidden=r>0; if (r===0) setT(lock, sk.ult&&me.lvl<6 ? t('unlockAt',{n:6}) : t('notLearned'));
     const c=b.querySelector('.cd'); c.style.setProperty('--p',(cd>0&&r>0?cd/cdOf(me,i)*100:0)+'%'); setT(c,cd>0?Math.ceil(cd):'');
-    b.classList.toggle('ready',r>0&&cd<=0&&!me.dead);
+    b.classList.toggle('ready',r>0&&cd<=0&&!me.dead&&me.mana>=manaCost(me,i));
     [...b.querySelectorAll('.pips i')].forEach((p,j)=>p.classList.toggle('on',j<r));
     b.querySelector('.plus').hidden=!canLearn(me,i);
   }
@@ -944,16 +1121,24 @@ const BT={
   barracks: {max:10, count:1,    w:.26, cost:l=>({g:300+280*l, c:8*l}), time:l=>Math.round(45*Math.pow(l+1,1.6))},
   tower:    {max:10, count:1,    w:.15, cost:l=>({g:280+260*l, c:8*l}), time:l=>Math.round(40*Math.pow(l+1,1.6))},
   workshop: {max:1,  count:1,    w:.26, cost:l=>({g:600, c:40}), time:l=>90},
+  arrow:    {max:10, count:3, def:true, w:.12, cost:l=>({g:200+180*l, c:0}), time:l=>Math.round(25*Math.pow(l+1,1.5))},
+  cannon:   {max:10, count:2, def:true, w:.15, cost:l=>({g:350+250*l, c:5*l}), time:l=>Math.round(35*Math.pow(l+1,1.5))},
+  frost:    {max:10, count:2, def:true, w:.13, cost:l=>({g:300+220*l, c:5*l}), time:l=>Math.round(35*Math.pow(l+1,1.5))},
+  trap:     {max:10, count:3, def:true, w:.12, cost:l=>({g:150+120*l, c:0}), time:l=>Math.round(15*Math.pow(l+1,1.5))},
 };
+const DEFENSES=['arrow','cannon','frost','trap'];
 const BUILDABLE=['goldmine','extractor','treasury','forge','barracks','tower','workshop'];
 function initBase(){
-  if (P.base) return;
+  if (P.base) { if (!P.base.defs) P.base.defs=DEF_SPOTS.map(()=>null); return; }
   const now=Date.now();
-  P.base={gold:600, crystals:60, core:{t:'core',lvl:1,job:null}, plots:PLOTS.map(()=>null)};
+  P.base={gold:600, crystals:60, core:{t:'core',lvl:1,job:null}, plots:PLOTS.map(()=>null), defs:DEF_SPOTS.map(()=>null)};
+  P.base.defs[0]={t:'arrow',lvl:1,job:null};
   P.base.plots[2]={t:'goldmine',lvl:1,job:null,last:now-25*60*1000};
   saveProfile();
 }
-const allB = () => [P.base.core, ...P.base.plots.filter(Boolean)];
+function ensureBase(){ initBase(); if (!P.base.defs){ P.base.defs=DEF_SPOTS.map(()=>null); P.base.defs[0]={t:'arrow',lvl:1,job:null}; saveProfile(); } if (!P.siegeAt){ P.siegeAt=Date.now()+SIEGE_EVERY; saveProfile(); } }
+const getB = i => i<0 ? P.base.core : i>=100 ? P.base.defs[i-100] : P.base.plots[i];
+const allB = () => [P.base.core, ...P.base.plots.filter(Boolean), ...(P.base.defs||[]).filter(Boolean)];
 function fortLevels(){ const L={core:P.base.core.lvl}; for (const k of BUILDABLE) L[k]=Math.max(0,...P.base.plots.filter(p=>p&&p.t===k).map(p=>p.lvl)); return L; }
 function bonuses(team){ initBase(); const L=fortLevels(), k=team===0?1:.8; return {hp:.03*(L.core-1)*k, dmg:.03*L.forge*k, tower:1+.06*L.tower*k, troop:1+.04*L.barracks*k}; }
 function caps(){ const tl=fortLevels().treasury; return {g:1500+2500*tl, c:200+300*tl}; }
@@ -973,6 +1158,7 @@ function effectText(t2,l){
     case 'barracks': return t('e_barracks',{x:4*l});
     case 'tower': return t('e_tower',{x:6*l});
     case 'workshop': return t('e_workshop');
+    case 'arrow': case 'cannon': case 'frost': case 'trap': return t('e_'+t2,{d:Math.round(DEFSTAT[t2].dmg(l))});
   }
 }
 function canStart(t2,fromLvl){
@@ -1006,11 +1192,11 @@ function speedCost(b){ return Math.max(1,Math.ceil((b.job.end-Date.now())/30000)
 let fortToastT=0;
 function fortToast(m){ const el=$('ftoast'); if (!el) return; el.textContent=m; el.style.opacity=1; clearTimeout(fortToastT); fortToastT=setTimeout(()=>{ const e2=$('ftoast'); if (e2) e2.style.opacity=0; },2600); }
 
-function spriteOf(t2,l){ const tier=t2==='workshop'?1:l>=7?3:l>=4?2:1; return 'b-'+t2+(tier>1?'-'+tier:''); }
+function spriteOf(t2,l){ if (t2==='arrow') t2='tower'; else if (BT[t2]&&BT[t2].def) return 'd-'+t2; const tier=t2==='workshop'?1:l>=7?3:l>=4?2:1; return 'b-'+t2+(tier>1?'-'+tier:''); }
 function bldHTML(b,idx){
-  const D=BT[b.t], [x,y]=idx<0?CORE_XY:PLOTS[idx], building=b.job&&b.lvl===0;
+  const D=BT[b.t], [x,y]=idx<0?CORE_XY:idx>=100?DEF_SPOTS[idx-100]:PLOTS[idx], building=b.job&&b.lvl===0;
   const sprite=building?'b-scaffold':spriteOf(b.t,b.lvl), pend=pending(b), showB=D.prod && pend>=Math.max(5,D.rate(b.lvl)*.02);
-  return `<button class="fb" data-i="${idx}" style="left:${x/GW*100}%;top:${y/GH*100}%;width:${(building?.27:D.w*(b.lvl>=7?1.04:1))*100}%;z-index:${y}">
+  return `<button class="fb" data-i="${idx}" style="left:${x/GW*100}%;top:${y/GH*100}%;width:${(building?(D.def?.14:.27):D.w*(b.lvl>=7&&!D.def?1.04:1))*100}%;z-index:${D.t==='trap'||b.t==='trap'?1:y}">
     <img alt="${t('t_'+b.t)}" src="${IMG[sprite+'.webp'].src}">
     ${b.lvl>0?`<span class="flv">${b.lvl}</span>`:''}
     ${b.job?`<span class="fjob"><i data-end="${b.job.end}" data-dur="${D.time(b.job.to-1)*1000}"></i><em data-end="${b.job.end}"></em></span>`:''}
@@ -1019,12 +1205,14 @@ function bldHTML(b,idx){
   </button>`;
 }
 function showBase(){
-  initBase(); tickBase();
+  ensureBase(); tickBase();
+  if (Date.now()>P.siegeAt+90000 && Date.now()-lastBaseTick>5000){ const r=autoResolveSiege(); setTimeout(()=>sheetOpen('r',`<header><h2>${t('report')}</h2><button class="x" aria-label="${t('close')}">×</button></header><p class="note">${r.won?t('autoWon'):t('autoLost')}</p><div class="rewards">${r.won?`<div class="r"><span>${t('rGoldL')}</span><span>+${r.gGot}</span></div><div class="r"><span>${t('rCr')}</span><span>+${r.cGot}</span></div>`:`<div class="r"><span>${t('stolen')}</span><span style="color:var(--red)">−${r.stolen}</span></div>`}</div>`),50); }
   const need=acctNeed(P.lvl), cap=caps();
   screen(`<div class="fort">
     <div class="fview" style="background-image:url('${IMG['base-ground.jpg'].src}')">
       ${bldHTML(P.base.core,-1)}
       ${P.base.plots.map((b,i)=>b?bldHTML(b,i):`<button class="fplot" data-plot="${i}" style="left:${PLOTS[i][0]/GW*100}%;top:${PLOTS[i][1]/GH*100}%" aria-label="${t('emptyPlot')}"><span>+</span></button>`).join('')}
+      ${P.base.defs.map((b,i)=>b?bldHTML(b,100+i):`<button class="fdef" data-def="${i}" style="left:${DEF_SPOTS[i][0]/GW*100}%;top:${DEF_SPOTS[i][1]/GH*100}%" aria-label="${t('defSpot')}"><span>⛨</span></button>`).join('')}
     </div>
     <div class="ftop">
       <div class="acct"><div class="lv">${P.lvl}</div><div class="info"><b>${t('guardian')}</b><small>${t('acctLvl',{n:P.lvl})} · ${t('wins',{n:P.wins})}</small><div class="bar xp"><i style="width:${P.xp/need*100}%"></i></div></div></div>
@@ -1035,36 +1223,51 @@ function showBase(){
       <span class="res"><img alt="" src="${IMG['it-crystal.jpg'].src}"><b id="rCr">${Math.floor(P.base.crystals)}</b><small>/${cap.c}</small></span>
       <span class="res"><span class="ham">⚒</span><b id="rBld">${buildersTotal()-buildersBusy()}/${buildersTotal()}</b></span>
     </div>
+    <div class="fsiege" id="fsiege"></div>
     <div id="ftoast" class="toast2" style="opacity:0"></div>
     <div class="fbot">
-      <button class="fhero" id="fHero"><img alt="" src="${IMG[P.hero+'-head.png'].src}"><span><small>${t('hero')}</small>${HEROES[P.hero].name}</span></button>
+      <button class="fhero" id="fHero"><img alt="" src="${IMG[P.hero+'-head.png'].src}"><span><small>${t('heroLvl',{n:P.hlvl})}</small>${HEROES[P.hero].name}<i class="hxp"><i style="width:${P.hxp/heroNeed(P.hlvl)*100}%"></i></i></span></button>
       <button class="play fgo" id="go">${t('battle')}</button>
     </div>
     <div id="fsheet" class="sheet" hidden></div>
   </div>`);
   bindLang(showBase);
-  for (const el of document.querySelectorAll('.fb')) el.onclick=()=>{ const i=+el.dataset.i, b=i<0?P.base.core:P.base.plots[i]; if (BT[b.t].prod && pending(b)>=1 && !b.job){ collect(b); showBase(); return; } openB(i); };
+  for (const el of document.querySelectorAll('.fb')) el.onclick=()=>{ const i=+el.dataset.i, b=getB(i); if (BT[b.t].prod && pending(b)>=1 && !b.job){ collect(b); showBase(); return; } openB(i); };
   for (const el of document.querySelectorAll('.fplot')) el.onclick=()=>openPlot(+el.dataset.plot);
+  for (const el of document.querySelectorAll('.fdef')) el.onclick=()=>openDef(+el.dataset.def);
+  renderSiegeBar();
+  if (!P.heroLocked) setTimeout(openHeroPick,60);
   $('fHero').onclick=openHeroPick;
   $('go').onclick=()=>{ initAudio(); stopFort(); findMatch(); };
   startFort();
 }
-let fortTimer=null;
+function renderSiegeBar(){
+  const el=$('fsiege'); if (!el) return;
+  const left=P.siegeAt-Date.now();
+  if (left>0){ if (el.dataset.m!=='wait'){ el.dataset.m='wait'; el.innerHTML=`<span id="sgT"></span><button class="ghost sm" id="sgTest">${t('testSiege')}</button>`; $('sgTest').onclick=()=>{ P.siegeAt=Date.now(); saveProfile(); renderSiegeBar(); }; } setT($('sgT'),t('siegeIn',{t:fmtT(left/1000)})); }
+  else if (el.dataset.m!=='now'){ el.dataset.m='now'; el.classList.add('alarm');
+    el.innerHTML=`<b>${t('siegeNow')}</b><div class="row2"><button class="play sm" id="sgGo">${t('defend')}</button><button class="ghost sm" id="sgAuto">${t('autoDefend')}</button></div>`;
+    $('sgGo').onclick=()=>{ initAudio(); stopFort(); $('screen').hidden=true; newSiege(); };
+    $('sgAuto').onclick=()=>{ const r=autoResolveSiege(); showBase(); fortToast(r.won?t('autoWon'):t('autoLost')+' −'+r.stolen); };
+    sfx('tower'); }
+}
+let fortTimer=null, lastBaseTick=0;
 function startFort(){ stopFort(); fortTimer=setInterval(()=>{
   if (!$('rGold')) return stopFort();
+  lastBaseTick=Date.now(); renderSiegeBar();
   if (tickBase()){ const open=$('fsheet').hidden?null:$('fsheet').dataset.k; showBase(); if (open) reopen(open); return; }
   const now=Date.now();
   for (const i2 of document.querySelectorAll('.fjob i')){ const end=+i2.dataset.end, dur=+i2.dataset.dur; i2.style.width=clamp(100-(end-now)/dur*100,0,100)+'%'; }
   for (const e of document.querySelectorAll('.fjob em,[data-left]')) e.textContent=fmtT((+(e.dataset.end||e.dataset.left)-now)/1000);
-  for (const bb of document.querySelectorAll('[data-pend]')){ const i3=+bb.dataset.pend, b=i3<0?P.base.core:P.base.plots[i3]; if (!b || !BT[b.t].prod) continue; const pd=pending(b); bb.textContent=Math.floor(pd); bb.parentElement.hidden=!(pd>=Math.max(5,BT[b.t].rate(b.lvl)*.02)); }
-  const sp=document.querySelector('[data-speed]'); if (sp){ const i4=+sp.dataset.speed, b=i4<0?P.base.core:P.base.plots[i4]; if (b.job) sp.querySelector('b').textContent=speedCost(b); }
+  for (const bb of document.querySelectorAll('[data-pend]')){ const i3=+bb.dataset.pend, b=getB(i3); if (!b || !BT[b.t].prod) continue; const pd=pending(b); bb.textContent=Math.floor(pd); bb.parentElement.hidden=!(pd>=Math.max(5,BT[b.t].rate(b.lvl)*.02)); }
+  const sp=document.querySelector('[data-speed]'); if (sp){ const i4=+sp.dataset.speed, b=getB(i4); if (b.job) sp.querySelector('b').textContent=speedCost(b); }
 },1000); }
 function stopFort(){ if (fortTimer){ clearInterval(fortTimer); fortTimer=null; } }
-function reopen(k){ if (k.startsWith('b')) openB(+k.slice(1)); else if (k.startsWith('p')) openPlot(+k.slice(1)); }
+function reopen(k){ if (k.startsWith('b')) openB(+k.slice(1)); else if (k.startsWith('p')) openPlot(+k.slice(1)); else if (k.startsWith('d')) openDef(+k.slice(1)); }
 function sheetOpen(k,html){ const sh=$('fsheet'); sh.dataset.k=k; sh.innerHTML=html; sh.hidden=false; const x=sh.querySelector('.x'); if (x) x.onclick=()=>sh.hidden=true; }
 function costHTML(c){ return `<i class="coin"></i>${c.g}${c.c?` <img alt="" src="${IMG['it-crystal.jpg'].src}">${c.c}`:''}`; }
 function openB(i){
-  const b=i<0?P.base.core:P.base.plots[i], D=BT[b.t];
+  const b=getB(i), D=BT[b.t];
   const busy=!!b.job, why=busy?'':canStart(b.t,b.lvl), nl=b.lvl+1, c=D.cost(b.lvl);
   let body=`<header><img class="sthumb" alt="" src="${IMG[spriteOf(b.t,Math.max(1,b.lvl))+'.webp'].src}"><h2>${t('t_'+b.t)} <em class="lvtag">${t('level',{n:b.lvl})}</em></h2><button class="x" aria-label="${t('close')}">×</button></header>`;
   if (b.lvl>0) body+=`<p class="note">${effectText(b.t,b.lvl)}</p>`;
@@ -1089,17 +1292,28 @@ function openPlot(i){
   sheetOpen('p'+i,`<header><h2>${t('chooseBuild')}</h2><button class="x" aria-label="${t('close')}">×</button></header><div class="items">${rows}</div>`);
   for (const bt of document.querySelectorAll('#fsheet .buy')) bt.onclick=()=>{ const k=bt.dataset.k; const nb={t:k,lvl:0,job:null,last:Date.now()}; if (canStart(k,0)) return; P.base.plots[i]=nb; startJob(nb); showBase(); };
 }
+function openDef(i){
+  const rows=DEFENSES.map(k=>{ const D=BT[k], have=P.base.defs.filter(p=>p&&p.t===k).length, c=D.cost(0);
+    const why = have>=D.count ? t('limit',{n:D.count}) : canStart(k,0);
+    return `<div class="item"><img alt="" src="${IMG[spriteOf(k,1)+'.webp'].src}" style="object-fit:contain;background:rgba(0,0,0,.3)"><div><b>${t('t_'+k)}</b><span>${effectText(k,1)}</span>${why?`<span class="warn2">${why}</span>`:''}</div>
+      <button class="buy" data-k="${k}" ${why?'disabled':''}>${costHTML(c)}<br>${fmtT(D.time(0))}</button></div>`; }).join('');
+  sheetOpen('d'+i,`<header><h2>${t('chooseDef')}</h2><button class="x" aria-label="${t('close')}">×</button></header><div class="items">${rows}</div>`);
+  for (const bt of document.querySelectorAll('#fsheet .buy')) bt.onclick=()=>{ const k=bt.dataset.k; if (canStart(k,0)) return; const nb={t:k,lvl:0,job:null}; P.base.defs[i]=nb; startJob(nb); showBase(); };
+}
 function openHeroPick(){
   const card=k=>{ const d=HEROES[k]; return `<button class="hcard ${P.hero===k?'sel':''}" data-k="${k}" style="--img:url('${IMG[k+'-card.jpg'].src}')"><div class="info"><h3>${d.name}</h3><p>${L(d.title)} · ${L(d.role)}</p></div></button>`; };
-  sheetOpen('h',`<header><h2>${t('pickHero')}</h2><button class="x" aria-label="${t('close')}">×</button></header><div class="cards">${card('vael')}${card('korr')}</div>
+  const locked=P.heroLocked;
+  sheetOpen('h',`<header><h2>${t('pickHero')}</h2>${locked?`<button class="x" aria-label="${t('close')}">×</button>`:''}</header><p class="note ${locked?'':'warn'}">${locked?t('heroLocked')+' '+t('heroLvl',{n:P.hlvl}):t('forever')}</p><div class="cards">${locked?card(P.hero):card('vael')+card('korr')}</div>${locked?'':`<button class="play" id="hPick">${t('choose',{h:HEROES[P.hero].name})}</button>`}
     <div class="rewards" style="font-size:12.5px;color:var(--muted);line-height:1.45"><span>• ${t('how1')}</span><span>• ${t('how2')}</span><span>• ${t('how3')}</span><span>• ${t('how4')}</span></div><p class="test">${t('attacks')}</p>`);
-  for (const b of document.querySelectorAll('#fsheet .hcard')) b.onclick=()=>{ P.hero=b.dataset.k; saveProfile(); showBase(); openHeroPick(); };
+  if (!locked){ for (const b of document.querySelectorAll('#fsheet .hcard')) b.onclick=()=>{ P.hero=b.dataset.k; saveProfile(); openHeroPick(); };
+    $('hPick').onclick=()=>{ P.heroLocked=true; saveProfile(); showBase(); }; }
 }
 function findMatch(){
   screen(`<div class="search"><div class="spin"></div><p class="sub" style="font-size:14px">${t('searching')}</p></div>`,'base.jpg');
+  MATCH.botRating=Math.round(P.rating+rand(-140,160));
   setTimeout(()=>{
     const foe=HEROES[P.hero==='vael'?'korr':'vael'];
-    screen(`<div class="search"><img alt="" src="${IMG[(P.hero==='vael'?'korr':'vael')+'-head.png'].src}" style="width:96px;height:96px;border-radius:50%;border:3px solid var(--red)"><h2 class="logo" style="font-size:30px">${t('found')}</h2><p class="sub">${t('foundSub',{h:foe.name})}</p></div>`,'base.jpg');
+    screen(`<div class="search"><img alt="" src="${IMG[(P.hero==='vael'?'korr':'vael')+'-head.png'].src}" style="width:96px;height:96px;border-radius:50%;border:3px solid var(--red)"><h2 class="logo" style="font-size:30px">${t('found')}</h2><p class="sub">${t('foundSub2',{h:foe.name,r:MATCH.botRating})}</p></div>`,'base.jpg');
     setTimeout(()=>{ $('screen').hidden=true; newMatch(P.hero); },1100);
   },1300);
 }
@@ -1111,9 +1325,11 @@ function showPause(){
 function endMatch(won){
   G.over=true;
   const st=G.stats, s=Math.floor(G.t), time=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-  const xp=60+(won?80:0)+st.k*15+Math.floor(st.cs*1.5), cr=15+(won?25:0)+st.k*3, gd=120+(won?100:0)+st.cs*4+st.k*20;
+  const diff=(G.botRating-P.rating), bonusM=won?clamp(1+diff/400,.7,1.6):1;
+  const xp=Math.round((60+(won?80:0)+st.k*15+Math.floor(st.cs*1.5))*bonusM), cr=Math.round((15+(won?25:0)+st.k*3)*bonusM), gd=Math.round((120+(won?100:0)+st.cs*4+st.k*20)*bonusM);
+  const exp=1/(1+Math.pow(10,-diff/400)), dR=Math.round(32*((won?1:0)-(1-exp)));
   initBase(); const cap=caps(); const gGot=Math.min(gd,Math.max(0,cap.g-P.base.gold)), cGot=Math.min(cr,Math.max(0,cap.c-P.base.crystals));
-  const before=P.lvl; P.games++; if (won) P.wins++; P.base.gold+=gGot; P.base.crystals+=cGot; P.xp+=xp;
+  const before=P.lvl; P.games++; if (won) P.wins++; P.base.gold+=gGot; P.base.crystals+=cGot; P.xp+=xp; P.rating=Math.max(0,P.rating+dR); const hUp=giveHeroXp(xp);
   while (P.xp>=acctNeed(P.lvl)){ P.xp-=acctNeed(P.lvl); P.lvl++; }
   saveProfile();
   setTimeout(()=>{
@@ -1121,7 +1337,7 @@ function endMatch(won){
       <p class="sub">${won?t('wonSub',{t:time}):t('lostSub',{t:time})}</p>
       <div class="stats"><div><small>${t('sKills')}</small>${st.k}</div><div><small>${t('sDeaths')}</small>${st.d}</div><div><small>${t('sCs')}</small>${st.cs}</div><div><small>${t('sLvl')}</small>${G.me.lvl}</div><div><small>${t('sGold')}</small>${Math.floor(st.gold)}</div></div>
       <p class="label">${t('rewards')}</p>
-      <div class="rewards"><div class="r"><span>${t('rXp')}</span><span>+${xp}</span></div><div class="r"><span>${t('rGoldL')}</span><span>+${gGot}${gGot<gd?' ('+t('storage')+' '+t('full')+')':''}</span></div><div class="r"><span>${t('rCr')}</span><span>+${cGot}</span></div>${P.lvl>before?`<div class="r"><span>${t('acctUp',{n:P.lvl})}</span><span></span></div>`:''}</div>
+      <div class="rewards"><div class="r"><span>${t('rXp')}</span><span>+${xp}</span></div><div class="r"><span>${t('rGoldL')}</span><span>+${gGot}${gGot<gd?' ('+t('storage')+' '+t('full')+')':''}</span></div><div class="r"><span>${t('rCr')}</span><span>+${cGot}</span></div><div class="r"><span>${t('rHero')}</span><span>+${xp}</span></div><div class="r"><span>${t('ratingCh',{d:(dR>=0?'+':'')+dR,r:P.rating})}</span><span></span></div>${bonusM>1.01?`<div class="r"><span>${t('strongBonus')}</span><span>+${Math.round((bonusM-1)*100)}%</span></div>`:''}${hUp?`<div class="r"><span>${t('heroUp',{n:P.hlvl})}</span><span></span></div>`:''}${P.lvl>before?`<div class="r"><span>${t('acctUp',{n:P.lvl})}</span><span></span></div>`:''}</div>
       <button class="play" id="home">${t('toFortress')}</button></div>`, won?'base.jpg':null);
     $('home').onclick=()=>{ G=null; $('hud').hidden=true; showBase(); };
   },1400);
