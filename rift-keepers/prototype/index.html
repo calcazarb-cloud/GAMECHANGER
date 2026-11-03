@@ -35,7 +35,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .bar span{position:absolute;inset:0;font-size:9px;font-weight:700;line-height:11px;text-align:center;text-shadow:0 1px 2px #000}
 .slots{display:flex;gap:4px;align-items:center}
 .slot{width:22px;height:22px;border-radius:5px;background:rgba(0,0,0,.5);border:1px solid var(--edge);overflow:hidden}
-.slot img{width:100%;height:100%;display:block}
+.slot{position:relative}.slot img{width:100%;height:100%;display:block}
+.slot .tier{position:absolute;right:-3px;bottom:-4px;font:900 8px/1 var(--display);font-style:normal;color:#2a1800;background:var(--gold);border-radius:4px;padding:1px 2px}
 .goldbtn{margin-left:auto;display:flex;align-items:center;gap:4px;background:linear-gradient(#3a2c10,#24190a);border:1px solid rgba(255,194,90,.55);border-radius:999px;padding:2px 8px 2px 4px;font:700 12px var(--body);color:var(--gold);font-variant-numeric:tabular-nums}
 .coin{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b8,#ffc25a 45%,#b77a14);display:inline-block}
 .goldbtn.pulse{box-shadow:0 0 10px rgba(255,194,90,.7)}
@@ -174,6 +175,21 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .jobbox{background:var(--panel2);border:1px solid var(--edge);border-radius:12px;padding:10px;font-size:14px}
 .warn2{display:block;color:var(--gold);font-size:11.5px;margin-top:2px}
 .item .buy{flex-direction:column;line-height:1.3;min-width:86px}
+.ggrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.gp{display:flex;gap:8px;align-items:center;text-align:left;background:var(--panel2);border:1px solid var(--edge);border-left:3px solid var(--rc,var(--edge));border-radius:12px;padding:6px;min-width:0}
+.gp img{width:40px;height:40px;border-radius:8px;flex:none}
+.gp span{min-width:0;display:flex;flex-direction:column;gap:1px}
+.gp b{font-size:12.5px;color:var(--rc,var(--text));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gp small{font-size:11px;color:var(--muted)}
+.gp.empty{opacity:.55;min-height:54px}
+.sock{display:flex;gap:3px;font-style:normal}.sock img{width:14px;height:14px;border-radius:3px}.sock u{width:12px;height:12px;border-radius:3px;border:1px dashed var(--muted);display:inline-block}
+.gemrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--edge);border-radius:12px;padding:6px 8px;font-size:12.5px}
+.gemrow img{width:26px;height:26px;border-radius:6px}.gemrow b{min-width:72px}
+.gcount{color:var(--muted);font-variant-numeric:tabular-nums}
+.sockets{display:flex;gap:8px}
+.skt{position:relative;width:54px;height:54px;border-radius:12px;border:2px dashed var(--edge);background:var(--panel2);font:700 22px var(--body);color:var(--muted);padding:0;overflow:hidden}
+.skt img{width:100%;height:100%}.skt em{position:absolute;right:2px;bottom:2px;font:900 10px var(--display);font-style:normal;color:#fff;text-shadow:0 1px 2px #000}
+.lootl{display:flex;align-items:center;gap:6px}.lootl img{width:22px;height:22px;border-radius:5px;border:1px solid var(--edge)}
 .fdef{position:absolute;z-index:2;transform:translate(-50%,-50%);width:34px;height:34px;padding:0;border-radius:10px;border:2px dashed rgba(255,194,90,.75);background:rgba(40,28,8,.55);color:var(--gold);font:700 16px var(--body);box-shadow:0 0 10px rgba(255,194,90,.35)}
 .fsiege{position:absolute;left:50%;transform:translateX(-50%);top:calc(max(10px,env(safe-area-inset-top,0px)) + 104px);z-index:6;display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:6px 8px 6px 12px;font-size:12.5px;font-weight:700;max-width:calc(100% - 20px);width:max-content;flex-wrap:wrap;justify-content:center;text-align:center}
 .fsiege.alarm{flex-direction:column;border-color:rgba(255,95,95,.7);box-shadow:0 0 24px rgba(255,95,95,.45);padding:10px 12px;animation:pulseR 1.2s ease-in-out infinite}
@@ -266,7 +282,13 @@ const STR = {
     defSpot:'Espacio de defensa', chooseDef:'Elige una defensa', t_arrow:'Torre de flechas', t_cannon:'Cañón de cristal', t_frost:'Pilón de escarcha', t_trap:'Trampa de púas',
     e_arrow:'Dispara a un enemigo: {d} de daño.', e_cannon:'Bala explosiva: {d} de daño en área.', e_frost:'{d} de daño en área y ralentiza.', e_trap:'{d} de daño a quien la pisa.',
     forever:'Elige con cuidado: tu héroe es para siempre y crecerá contigo.', heroLocked:'Tu héroe es para siempre.', heroLvl:'Nivel de héroe {n}', choose:'Elegir a {h}', heroUp:'¡Tu héroe subió a nivel {n}!',
-    rating:'Puntaje', ratingCh:'Puntaje {d} (ahora {r})', strongBonus:'Bono por rival más fuerte', foundSub2:'{h} · puntaje {r} · bot de prueba', rHero:'Experiencia del héroe', siegeWave:'¡Oleada {n}!', siegeBoss:'¡El Heraldo ataca tu base!', defendCore:'Defiende tu Núcleo', enemies:'enemigos' },
+    rating:'Puntaje', ratingCh:'Puntaje {d} (ahora {r})', strongBonus:'Bono por rival más fuerte', foundSub2:'{h} · puntaje {r} · bot de prueba', rHero:'Experiencia del héroe', siegeWave:'¡Oleada {n}!', siegeBoss:'¡El Heraldo ataca tu base!', defendCore:'Defiende tu Núcleo', enemies:'enemigos',
+    combine:'Combinar → {r}', combined:'{i} combinado a nivel {r}', maxTier:'Nivel máximo',
+    gearTitle:'Equipo de {h}', gearStats:'Bonos del equipo', inventory:'Inventario', gems:'Joyas', emptySlot:'Vacío', equip:'Equipar', equipped:'Equipado', salvage:'Desarmar (+{n} cristales)',
+    upgradeGear:'Mejorar a nivel {n}', gearMax:'Nivel máximo (sube la Forja para más)', socket:'Hueco para joya', addGem:'Elige una joya', noGems:'No tienes joyas. Ganas joyas en asedios y batallas.', fuse:'Fusionar 3 → 1', fused:'Fusionaste {g}',
+    s_weapon:'Arma', s_armor:'Armadura', s_helm:'Yelmo', s_amulet:'Amuleto', g_ruby:'Rubí', g_sapphire:'Zafiro', g_emerald:'Esmeralda',
+    r0:'Común', r1:'Raro', r2:'Épico', r3:'Legendario', r4:'Mítico', loot:'Botín', noLoot:'Sin botín esta vez', gemDrop:'{g} {t}',
+    st_dmg:'+{n} daño', st_hp:'+{n} vida', st_cdr:'−{n}% recarga', st_dmgP:'+{n}% daño', st_hpP:'+{n}% vida', tapPiece:'Toca una pieza para mejorarla o ponerle joyas.', heroBtn:'Equipo y héroe' },
   en:{ loading:'Loading…', testmode:'Test mode: your opponent is a bot', guardian:'Guardian', acctLvl:'Account level {n}', crystals:'Crystals',
     fortress:'Your fortress', heroes:'Hero', findMatch:'Find quick battle', searching:'Searching for an opponent…', found:'Opponent found', foundSub:'{h} · test bot',
     upgrade:'Upgrade', maxed:'Max', needCore:'Upgrade Core first', level:'Lv {n}',
@@ -296,14 +318,20 @@ const STR = {
     defSpot:'Defense spot', chooseDef:'Choose a defense', t_arrow:'Arrow Tower', t_cannon:'Crystal Cannon', t_frost:'Frost Pylon', t_trap:'Spike Trap',
     e_arrow:'Shoots one enemy: {d} damage.', e_cannon:'Explosive shot: {d} area damage.', e_frost:'{d} area damage and a slow.', e_trap:'{d} damage to anything that steps on it.',
     forever:'Choose carefully: your hero is yours forever and grows with you.', heroLocked:'Your hero is yours forever.', heroLvl:'Hero level {n}', choose:'Choose {h}', heroUp:'Your hero reached level {n}!',
-    rating:'Rating', ratingCh:'Rating {d} (now {r})', strongBonus:'Stronger opponent bonus', foundSub2:'{h} · rating {r} · test bot', rHero:'Hero XP', siegeWave:'Wave {n}!', siegeBoss:'The Herald attacks your base!', defendCore:'Defend your Core', enemies:'enemies' },
+    rating:'Rating', ratingCh:'Rating {d} (now {r})', strongBonus:'Stronger opponent bonus', foundSub2:'{h} · rating {r} · test bot', rHero:'Hero XP', siegeWave:'Wave {n}!', siegeBoss:'The Herald attacks your base!', defendCore:'Defend your Core', enemies:'enemies',
+    combine:'Combine → {r}', combined:'{i} combined to tier {r}', maxTier:'Max tier',
+    gearTitle:'{h}\'s gear', gearStats:'Gear bonuses', inventory:'Inventory', gems:'Gems', emptySlot:'Empty', equip:'Equip', equipped:'Equipped', salvage:'Salvage (+{n} crystals)',
+    upgradeGear:'Upgrade to level {n}', gearMax:'Max level (upgrade the Forge for more)', socket:'Gem socket', addGem:'Choose a gem', noGems:'You have no gems. Earn gems in sieges and battles.', fuse:'Fuse 3 → 1', fused:'You fused {g}',
+    s_weapon:'Weapon', s_armor:'Armor', s_helm:'Helm', s_amulet:'Amulet', g_ruby:'Ruby', g_sapphire:'Sapphire', g_emerald:'Emerald',
+    r0:'Common', r1:'Rare', r2:'Epic', r3:'Legendary', r4:'Mythic', loot:'Loot', noLoot:'No loot this time', gemDrop:'{g} {t}',
+    st_dmg:'+{n} damage', st_hp:'+{n} health', st_cdr:'−{n}% cooldowns', st_dmgP:'+{n}% damage', st_hpP:'+{n}% health', tapPiece:'Tap a piece to upgrade it or add gems.', heroBtn:'Gear and hero' },
 };
 const t = (k,v={}) => (STR[LANG][k] ?? STR.es[k] ?? k).replace(/\{(\w+)\}/g,(_,n)=>v[n]??'');
 const L = o => typeof o==='string' ? o : (o[LANG] ?? o.es);
 
 /* ---------- Assets ---------- */
 const IMG = {};
-const NAMES = ['map.jpg','base.jpg','base-ground.jpg',...['core','goldmine','extractor','treasury','forge','barracks','tower'].flatMap(k=>['b-'+k+'.webp','b-'+k+'-2.webp','b-'+k+'-3.webp']),'b-workshop.webp','b-scaffold.webp','r-crawler.webp','r-brute.webp','r-seer.webp','r-breaker.webp','r-herald.webp','d-cannon.webp','d-frost.webp','d-trap.webp','vael-head.png','korr-head.png','foot-b.png','foot-r.png','xbow-b.png','xbow-r.png','brute-b.png','brute-r.png','vael-card.jpg','korr-card.jpg',
+const NAMES = ['map.jpg','base.jpg','base-ground.jpg',...['core','goldmine','extractor','treasury','forge','barracks','tower'].flatMap(k=>['b-'+k+'.webp','b-'+k+'-2.webp','b-'+k+'-3.webp']),'b-workshop.webp','b-scaffold.webp','r-crawler.webp','r-brute.webp','r-seer.webp','r-breaker.webp','r-herald.webp','d-cannon.webp','d-frost.webp','d-trap.webp','g-armor.jpg','g-helm.jpg','g-amulet.jpg','g-chest.jpg','vael-head.png','korr-head.png','foot-b.png','foot-r.png','xbow-b.png','xbow-r.png','brute-b.png','brute-r.png','vael-card.jpg','korr-card.jpg',
   'it-sword.jpg','it-voidbow.jpg','it-hammer.jpg','it-ruby.jpg','it-sapphire.jpg','it-emerald.jpg','it-crystal.jpg',
   ...[0,1,2,3,4].map(i=>'vael-s'+i+'.jpg'), ...[0,1,2,3,4].map(i=>'korr-s'+i+'.jpg')];
 let loaded = 0;
@@ -392,19 +420,22 @@ function addStruct(kind,team,x,y,mul){
 function addHero(key,team){
   const d=HEROES[key], s=spawnOf(team);
   const h={id:G.id++, kind:'hero', key, def:d, team, x:s.x, y:s.y, r:d.r, lvl:1, xp:0, points:1, ranks:[1,0,0,0,0], gold:300, items:[],
-    baseHp:bonuses(team).hp+heroBonus(team), baseDmg:bonuses(team).dmg+heroBonus(team), mana:300, maxMana:300,
+    baseHp:bonuses(team).hp+heroBonus(team), baseDmg:bonuses(team).dmg+heroBonus(team), mana:300, maxMana:300, gs:gearStats(team===0?1:.9),
     maxHp:d.hp, hp:d.hp, dmg:d.dmg, range:d.range, atkCd:0, cds:[0,0,0,0,0], face:{x:0,y:team?1:-1}, moving:false, mv:{x:0,y:0},
     dead:false, respawn:0, stun:0, root:0, slow:0, slowT:0, invis:0, haste:0, shield:0, shieldT:0, dr:0, drT:0, crit:false, critMul:2.5,
     markTgt:null, markN:0, dash:null, kb:null, flash:0, aggroT:0, head:IMG[key+'-head.png']};
   recalc(h); h.hp=h.maxHp; h.mana=h.maxMana;
   G.ents.push(h); return h;
 }
-function itemSum(h){ const s={dmg:0,hp:0,spd:0,cdr:0,ls:0,regen:0,as:0}; for (const id of h.items){ const fx=ITEMS.find(i=>i.id===id).fx; for (const k in fx) s[k]+=fx[k]; } return s; }
+const TIERM=[0,1,2.2,3.6], ROMAN=['','I','II','III'];
+function itemSum(h){ const s={dmg:0,hp:0,spd:0,cdr:0,ls:0,regen:0,as:0}; for (const o of h.items){ const fx=ITEMS.find(i=>i.id===o.id).fx; for (const k in fx) s[k]+=fx[k]*TIERM[o.tier]; } return s; }
+const upCostOf = (it,tier) => Math.round(it.cost*(tier===1?1:1.4));
 function recalc(h){
   const k=h.lvl-1, it=itemSum(h), old=h.maxHp;
-  h.maxHp=Math.round(h.def.hp*(1+.07*k)*(1+h.baseHp)+it.hp);
-  h.dmg=(h.def.dmg*(1+.055*k)+it.dmg)*(1+h.baseDmg);
-  h.spdMul=1+it.spd; h.cdrMul=1-Math.min(.4,it.cdr); h.ls=it.ls; h.regen=it.regen; h.asMul=1+it.as;
+  const gs=h.gs||{dmg:0,hp:0,cdr:0,dmgP:0,hpP:0};
+  h.maxHp=Math.round((h.def.hp*(1+.07*k)+gs.hp)*(1+h.baseHp+gs.hpP)+it.hp);
+  h.dmg=(h.def.dmg*(1+.055*k)+it.dmg+gs.dmg)*(1+h.baseDmg+gs.dmgP);
+  h.spdMul=1+it.spd; h.cdrMul=1-Math.min(.45,it.cdr+gs.cdr); h.ls=it.ls; h.regen=it.regen; h.asMul=1+it.as;
   const om=h.maxMana||0; h.maxMana=Math.round(260+22*k); h.mana=Math.min(h.maxMana,(h.mana||h.maxMana)+Math.max(0,h.maxMana-om));
   if (h.maxHp>old) h.hp+=h.maxHp-old; h.hp=Math.min(h.hp,h.maxHp);
 }
@@ -622,11 +653,9 @@ function controlPlayer(h,dt){
 /* ---------- Bot (test mode only) ---------- */
 function botShop(b){
   for (const id of BOT_BUILD[b.key]){
-    if (b.items.length>=4) return;
-    const it=ITEMS.find(i=>i.id===id); const owned=b.items.filter(x=>x===id).length; const want=BOT_BUILD[b.key].filter(x=>x===id).length;
-    if (owned>=want) continue;
-    if (b.gold>=it.cost){ b.gold-=it.cost; b.items.push(id); recalc(b); }
-    return;
+    const it=ITEMS.find(i=>i.id===id), o=b.items.find(x=>x.id===id);
+    if (!o){ if (b.items.length>=4) continue; if (b.gold>=it.cost){ b.gold-=it.cost; b.items.push({id,tier:1}); recalc(b); } return; }
+    if (o.tier<3){ const c=upCostOf(it,o.tier); if (b.gold>=c){ b.gold-=c; o.tier++; recalc(b); } return; }
   }
 }
 function controlBot(b,dt){
@@ -795,13 +824,13 @@ function endSiege(won){
   let gGot=0, cGot=0, stolen=0; const hx=won?160+40*P.siegeN:60;
   if (won){ const cap=caps(); gGot=Math.min(200+60*P.siegeN,Math.max(0,cap.g-P.base.gold)); cGot=Math.min(25+10*P.siegeN,Math.max(0,cap.c-P.base.crystals)); P.base.gold+=gGot; P.base.crystals+=cGot; P.siegeN++; }
   else { stolen=Math.floor(P.base.gold*.15); P.base.gold-=stolen; }
-  const hUp=giveHeroXp(hx); P.siegeAt=Date.now()+SIEGE_EVERY; saveProfile();
+  const hUp=giveHeroXp(hx); const loot = won ? dropLoot(1+.08*P.siegeN, 2, Math.min(3,1+Math.floor(P.siegeN/3))) : []; P.siegeAt=Date.now()+SIEGE_EVERY; saveProfile();
   setTimeout(()=>{
     screen(`<div class="wrap"><h2 class="result" style="color:${won?'var(--gold)':'var(--red)'}">${won?t('siegeWon'):t('siegeLost')}</h2><p class="sub">${t('siegeSub',{n})}</p>
       <div class="stats"><div><small>${t('enemies')}</small>${G.stats.cs}</div><div><small>${t('sDeaths')}</small>${G.stats.d}</div><div><small>${t('sLvl')}</small>${G.me.lvl}</div></div>
       <p class="label">${t('rewards')}</p>
       <div class="rewards">${won?`<div class="r"><span>${t('rGoldL')}</span><span>+${gGot}</span></div><div class="r"><span>${t('rCr')}</span><span>+${cGot}</span></div>`:`<div class="r"><span>${t('stolen')}</span><span style="color:var(--red)">−${stolen}</span></div>`}
-      <div class="r"><span>${t('rHero')}</span><span>+${hx}</span></div>${hUp?`<div class="r"><span>${t('heroUp',{n:P.hlvl})}</span><span></span></div>`:''}</div>
+      <div class="r"><span>${t('rHero')}</span><span>+${hx}</span></div>${hUp?`<div class="r"><span>${t('heroUp',{n:P.hlvl})}</span><span></span></div>`:''}${won?lootHTML(loot):''}</div>
       <button class="play" id="home">${t('toFortress')}</button></div>`, won?'base.jpg':null);
     $('home').onclick=()=>{ G=null; $('hud').hidden=true; showBase(); };
   },1400);
@@ -1021,9 +1050,9 @@ function updateHud(){
   else { $('coreR').style.width=(cR.hp/cR.maxHp*100)+'%'; const s=Math.floor(G.t); setT($('clock'),Math.floor(s/60)+':'+String(s%60).padStart(2,'0')); setT($('kd'),t('kd',{k:G.stats.k,d:G.stats.d,cs:G.stats.cs})); }
   const canShop=me.dead||inBase(me), cheapest=Math.min(...ITEMS.map(i=>i.cost));
   const sb=$('btnShop'); setT(sb, t('shop')+' · '+Math.floor(me.gold)); sb.classList.toggle('dim',!canShop);
-  const slotsKey=me.items.join(',');
+  const slotsKey=me.items.map(o=>o.id+o.tier).join(',');
   if ($('slots').dataset.k!==slotsKey){ $('slots').dataset.k=slotsKey;
-    $('slots').innerHTML=[0,1,2,3].map(i=>{ const it=me.items[i]&&ITEMS.find(x=>x.id===me.items[i]); return `<span class="slot">${it?`<img alt="${L(it.n)}" src="${IMG[it.icon+'.jpg'].src}">`:''}</span>`; }).join(''); }
+    $('slots').innerHTML=[0,1,2,3].map(i=>{ const o=me.items[i], it=o&&ITEMS.find(x=>x.id===o.id); return `<span class="slot">${it?`<img alt="${L(it.n)}" src="${IMG[it.icon+'.jpg'].src}"><em class="tier">${ROMAN[o.tier]}</em>`:''}</span>`; }).join(''); }
   for (let i=1;i<5;i++){
     const b=$('sk'+i), sk=me.def.skills[i], r=me.ranks[i], cd=me.cds[i];
     const lock=b.querySelector('.lock'); lock.hidden=r>0; if (r===0) setT(lock, sk.ult&&me.lvl<6 ? t('unlockAt',{n:6}) : t('notLearned'));
@@ -1032,7 +1061,7 @@ function updateHud(){
     [...b.querySelectorAll('.pips i')].forEach((p,j)=>p.classList.toggle('on',j<r));
     b.querySelector('.plus').hidden=!canLearn(me,i);
   }
-  $('dead').hidden=!me.dead; if (me.dead){ setT($('deadL'),t('respawnIn')); setT($('deadT'),Math.ceil(me.respawn)); setT($('deadS'),me.gold>=cheapest&&me.items.length<4?t('respawnShop'):''); }
+  $('dead').hidden=!me.dead; if (me.dead){ setT($('deadL'),t('respawnIn')); setT($('deadT'),Math.ceil(me.respawn)); setT($('deadS'),me.gold>=cheapest?t('respawnShop'):''); }
   if (!$('sheet').hidden && $('sheet').dataset.kind==='shop') refreshShop();
 }
 
@@ -1042,7 +1071,7 @@ function openShop(){
   sh.innerHTML=`<header><h2>${t('shopTitle')}</h2><span class="goldbtn"><i class="coin"></i><span id="shGold"></span></span><button class="x" id="shX" aria-label="X">×</button></header>
     <p class="note" id="shNote"></p>
     <div class="items">${ITEMS.map(it=>`<div class="item"><img alt="" src="${IMG[it.icon+'.jpg'].src}"><div><b>${L(it.n)}</b><span>${L(it.d)}</span></div>
-      <button class="buy" data-id="${it.id}"><i class="coin"></i>${it.cost}</button></div>`).join('')}</div>`;
+      <button class="buy" data-id="${it.id}"></button></div>`).join('')}</div>`;
   sh.hidden=false;
   $('shX').onclick=()=>sh.hidden=true;
   for (const b of sh.querySelectorAll('.buy')) b.onclick=()=>buy(b.dataset.id);
@@ -1052,13 +1081,18 @@ function refreshShop(){
   const me=G.me, sh=$('sheet'), can=me.dead||inBase(me), full=me.items.length>=4;
   if (!$('shGold')) return;
   setT($('shGold'),Math.floor(me.gold));
-  const n=$('shNote'); setT(n, full?t('slotsFull'):me.dead?t('shopDead'):can?t('shopBase'):t('shopAway')); n.classList.toggle('warn',!can||full);
-  for (const b of sh.querySelectorAll('.buy')){ const it=ITEMS.find(i=>i.id===b.dataset.id); b.disabled=!can||full||me.gold<it.cost; }
+  const n=$('shNote'); setT(n, me.dead?t('shopDead'):can?t('shopBase'):t('shopAway')); n.classList.toggle('warn',!can);
+  for (const b of sh.querySelectorAll('.buy')){ const it=ITEMS.find(i=>i.id===b.dataset.id), o=me.items.find(x=>x.id===it.id);
+    const c = o ? upCostOf(it,o.tier) : it.cost, label = o ? (o.tier>=3 ? t('maxTier') : t('combine',{r:ROMAN[o.tier+1]})+' · '+c) : String(c);
+    if (b.dataset.l!==label){ b.dataset.l=label; b.innerHTML=(o&&o.tier>=3?'':'<i class="coin"></i>')+label; }
+    b.disabled=!can||(o?o.tier>=3:full)||me.gold<c; }
 }
 function buy(id){
   const me=G.me, it=ITEMS.find(i=>i.id===id);
-  if (!(me.dead||inBase(me)) || me.items.length>=4 || me.gold<it.cost) return;
-  me.gold-=it.cost; me.items.push(id); recalc(me); sfx('buy'); toast(t('bought',{i:L(it.n)}));
+  if (!(me.dead||inBase(me))) return;
+  const o=me.items.find(x=>x.id===id);
+  if (o){ if (o.tier>=3) return; const c=upCostOf(it,o.tier); if (me.gold<c) return; me.gold-=c; o.tier++; recalc(me); sfx('lvl'); toast(t('combined',{i:L(it.n),r:ROMAN[o.tier]})); }
+  else { if (me.items.length>=4 || me.gold<it.cost) return; me.gold-=it.cost; me.items.push({id,tier:1}); recalc(me); sfx('buy'); toast(t('bought',{i:L(it.n)})); }
   G.rings.push({x:me.x,y:me.y,r0:10,r1:50,t:0,life:.5,col:'#ffc25a',w:3}); if (!$('sheet').hidden && $('sheet').dataset.kind==='shop') refreshShop();
 }
 function openInfo(){
@@ -1102,6 +1136,85 @@ function keyInput(){
   const m=Math.hypot(x,y); input.x=m?x/m:0; input.y=m?y/m:0;
 }
 $('btnPause').onclick=()=>{ if (!G||G.over) return; G.paused=true; showPause(); };
+
+/* ---------- Permanent gear and gems ---------- */
+const SLOTS=['weapon','armor','helm','amulet'];
+const RAR=[{m:1,s:1,col:'#aeb4c8'},{m:1.35,s:1,col:'#5fa8ff'},{m:1.8,s:2,col:'#b07cff'},{m:2.35,s:3,col:'#ffc25a'},{m:3,s:3,col:'#ff6a4a'}];
+const SLOTBASE={weapon:{dmg:7}, armor:{hp:95}, helm:{hp:45,dmg:3}, amulet:{dmgP:.03,hpP:.03}};
+const GEMS={ruby:{st:'dmg',v:[5,12,26]}, emerald:{st:'hp',v:[60,140,300]}, sapphire:{st:'cdr',v:[.03,.06,.1]}};
+const GEMKEYS=['ruby','sapphire','emerald'];
+function ensureGear(){
+  if (P.gear) return;
+  P.gear={eq:{weapon:null,armor:null,helm:null,amulet:null}, inv:[], gems:{ruby:[2,0,0],sapphire:[0,0,0],emerald:[1,0,0]}, nid:1};
+  const w=newPiece('weapon',0), a=newPiece('armor',0); P.gear.eq.weapon=w.id; P.gear.eq.armor=a.id; saveProfile();
+}
+function newPiece(slot,rar){ const pc={id:P.gear.nid++, slot, rar, lvl:1, gems:Array(RAR[rar].s).fill(null)}; P.gear.inv.push(pc); return pc; }
+const pieceById = id => P.gear.inv.find(p=>p.id===id);
+function pieceStats(pc){
+  const o={dmg:0,hp:0,cdr:0,dmgP:0,hpP:0}, m=RAR[pc.rar].m*(1+.18*(pc.lvl-1)), b=SLOTBASE[pc.slot];
+  for (const k in b) o[k]+=b[k]*m;
+  for (const g of pc.gems) if (g){ const G2=GEMS[g.k]; o[G2.st]+=G2.v[g.t-1]; }
+  return o;
+}
+function gearStats(scale){
+  ensureGear(); const o={dmg:0,hp:0,cdr:0,dmgP:0,hpP:0};
+  for (const sl of SLOTS){ const id=P.gear.eq[sl]; if (!id) continue; const st=pieceStats(pieceById(id)); for (const k in o) o[k]+=st[k]; }
+  for (const k in o) o[k]*=scale; return o;
+}
+function statLines(st){ const out=[]; if (st.dmg>=.5) out.push(t('st_dmg',{n:Math.round(st.dmg)})); if (st.hp>=.5) out.push(t('st_hp',{n:Math.round(st.hp)})); if (st.cdr>0) out.push(t('st_cdr',{n:Math.round(st.cdr*100)})); if (st.dmgP>0) out.push(t('st_dmgP',{n:Math.round(st.dmgP*100)})); if (st.hpP>0) out.push(t('st_hpP',{n:Math.round(st.hpP*100)})); return out.join(' · '); }
+const pieceIcon = pc => pc.slot==='weapon' ? (P.hero==='vael'?'it-voidbow':'it-hammer') : 'g-'+pc.slot;
+const WNAME={vael:{es:'Arco',en:'Bow'}, korr:{es:'Martillo',en:'Hammer'}};
+const pieceName = pc => (pc.slot==='weapon'?L(WNAME[P.hero]):t('s_'+pc.slot))+' '+t('r'+pc.rar);
+const gearMaxLvl = () => 2+2*fortLevels().forge;
+const gearCost = l => ({g:120*l, c:4*l});
+function rollRar(luck){ const r=Math.random()/luck; return r<.012?4:r<.05?3:r<.16?2:r<.42?1:0; }
+function giveGem(k,tier){ P.gear.gems[k][tier-1]++; }
+function dropLoot(luck,gemN,gemTier){
+  ensureGear(); const out=[];
+  if (luck>0){ const pc=newPiece(SLOTS[Math.floor(Math.random()*4)],rollRar(luck)); out.push({pc}); }
+  for (let i=0;i<gemN;i++){ const k=GEMKEYS[Math.floor(Math.random()*3)], tr=Math.random()<.25?Math.min(3,gemTier+1):gemTier; giveGem(k,tr); out.push({gem:k,tier:tr}); }
+  saveProfile(); return out;
+}
+function lootHTML(loot){
+  if (!loot.length) return `<div class="r"><span>${t('loot')}</span><span>${t('noLoot')}</span></div>`;
+  return loot.map(l=>l.pc?`<div class="r"><span class="lootl"><img alt="" src="${IMG[pieceIcon(l.pc)+'.jpg'].src}" style="border-color:${RAR[l.pc.rar].col}">${t('loot')}</span><span style="color:${RAR[l.pc.rar].col}">${pieceName(l.pc)}</span></div>`
+    :`<div class="r"><span class="lootl"><img alt="" src="${IMG['it-'+l.gem+'.jpg'].src}">${t('loot')}</span><span>${t('gemDrop',{g:t('g_'+l.gem),t:ROMAN[l.tier]})}</span></div>`).join('');
+}
+function pieceCard(pc,eqd){ return `<button class="gp" data-p="${pc.id}" style="--rc:${RAR[pc.rar].col}"><img alt="" src="${IMG[pieceIcon(pc)+'.jpg'].src}"><span><b>${pieceName(pc)}</b><small>${t('level',{n:pc.lvl})}${eqd?' · '+t('equipped'):''}</small><i class="sock">${pc.gems.map(g=>g?`<img alt="" src="${IMG['it-'+g.k+'.jpg'].src}">`:'<u></u>').join('')}</i></span></button>`; }
+function openGear(){
+  ensureGear(); const g=P.gear, eqIds=Object.values(g.eq).filter(Boolean);
+  const slots=SLOTS.map(sl=>{ const pc=g.eq[sl]&&pieceById(g.eq[sl]); return pc?pieceCard(pc,true):`<div class="gp empty"><span><b>${t('s_'+sl)}</b><small>${t('emptySlot')}</small></span></div>`; }).join('');
+  const inv=g.inv.filter(p=>!eqIds.includes(p.id)).sort((a,b)=>b.rar-a.rar||b.lvl-a.lvl).map(p=>pieceCard(p,false)).join('');
+  const gems=GEMKEYS.map(k=>`<div class="gemrow"><img alt="" src="${IMG['it-'+k+'.jpg'].src}"><b>${t('g_'+k)}</b>${[1,2,3].map(tr=>`<span class="gcount">${ROMAN[tr]} × ${g.gems[k][tr-1]}</span>`).join('')}
+    ${[1,2].map(tr=>g.gems[k][tr-1]>=3?`<button class="up sm" data-fuse="${k}:${tr}">${ROMAN[tr]}→${ROMAN[tr+1]}</button>`:'').join('')}</div>`).join('');
+  sheetOpen('h',`<header><img class="sthumb" alt="" src="${IMG[P.hero+'-head.png'].src}" style="border-radius:50%"><h2>${t('gearTitle',{h:HEROES[P.hero].name})} <em class="lvtag">${t('heroLvl',{n:P.hlvl})}</em></h2><button class="x" aria-label="${t('close')}">×</button></header>
+    <p class="note">${t('gearStats')}: ${statLines(gearStats(1))||'—'}${P.hlvl>1?' · '+t('st_hpP',{n:2*(P.hlvl-1)})+' · '+t('st_dmgP',{n:2*(P.hlvl-1)}):''}</p>
+    <div class="ggrid">${slots}</div><p class="note">${t('tapPiece')}</p>
+    ${inv?`<p class="label">${t('inventory')}</p><div class="ggrid">${inv}</div>`:''}
+    <p class="label">${t('gems')} · ${t('fuse')}</p>${gems}`);
+  for (const b of document.querySelectorAll('#fsheet .gp[data-p]')) b.onclick=()=>openPiece(+b.dataset.p);
+  for (const b of document.querySelectorAll('#fsheet [data-fuse]')) b.onclick=()=>{ const [k,tr]=b.dataset.fuse.split(':'), n=+tr; if (g.gems[k][n-1]<3) return; g.gems[k][n-1]-=3; g.gems[k][n]++; saveProfile(); sfx('lvl'); fortToast(t('fused',{g:t('g_'+k)+' '+ROMAN[n+1]})); openGear(); };
+}
+function openPiece(id){
+  const g=P.gear, pc=pieceById(id), eqd=g.eq[pc.slot]===pc.id, mx=gearMaxLvl(), c=gearCost(pc.lvl);
+  const can=pc.lvl<mx && P.base.gold>=c.g && P.base.crystals>=c.c;
+  sheetOpen('g'+id,`<header><img class="sthumb" alt="" src="${IMG[pieceIcon(pc)+'.jpg'].src}" style="border:2px solid ${RAR[pc.rar].col};border-radius:10px"><h2 style="color:${RAR[pc.rar].col}">${pieceName(pc)} <em class="lvtag">${t('level',{n:pc.lvl})}</em></h2><button class="x" aria-label="${t('close')}">×</button></header>
+    <p class="note">${statLines(pieceStats(pc))}</p>
+    <p class="label">${t('socket')}</p><div class="sockets">${pc.gems.map((gm,i)=>`<button class="skt" data-s="${i}">${gm?`<img alt="" src="${IMG['it-'+gm.k+'.jpg'].src}"><em>${ROMAN[gm.t]}</em>`:'+'}</button>`).join('')}</div>
+    ${pc.lvl<mx?`<button class="buy wide" id="gUp" ${can?'':'disabled'}>${t('upgradeGear',{n:pc.lvl+1})} · ${costHTML(c)}</button>`:`<p class="note warn">${t('gearMax')}</p>`}
+    ${eqd?'':`<button class="up wide" id="gEq">${t('equip')}</button><button class="ghost" id="gSal">${t('salvage',{n:5*(pc.rar+1)})}</button>`}`);
+  if ($('gUp')) $('gUp').onclick=()=>{ if (!can) return; P.base.gold-=c.g; P.base.crystals-=c.c; pc.lvl++; saveProfile(); sfx('buy'); showBase(); openPiece(id); };
+  if ($('gEq')) $('gEq').onclick=()=>{ g.eq[pc.slot]=pc.id; saveProfile(); sfx('buy'); openGear(); };
+  if ($('gSal')) $('gSal').onclick=()=>{ for (const gm of pc.gems) if (gm) giveGem(gm.k,gm.t); g.inv=g.inv.filter(p=>p!==pc); P.base.crystals+=5*(pc.rar+1); saveProfile(); showBase(); openGear(); };
+  for (const b of document.querySelectorAll('#fsheet .skt')) b.onclick=()=>openSocket(id,+b.dataset.s);
+}
+function openSocket(id,si){
+  const g=P.gear, pc=pieceById(id);
+  const opts=[]; for (const k of GEMKEYS) for (let tr=3;tr>=1;tr--) if (g.gems[k][tr-1]>0) opts.push([k,tr]);
+  sheetOpen('k'+id,`<header><h2>${t('addGem')}</h2><button class="x" aria-label="${t('close')}">×</button></header>
+    ${opts.length?`<div class="items">${opts.map(([k,tr])=>`<div class="item"><img alt="" src="${IMG['it-'+k+'.jpg'].src}"><div><b>${t('g_'+k)} ${ROMAN[tr]}</b><span>${statLines({dmg:0,hp:0,cdr:0,dmgP:0,hpP:0,[GEMS[k].st]:GEMS[k].v[tr-1]})} · × ${g.gems[k][tr-1]}</span></div><button class="buy" data-g="${k}:${tr}">+</button></div>`).join('')}</div>`:`<p class="note">${t('noGems')}</p>`}`);
+  for (const b of document.querySelectorAll('#fsheet [data-g]')) b.onclick=()=>{ const [k,tr]=b.dataset.g.split(':'), n=+tr; const old=pc.gems[si]; if (old) giveGem(old.k,old.t); g.gems[k][n-1]--; pc.gems[si]={k,t:n}; saveProfile(); sfx('buy'); openPiece(id); };
+}
 
 /* ---------- Screens ---------- */
 function screen(html,bg){ const s=$('screen'); s.innerHTML=(bg?`<div class="bgimg" style="--bg:url('${IMG[bg].src}')"></div>`:'')+html; s.hidden=false; s.scrollTop=0; }
@@ -1237,7 +1350,7 @@ function showBase(){
   for (const el of document.querySelectorAll('.fdef')) el.onclick=()=>openDef(+el.dataset.def);
   renderSiegeBar();
   if (!P.heroLocked) setTimeout(openHeroPick,60);
-  $('fHero').onclick=openHeroPick;
+  $('fHero').onclick=()=>P.heroLocked?openGear():openHeroPick();
   $('go').onclick=()=>{ initAudio(); stopFort(); findMatch(); };
   startFort();
 }
@@ -1263,7 +1376,7 @@ function startFort(){ stopFort(); fortTimer=setInterval(()=>{
   const sp=document.querySelector('[data-speed]'); if (sp){ const i4=+sp.dataset.speed, b=getB(i4); if (b.job) sp.querySelector('b').textContent=speedCost(b); }
 },1000); }
 function stopFort(){ if (fortTimer){ clearInterval(fortTimer); fortTimer=null; } }
-function reopen(k){ if (k.startsWith('b')) openB(+k.slice(1)); else if (k.startsWith('p')) openPlot(+k.slice(1)); else if (k.startsWith('d')) openDef(+k.slice(1)); }
+function reopen(k){ if (k.startsWith('b')) openB(+k.slice(1)); else if (k.startsWith('p')) openPlot(+k.slice(1)); else if (k.startsWith('d')) openDef(+k.slice(1)); else if (k==='h' && P.heroLocked) openGear(); else if (k.startsWith('g')) openPiece(+k.slice(1)); }
 function sheetOpen(k,html){ const sh=$('fsheet'); sh.dataset.k=k; sh.innerHTML=html; sh.hidden=false; const x=sh.querySelector('.x'); if (x) x.onclick=()=>sh.hidden=true; }
 function costHTML(c){ return `<i class="coin"></i>${c.g}${c.c?` <img alt="" src="${IMG['it-crystal.jpg'].src}">${c.c}`:''}`; }
 function openB(i){
@@ -1306,7 +1419,7 @@ function openHeroPick(){
   sheetOpen('h',`<header><h2>${t('pickHero')}</h2>${locked?`<button class="x" aria-label="${t('close')}">×</button>`:''}</header><p class="note ${locked?'':'warn'}">${locked?t('heroLocked')+' '+t('heroLvl',{n:P.hlvl}):t('forever')}</p><div class="cards">${locked?card(P.hero):card('vael')+card('korr')}</div>${locked?'':`<button class="play" id="hPick">${t('choose',{h:HEROES[P.hero].name})}</button>`}
     <div class="rewards" style="font-size:12.5px;color:var(--muted);line-height:1.45"><span>• ${t('how1')}</span><span>• ${t('how2')}</span><span>• ${t('how3')}</span><span>• ${t('how4')}</span></div><p class="test">${t('attacks')}</p>`);
   if (!locked){ for (const b of document.querySelectorAll('#fsheet .hcard')) b.onclick=()=>{ P.hero=b.dataset.k; saveProfile(); openHeroPick(); };
-    $('hPick').onclick=()=>{ P.heroLocked=true; saveProfile(); showBase(); }; }
+    $('hPick').onclick=()=>{ P.heroLocked=true; P.gear=null; saveProfile(); ensureGear(); showBase(); }; }
 }
 function findMatch(){
   screen(`<div class="search"><div class="spin"></div><p class="sub" style="font-size:14px">${t('searching')}</p></div>`,'base.jpg');
@@ -1330,6 +1443,7 @@ function endMatch(won){
   const exp=1/(1+Math.pow(10,-diff/400)), dR=Math.round(32*((won?1:0)-(1-exp)));
   initBase(); const cap=caps(); const gGot=Math.min(gd,Math.max(0,cap.g-P.base.gold)), cGot=Math.min(cr,Math.max(0,cap.c-P.base.crystals));
   const before=P.lvl; P.games++; if (won) P.wins++; P.base.gold+=gGot; P.base.crystals+=cGot; P.xp+=xp; P.rating=Math.max(0,P.rating+dR); const hUp=giveHeroXp(xp);
+  const loot = won ? dropLoot(clamp(bonusM,.8,1.6),1,1) : (Math.random()<.4 ? dropLoot(0,1,1) : []);
   while (P.xp>=acctNeed(P.lvl)){ P.xp-=acctNeed(P.lvl); P.lvl++; }
   saveProfile();
   setTimeout(()=>{
@@ -1337,7 +1451,7 @@ function endMatch(won){
       <p class="sub">${won?t('wonSub',{t:time}):t('lostSub',{t:time})}</p>
       <div class="stats"><div><small>${t('sKills')}</small>${st.k}</div><div><small>${t('sDeaths')}</small>${st.d}</div><div><small>${t('sCs')}</small>${st.cs}</div><div><small>${t('sLvl')}</small>${G.me.lvl}</div><div><small>${t('sGold')}</small>${Math.floor(st.gold)}</div></div>
       <p class="label">${t('rewards')}</p>
-      <div class="rewards"><div class="r"><span>${t('rXp')}</span><span>+${xp}</span></div><div class="r"><span>${t('rGoldL')}</span><span>+${gGot}${gGot<gd?' ('+t('storage')+' '+t('full')+')':''}</span></div><div class="r"><span>${t('rCr')}</span><span>+${cGot}</span></div><div class="r"><span>${t('rHero')}</span><span>+${xp}</span></div><div class="r"><span>${t('ratingCh',{d:(dR>=0?'+':'')+dR,r:P.rating})}</span><span></span></div>${bonusM>1.01?`<div class="r"><span>${t('strongBonus')}</span><span>+${Math.round((bonusM-1)*100)}%</span></div>`:''}${hUp?`<div class="r"><span>${t('heroUp',{n:P.hlvl})}</span><span></span></div>`:''}${P.lvl>before?`<div class="r"><span>${t('acctUp',{n:P.lvl})}</span><span></span></div>`:''}</div>
+      <div class="rewards"><div class="r"><span>${t('rXp')}</span><span>+${xp}</span></div><div class="r"><span>${t('rGoldL')}</span><span>+${gGot}${gGot<gd?' ('+t('storage')+' '+t('full')+')':''}</span></div><div class="r"><span>${t('rCr')}</span><span>+${cGot}</span></div><div class="r"><span>${t('rHero')}</span><span>+${xp}</span></div><div class="r"><span>${t('ratingCh',{d:(dR>=0?'+':'')+dR,r:P.rating})}</span><span></span></div>${bonusM>1.01?`<div class="r"><span>${t('strongBonus')}</span><span>+${Math.round((bonusM-1)*100)}%</span></div>`:''}${hUp?`<div class="r"><span>${t('heroUp',{n:P.hlvl})}</span><span></span></div>`:''}${lootHTML(loot)}${P.lvl>before?`<div class="r"><span>${t('acctUp',{n:P.lvl})}</span><span></span></div>`:''}</div>
       <button class="play" id="home">${t('toFortress')}</button></div>`, won?'base.jpg':null);
     $('home').onclick=()=>{ G=null; $('hud').hidden=true; showBase(); };
   },1400);
