@@ -253,6 +253,7 @@ function newGame(civ){
     for (let i=0;i<2;i++) sp('archer',tc.x+dir*185,tc.y+rand(-50,50));
   }
   G.team[1].next=200;
+  { const tc=G.E.find(e=>e.kind==='bld'&&e.type==='tc'&&e.team===0), r=$('app').getBoundingClientRect(); G.cam.z=clamp(r.height/560,1.05,1.5); G.cam.x=tc.x+r.width/G.cam.z*.22; G.cam.y=tc.y+20; }
   resize(); $('topbar').hidden=false; $('tray').hidden=false; $('mini').hidden=false; $('screen').hidden=true;
   renderTray(); toast('Juegas con '+CIV[G.civ[0]].n+' contra '+CIV[G.civ[1]].n+'. Tus aldeanos trabajan solos: abre el Plan para elegir prioridades.');
 }
@@ -536,7 +537,7 @@ function drawUnit(e,f,sc){ const A=ANIM[animKey(e)], k=DH[e.type]*sc/150; ctx.dr
 const cv=$('cv'), ctx=cv.getContext('2d'); let SW=0,SH=0,DPR=1;
 let UI=1;
 function resize(){ const r=$('app').getBoundingClientRect(); SW=r.width; SH=r.height; DPR=Math.min(2,devicePixelRatio||1); cv.width=SW*DPR; cv.height=SH*DPR;
-  UI=clamp(Math.min(SH/340, SW/(SW>SH?720:420)),.74,1);
+  UI=clamp(Math.min(SH/340, SW/(SW>SH?720:420)),.74,clamp(Math.min(SH/620,SW/1100),1,1.35));
   for (const id of ['topbar','tray','sheet','mini','toast','rotate']) $(id).style.zoom=UI;
   for (const w of document.querySelectorAll('#screen .wrap')) w.style.zoom=UI; }
 new ResizeObserver(resize).observe($('app'));
@@ -633,16 +634,28 @@ const endPtr=e=>{
   if (pinch){ if (pts.size<2) pinch=null; drag=null; return; }
   if (!drag) return;
   const r=$('app').getBoundingClientRect(), sx=e.clientX-r.left, sy=e.clientY-r.top;
-  if (drag.mode==='pending'){ if (e.button===2) command(toWorld(sx,sy)); else tap(toWorld(sx,sy)); }
-  else if (drag.mode==='pan' && drag.btn===2 && Math.hypot(sx-drag.sx,sy-drag.sy)<6) command(toWorld(sx,sy));
-  else if (drag.mode==='box'){ boxSelect(drag.w0,drag.w1); if (G.selMode){ G.selMode=false; renderTray(); } }
+  if (drag.mode==='pending') tap(toWorld(sx,sy),e.pointerType==='mouse',e.shiftKey);
+  else if (drag.mode==='pan' && drag.btn===2 && Math.hypot(sx-drag.sx,sy-drag.sy)<6) rightClick(toWorld(sx,sy));
+  else if (drag.mode==='box'){ boxSelect(drag.w0,drag.w1,e.shiftKey); if (G.selMode){ G.selMode=false; renderTray(); } }
   else if (drag.mode==='ghost') renderTray();
   drag=null;
 };
 cv.addEventListener('pointerup',endPtr); cv.addEventListener('pointercancel',endPtr);
 cv.addEventListener('wheel',e=>{ e.preventDefault(); const r=$('app').getBoundingClientRect(); const before=toWorld(e.clientX-r.left,e.clientY-r.top); G.cam.z*=e.deltaY<0?1.12:.89; clampCam(); const after=toWorld(e.clientX-r.left,e.clientY-r.top); G.cam.x+=before.x-after.x; G.cam.y+=before.y-after.y; },{passive:false});
-const keys={}; addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; if (e.key==='Escape'){ G&&(G.place=null,G.sel=[],G.selB=null); renderTray(); } }); addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-function keyPan(dt){ const s=520*dt/G.cam.z; if (keys.a||keys.arrowleft) G.cam.x-=s; if (keys.d||keys.arrowright) G.cam.x+=s; if (keys.w||keys.arrowup) G.cam.y-=s; if (keys.s||keys.arrowdown) G.cam.y+=s; }
+const keys={}; addEventListener('keydown',e=>{ const k=e.key.toLowerCase(); keys[k]=true;
+  if (!G||G.over||e.target.tagName==='INPUT'&&e.target.type!=='range') return;
+  if (k==='escape'){ if (!$('sheet').hidden) $('sheet').hidden=true; else { G.place=null; G.sel=[]; G.selB=null; } renderTray(); return; }
+  const grp=g=>{ G.sel=units(0).filter(u=>u.type!=='villager'&&(g==='all'||u.D.cat===g)); G.selB=null; renderTray(); };
+  const act={' ':()=>$('bPause').click(), h:()=>{ const tc=blds(0).find(b=>b.type==='tc'); if (tc){ G.cam.x=tc.x+150; G.cam.y=tc.y; } }, b:openBuild, p:openPlan,
+    '1':()=>grp('inf'), '2':()=>grp('arc'), '3':()=>grp('cav'), '4':()=>grp('all'), q:()=>{ const v=units(0).filter(u=>u.type==='villager'&&!u.job&&u.state==='idle'); G.sel=v; G.selB=null; if (v[0]){ G.cam.x=v[0].x; G.cam.y=v[0].y; } renderTray(); }};
+  if (act[k]){ e.preventDefault(); act[k](); } });
+const mouse={in:false,x:0,y:0}; cv.addEventListener('pointerleave',()=>mouse.in=false);
+cv.addEventListener('pointermove',e=>{ if (e.pointerType!=='mouse'||!G) return; const r=$('app').getBoundingClientRect(); mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top; mouse.in=true;
+  if (G.place && !drag){ const w=toWorld(mouse.x,mouse.y); G.place.x=w.x; G.place.y=w.y; }
+  const h=pick(toWorld(mouse.x,mouse.y)); cv.style.cursor=h&&h.team===0?'pointer':h&&h.team===1&&G.sel.length?'crosshair':'default'; });
+addEventListener('blur',()=>{ mouse.in=false; for (const k in keys) keys[k]=false; }); addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+function keyPan(dt){ const s=520*dt/G.cam.z;
+  if (mouse.in && !drag && document.hasFocus()){ const E=14, tr=$('tray').getBoundingClientRect(), app=$('app').getBoundingClientRect(), right=tr.width&&tr.left>app.left+SW/2?tr.left-app.left:SW; if (mouse.x<E) G.cam.x-=s; if (mouse.x>right-E) G.cam.x+=s; if (mouse.y<E) G.cam.y-=s; if (mouse.y>SH-E) G.cam.y+=s; } if (keys.a||keys.arrowleft) G.cam.x-=s; if (keys.d||keys.arrowright) G.cam.x+=s; if (keys.w||keys.arrowup) G.cam.y-=s; if (keys.s||keys.arrowdown) G.cam.y+=s; }
 
 function pick(w){
   const tol=10/G.cam.z; let best=null,bd=1e9;
@@ -652,9 +665,17 @@ function pick(w){
   for (const e of G.E){ if (e.kind==='res'&&e.amount>0&&Math.hypot(e.x-w.x,e.y-w.y)<e.r+14+tol) return e; }
   return null;
 }
-function tap(w){
-  if (G.place){ G.place.x=w.x; G.place.y=w.y; renderTray(); return; }
+function rightClick(w){
+  if (G.place){ G.place=null; renderTray(); return; }
+  if (G.sel.length){ command(w); return; }
+  if (G.selB && G.selB.D.trains){ G.selB.rally={x:w.x,y:w.y}; toast('Punto de reunión marcado'); }
+}
+function tap(w,mouse,shift){
+  if (G.place){ G.place.x=w.x; G.place.y=w.y; if (mouse) $('pOk')&&$('pOk').click(); else renderTray(); return; }
   const h=pick(w), now=performance.now();
+  if (mouse && shift && h && h.kind==='unit' && h.team===0){ G.sel=G.sel.includes(h)?G.sel.filter(u=>u!==h):G.sel.concat([h]); G.selB=null; renderTray(); return; }
+  if (mouse && !(h && h.team===0)){ if (h && h.kind==='res' && !G.sel.length){ h.prio=!h.prio; toast(h.prio?'Zona prioritaria: los aldeanos irán primero aquí':'Prioridad quitada'); return; } G.sel=[]; G.selB=null; renderTray(); return; }
+  if (mouse && h && h.kind==='bld'){ G.sel=[]; G.selB=h; renderTray(); return; }
   if (h && h.kind==='unit' && h.team===0){
     if (now-lastTap.t<380 && lastTap.type===h.type){ const c=G.cam, hw=SW/2/c.z, hh=SH/2/c.z; G.sel=units(0).filter(u=>u.type===h.type && Math.abs(u.x-c.x)<hw && Math.abs(u.y-c.y)<hh); }
     else G.sel=[h];
@@ -680,11 +701,11 @@ function command(w,h){
     v.manual=true; v.job=null; v.target=null; v.tx=w.x+rand(-12,12); v.ty=w.y+rand(-12,12); v.state='move';
   }
 }
-function boxSelect(a,b){
+function boxSelect(a,b,add){
   const x0=Math.min(a.x,b.x), x1=Math.max(a.x,b.x), y0=Math.min(a.y,b.y), y1=Math.max(a.y,b.y);
   const inBox=units(0).filter(u=>u.x>=x0&&u.x<=x1&&u.y>=y0&&u.y<=y1);
   const mil=inBox.filter(u=>u.type!=='villager');
-  G.sel = mil.length ? mil : inBox; G.selB=null; renderTray();
+  G.sel = mil.length ? mil : inBox; if (add) G.sel=[...new Set(G.sel.concat(inBox))]; G.selB=null; renderTray();
 }
 
 /* ---------- Tray (bottom commands) ---------- */
@@ -717,8 +738,8 @@ function renderTray(soft){
   } else {
     const idle=units(0).filter(u=>u.type==='villager'&&!u.job&&u.state==='idle').length;
     const cnt=c=>units(0).filter(u=>u.type!=='villager'&&(c==='all'||u.D.cat===c)).length;
-    h=`<div class="row"><button class="btn gold" id="plan"><img alt="" src="${IMG['ic-plan'].src}" class="bi">Plan</button><button class="btn" id="build"><img alt="" src="${IMG['ic-build'].src}" class="bi">Construir</button>${idle?`<button class="btn warn wide" id="idle">${idle} sin trabajo</button>`:''}
-      <button class="btn" data-grp="all"><img alt="" src="${IMG['ic-pop'].src}" class="bi">Todos ${cnt('all')}</button><button class="btn" data-grp="inf"><img alt="" src="${uicon('spear',0)}">Infant. ${cnt('inf')}</button><button class="btn" data-grp="arc"><img alt="" src="${uicon('archer',0)}">Arqueros ${cnt('arc')}</button><button class="btn" data-grp="cav"><img alt="" src="${uicon(G.civ[0]==='imperio'?'cav':G.civ[0]==='estepa'?'lightcav':'chariot',0)}">Caball. ${cnt('cav')}</button><button class="btn ${G.selMode?'on':''}" id="area">▢ Área</button><button class="btn" id="home">⌂ Ciudad</button></div>`;
+    h=`<div class="row"><button class="btn gold" id="plan" title="Plan económico (P)"><img alt="" src="${IMG['ic-plan'].src}" class="bi">Plan</button><button class="btn" id="build" title="Construir (B)"><img alt="" src="${IMG['ic-build'].src}" class="bi">Construir</button>${idle?`<button class="btn warn wide" id="idle">${idle} sin trabajo</button>`:''}
+      <button class="btn" data-grp="all"><img alt="" src="${IMG['ic-pop'].src}" class="bi">Todos ${cnt('all')}</button><button class="btn" data-grp="inf"><img alt="" src="${uicon('spear',0)}">Infant. ${cnt('inf')}</button><button class="btn" data-grp="arc"><img alt="" src="${uicon('archer',0)}">Arqueros ${cnt('arc')}</button><button class="btn" data-grp="cav"><img alt="" src="${uicon(G.civ[0]==='imperio'?'cav':G.civ[0]==='estepa'?'lightcav':'chariot',0)}">Caball. ${cnt('cav')}</button><button class="btn ${G.selMode?'on':''}" id="area">▢ Área</button><button class="btn" id="home" title="Ir a la ciudad (H)">⌂ Ciudad</button></div>`;
   }
   tr.innerHTML=h;
   const on=(id,f)=>{ const el=$(id); if (el) el.onclick=f; };
@@ -777,6 +798,7 @@ function showStart(){
     <div class="card"><ul>
       <li><b>Un dedo</b> mueve el mapa, <b>dos dedos</b> hacen zoom. <b>Toca</b> una tropa y luego <b>toca el mapa</b> para mandarla; <b>doble toque</b> elige todas las de ese tipo.</li>
       <li>Tus aldeanos trabajan solos según el <b>Plan</b>. Construye <b>torres</b> para defenderte y un <b>templo</b> para tener sacerdotes con poderes.</li>
+      ${matchMedia('(pointer:fine)').matches?`<li><b>En computadora:</b> clic para elegir (Shift suma), arrastra para encerrar tropas, <b>clic derecho</b> para mandar, rueda para zoom, mueve el mapa con flechas, WASD o el borde de la pantalla. Atajos: <b>B</b> construir, <b>P</b> plan, <b>H</b> ciudad, <b>Q</b> aldeanos sin trabajo, <b>1-4</b> grupos, <b>Espacio</b> pausa, <b>Esc</b> cancelar.</li>`:''}
       <li>En la <b>Edad del Hierro</b> tus soldados y edificios mejoran y aparecen tropas nuevas. Gana quien destruya el <b>Centro urbano</b> rival.</li>
     </ul></div></div>`;
   for (const el of s.querySelectorAll('[data-civ]')) el.onclick=()=>newGame(el.dataset.civ); resize();

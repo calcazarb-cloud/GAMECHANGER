@@ -49,6 +49,10 @@ Read this first. It summarizes the project so far so a new conversation can cont
   frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
   on-map width so they stay sharp.
 - Higgsfield: 38.5 credits left (medium 1k image = 0.5, high 4K map = 4.25).
+- Computer play (2026-11-04): left click selects (Shift adds), drag to box-select, right click orders (or sets the
+  rally point / cancels placement), wheel zoom, arrows/WASD or screen edge to pan. Shortcuts: B build, P plan,
+  H city, Q idle villagers, 1-4 groups, Space pause, Esc cancel. UI scales up on big screens; the controls are listed
+  on the start screen only on devices with a mouse. Phone controls are unchanged.
 - Not done yet from the proposals: walls and gates, boats, heroes, movable yurts for the Steppe.
 - Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
   dense painted forest are blocked. The river can only be crossed at the two painted fords (top around map 700,165
