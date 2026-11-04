@@ -130,19 +130,19 @@ let nload=0; const ready=new Promise(r=>{ for (const n of NAMES){ const im=new I
 
 /* ---------- Definitions ---------- */
 const UT={
-  villager:{n:'Aldeano', hp:40, spd:38, dmg:3, range:10, cd:1.5, size:24, cost:{f:50}, time:16, cat:'eco'},
-  spear:   {n:'Lancero', hp:60, spd:40, dmg:6, range:12, cd:1.4, size:28, cost:{f:35,w:25}, time:16, cat:'inf', bonus:{cav:3}},
-  archer:  {n:'Arquero', hp:35, spd:40, dmg:5, range:115, cd:1.6, size:28, cost:{w:25,g:40}, time:18, cat:'arc', ranged:true, bonus:{spear:1.5,legion:.6}},
-  cav:     {n:'Caballero', hp:115, spd:68, dmg:9, range:14, cd:1.5, size:38, cost:{f:80,g:60}, time:22, cat:'cav', age:3, bonus:{archer:2}},
-  legion:  {n:'Legionario', hp:135, spd:34, dmg:10, range:12, cd:1.6, size:31, cost:{f:60,g:35}, time:20, cat:'inf', age:3, armorRanged:.5, unique:true},
+  villager:{n:'Aldeano', hp:40, spd:38, dmg:3, range:10, cd:1.5, size:15, cost:{f:50}, time:16, cat:'eco'},
+  spear:   {n:'Lancero', hp:60, spd:40, dmg:6, range:12, cd:1.4, size:17, cost:{f:35,w:25}, time:16, cat:'inf', bonus:{cav:3}},
+  archer:  {n:'Arquero', hp:35, spd:40, dmg:5, range:115, cd:1.6, size:17, cost:{w:25,g:40}, time:18, cat:'arc', ranged:true, bonus:{spear:1.5,legion:.6}},
+  cav:     {n:'Caballero', hp:115, spd:68, dmg:9, range:14, cd:1.5, size:24, cost:{f:80,g:60}, time:22, cat:'cav', age:3, bonus:{archer:2}},
+  legion:  {n:'Legionario', hp:135, spd:34, dmg:10, range:12, cd:1.6, size:19, cost:{f:60,g:35}, time:20, cat:'inf', age:3, armorRanged:.5, unique:true},
 };
 const BT={
-  tc:      {n:'Centro urbano', hp:1500, r:58, w:120, cost:{w:9999}, time:120, drop:['food','wood','gold'], pop:10, trains:['villager']},
-  house:   {n:'Casa', hp:320, r:26, w:56, cost:{w:30}, time:14, pop:5, d:'+5 de población'},
-  lumber:  {n:'Aserradero', hp:420, r:30, w:66, cost:{w:100}, time:20, drop:['wood'], d:'Deposita madera cerca del bosque'},
-  mine:    {n:'Campamento minero', hp:420, r:30, w:66, cost:{w:100}, time:20, drop:['gold'], d:'Deposita oro cerca de la mina'},
-  farm:    {n:'Granja', hp:200, r:32, w:70, cost:{w:60}, time:12, food:true, d:'Comida sin fin, 2 granjeros'},
-  barracks:{n:'Cuartel', hp:850, r:44, w:96, cost:{w:150}, time:30, trains:['spear','archer','cav','legion'], d:'Entrena el ejército'},
+  tc:      {n:'Centro urbano', hp:1500, r:68, w:150, cost:{w:9999}, time:120, drop:['food','wood','gold'], pop:10, trains:['villager']},
+  house:   {n:'Casa', hp:320, r:30, w:66, cost:{w:30}, time:14, pop:5, d:'+5 de población'},
+  lumber:  {n:'Aserradero', hp:420, r:34, w:76, cost:{w:100}, time:20, drop:['wood'], d:'Deposita madera cerca del bosque'},
+  mine:    {n:'Campamento minero', hp:420, r:34, w:76, cost:{w:100}, time:20, drop:['gold'], d:'Deposita oro cerca de la mina'},
+  farm:    {n:'Granja', hp:200, r:36, w:82, cost:{w:60}, time:12, food:true, d:'Comida sin fin, 2 granjeros'},
+  barracks:{n:'Cuartel', hp:850, r:52, w:116, cost:{w:150}, time:30, trains:['spear','archer','cav','legion'], d:'Entrena el ejército'},
 };
 const BUILD_LIST=['house','farm','lumber','mine','barracks'];
 const AGE_COST={f:500,g:150}, AGE_TIME=45;
@@ -155,7 +155,7 @@ const P=(x,y)=>({x:x*K,y:y*K});
 function newGame(){
   G={t:0,E:[],projs:[],parts:[],texts:[],id:1,sel:[],selB:null,over:false,paused:false,
      team:[{res:{food:320,wood:320,gold:180},plan:{food:40,wood:35,gold:25,build:0},assist:true,age:2,ageT:0,ageUp:false},{res:{food:320,wood:320,gold:180},plan:{food:45,wood:35,gold:20,build:0},assist:true,age:2,ageT:0,ageUp:false,wave:0,next:0}],
-     cam:{x:480,y:680,z:.8}, place:null, stats:{kills:0,lost:0}};
+     cam:{x:470,y:670,z:1.05}, place:null, stats:{kills:0,lost:0}};
   // resources
   const trees=[[60,150],[120,200],[40,240],[360,250],[385,330],[425,290],[60,445],[140,450],[220,475],[300,450],[30,330],
     [1290,240],[1235,170],[1310,310],[935,450],[1005,470],[1280,455],[1300,525],[880,210],[950,250],
@@ -379,10 +379,14 @@ let toastT=0; function toast(m){ const el=$('toast'); el.textContent=m; el.style
 
 /* ---------- Rendering ---------- */
 const cv=$('cv'), ctx=cv.getContext('2d'); let SW=0,SH=0,DPR=1;
-function resize(){ const r=$('app').getBoundingClientRect(); SW=r.width; SH=r.height; DPR=Math.min(2,devicePixelRatio||1); cv.width=SW*DPR; cv.height=SH*DPR; }
+let UI=1;
+function resize(){ const r=$('app').getBoundingClientRect(); SW=r.width; SH=r.height; DPR=Math.min(2,devicePixelRatio||1); cv.width=SW*DPR; cv.height=SH*DPR;
+  UI=clamp(Math.min(SH/430, SW/(SW>SH?880:420)),.5,1);
+  for (const id of ['topbar','tray','sheet','mini','toast','rotate']) $(id).style.zoom=UI;
+  for (const w of document.querySelectorAll('#screen .wrap')) w.style.zoom=UI; }
 new ResizeObserver(resize).observe($('app'));
 const minZ=()=>Math.max(SW/WW, SH/WH, .3);
-function clampCam(){ const c=G.cam; c.z=clamp(c.z,minZ(),1.5); const hw=SW/2/c.z, hh=SH/2/c.z; c.x=clamp(c.x,Math.min(hw,WW/2),Math.max(WW-hw,WW/2)); c.y=clamp(c.y,Math.min(hh-50/c.z,WH/2),Math.max(WH-hh+70/c.z,WH/2)); }
+function clampCam(){ const c=G.cam; c.z=clamp(c.z,minZ(),1.8); const hw=SW/2/c.z, hh=SH/2/c.z; c.x=clamp(c.x,Math.min(hw,WW/2),Math.max(WW-hw,WW/2)); c.y=clamp(c.y,Math.min(hh-50/c.z,WH/2),Math.max(WH-hh+70/c.z,WH/2)); }
 const toWorld=(sx,sy)=>({x:(sx-SW/2)/G.cam.z+G.cam.x, y:(sy-SH/2)/G.cam.z+G.cam.y});
 function sprite(name,x,y,w,alpha,flip){ const im=IMG[name]; const h=w*(im.naturalHeight/im.naturalWidth||1); ctx.save(); ctx.globalAlpha=alpha??1; ctx.translate(x,y); if (flip) ctx.scale(-1,1); ctx.drawImage(im,-w/2,-h*.78,w,h); ctx.restore(); return h; }
 function bar(x,y,w,r,c){ ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillRect(x-w/2-1,y-1,w+2,5); ctx.fillStyle=c; ctx.fillRect(x-w/2,y,w*clamp(r,0,1),3); }
@@ -413,13 +417,13 @@ function draw(){
     } else {
       const D=e.D;
       ctx.fillStyle='rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(e.x,e.y+1,e.r*1.3,e.r*.6,0,0,7); ctx.fill();
-      ctx.strokeStyle=TC_COL[e.team]; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(e.x,e.y+1,e.r*1.1,e.r*.52,0,0,7); ctx.stroke();
+      ctx.strokeStyle=TC_COL[e.team]; ctx.lineWidth=1.4; ctx.beginPath(); ctx.ellipse(e.x,e.y+1,e.r*1.3,e.r*.62,0,0,7); ctx.stroke();
       const moving=(e.state==='move'||e.state==='flee'); const by=moving?Math.abs(Math.sin(e.bob))*1.5:0;
       sprite(e.type,e.x,e.y-by+2,D.size,1,e.face<0);
       if (e.flash>0){ ctx.globalAlpha=.4; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(e.x,e.y-D.size*.4,e.r,0,7); ctx.fill(); ctx.globalAlpha=1; }
-      if (e.carry.n>0){ ctx.fillStyle=e.carry.k==='food'?'#ff8a70':e.carry.k==='wood'?'#c49a62':'#ffd36a'; ctx.fillRect(e.x+e.r*.6,e.y-D.size*.55,5,5); }
-      if (e.team===1){ ctx.fillStyle='#ff5a4a'; ctx.beginPath(); ctx.moveTo(e.x,e.y-D.size*.98); ctx.lineTo(e.x+4,e.y-D.size*.98-6); ctx.lineTo(e.x-4,e.y-D.size*.98-6); ctx.fill(); }
-      if (e.hp<e.maxHp || G.sel.includes(e)) bar(e.x,e.y-D.size*.92,18,e.hp/e.maxHp,e.team?'#ff6a5a':'#7bd88f');
+      if (e.carry.n>0){ ctx.fillStyle=e.carry.k==='food'?'#ff8a70':e.carry.k==='wood'?'#c49a62':'#ffd36a'; ctx.fillRect(e.x+e.r*.6,e.y-D.size*.55,3.5,3.5); }
+      if (e.team===1){ ctx.fillStyle='#ff5a4a'; ctx.beginPath(); ctx.moveTo(e.x,e.y-D.size*.98); ctx.lineTo(e.x+2.5,e.y-D.size*.98-4); ctx.lineTo(e.x-2.5,e.y-D.size*.98-4); ctx.fill(); }
+      if (e.hp<e.maxHp || G.sel.includes(e)) bar(e.x,e.y-D.size*.95-2,13,e.hp/e.maxHp,e.team?'#ff6a5a':'#7bd88f');
     }
   }
   if (G.place){ const p=G.place, ok=canPlace(p.type,p.x,p.y,0); ctx.globalAlpha=.6; sprite(p.type,p.x,p.y+BT[p.type].r*.35,BT[p.type].w); ctx.globalAlpha=1; ctx.strokeStyle=ok?'#7bd88f':'#ff5a4a'; ctx.lineWidth=3/c.z; ctx.beginPath(); ctx.ellipse(p.x,p.y,BT[p.type].r,BT[p.type].r*.55,0,0,7); ctx.stroke(); }
@@ -480,7 +484,7 @@ function keyPan(dt){ const s=520*dt/G.cam.z; if (keys.a||keys.arrowleft) G.cam.x
 
 function pick(w){
   const tol=10/G.cam.z; let best=null,bd=1e9;
-  for (const e of G.E){ if (e.kind!=='unit'||e.hp<=0) continue; const d=Math.hypot(e.x-w.x,(e.y-e.D.size*.35)-w.y); if (d<e.r+12+tol && d<bd){bd=d;best=e;} }
+  for (const e of G.E){ if (e.kind!=='unit'||e.hp<=0) continue; const d=Math.hypot(e.x-w.x,(e.y-e.D.size*.35)-w.y); if (d<e.r+9+tol && d<bd){bd=d;best=e;} }
   if (best) return best;
   for (const e of G.E){ if (e.kind==='bld'&&e.hp>0){ if (Math.abs(e.x-w.x)<e.r*1.05 && w.y<e.y+e.r*.6 && w.y>e.y-e.r*1.6) return e; } }
   for (const e of G.E){ if (e.kind==='res'&&e.amount>0&&Math.hypot(e.x-w.x,e.y-w.y)<e.r+14+tol) return e; }
@@ -505,7 +509,7 @@ function command(w,h){
   const mil=G.sel.filter(u=>u.type!=='villager'), vil=G.sel.filter(u=>u.type==='villager');
   const enemy=h && h.team===1 && h.hp>0;
   G.parts.push({x:w.x,y:w.y,vx:0,vy:0,l:.5,c:enemy?'#ff5a4a':'#7bd88f'});
-  mil.forEach((u,i)=>{ if (enemy){ u.target=h; u.state='attack'; } else { const a=i*2.4, rr=8*Math.sqrt(i)*1.6; u.tx=w.x+Math.cos(a)*rr; u.ty=w.y+Math.sin(a)*rr; u.state='move'; u.am=true; u.target=null; } });
+  mil.forEach((u,i)=>{ if (enemy){ u.target=h; u.state='attack'; } else { const a=i*2.4, rr=6*Math.sqrt(i)*1.5; u.tx=w.x+Math.cos(a)*rr; u.ty=w.y+Math.sin(a)*rr; u.state='move'; u.am=true; u.target=null; } });
   for (const v of vil){
     if (enemy){ v.target=h; v.state='attack'; continue; }
     if (h && h.kind==='res'){ v.manual=true; v.job=h.rtype; v.target=h; v.state='idle'; continue; }
@@ -612,7 +616,7 @@ function showStart(){
       <li>Avanza a la <b>Edad del Hierro</b> desde el Centro urbano para desbloquear caballería y legionarios.</li>
       <li>Gana quien destruya el <b>Centro urbano</b> rival. En computadora: rueda para zoom, clic derecho para mandar.</li>
     </ul></div><button class="play" id="go">Jugar</button></div>`;
-  $('go').onclick=()=>newGame();
+  $('go').onclick=()=>newGame(); resize();
 }
 function endGame(won){
   G.over=true;
@@ -620,7 +624,7 @@ function endGame(won){
     s.innerHTML=`<div class="wrap"><h1 class="logo" style="color:${won?'#f7dfa4':'#ff8a7a'}">${won?'Victoria':'Derrota'}</h1><p class="sub">${won?'Destruiste el Centro urbano rival':'Tu Centro urbano cayó'} · ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</p>
       <div class="stats"><div><small>Enemigos</small>${G.stats.kills}</div><div><small>Perdidos</small>${G.stats.lost}</div><div><small>Edad</small>${G.team[0].age>=3?'Hierro':'Bronce'}</div></div>
       <button class="play" id="go">Jugar otra vez</button></div>`;
-    $('go').onclick=()=>newGame(); },1200);
+    $('go').onclick=()=>newGame(); resize(); },1200);
 }
 let last=performance.now(), trayT=0;
 let stayV=false;
