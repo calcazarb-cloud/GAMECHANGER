@@ -48,7 +48,7 @@ Read this first. It summarizes the project so far so a new conversation can cont
 - Readability fixes (2026-11-04): attack and work animations slowed down (attack 0.8 s, hit lands on the strike
   frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
   on-map width so they stay sharp.
-- Higgsfield: about 31 credits left (medium 1k image = 0.5, high 4K map = 4.25).
+- Higgsfield: 38.5 credits left (medium 1k image = 0.5, high 4K map = 4.25).
 - Not done yet from the proposals: walls and gates, boats, heroes, movable yurts for the Steppe.
 - Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
   dense painted forest are blocked. The river can only be crossed at the two painted fords (top around map 700,165
