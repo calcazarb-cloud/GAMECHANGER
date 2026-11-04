@@ -26,10 +26,19 @@ Read this first. It summarizes the project so far so a new conversation can cont
   - Buildings: town center, house, farm, lumber camp, mining camp, barracks. Units: villager, spearman, archer, cavalry, legionnaire (Iron Age).
   - Advance to the Iron Age, counter system, town center arrows, computer that builds, advances and attacks in waves.
   - Readability: team discs and glow on units, minimum on-screen size, dimmed map.
+- Animations (2026-11-04): walk (6 frames), attack (4), work (4), idle and a falling death, built at load time
+  from each unit sprite (`buildAnim` in index.html: legs split at the hip and swung, upper body leans and swings).
+  Melee damage lands on the strike frame and arrows leave on the release frame. Generated per-frame art with
+  Higgsfield is still possible later: that needs the user's OK because it spends credits.
+- Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
+  dense painted forest are blocked. The river can only be crossed at the two painted fords (top around map 700,165
+  and bottom around 690,615). Units path with A* (`findPath`) and walk straight when the line is clear; buildings
+  cannot be placed on blocked cells; choppable trees sit on the forest edges. If map-h.jpg changes, the grid must be
+  regenerated (color threshold on the image, then manual fixes at the fords and the river ends).
 - User feedback still open: the game is hard to read and play; asked to improve graphics.
 - Agreed next steps:
-  1. Real unit animations (generated walk, attack and work frames).
-  2. Rivers and forests block movement; cross only at fords.
+  1. Done: unit animations (procedural from the sprites).
+  2. Done: rivers and forests block movement; cross only at fords.
   3. Buildings change look with the age.
   4. Second civilization, classic match from zero, tutorial campaign, sound, English.
   5. Online play needs hosting outside the artifact (for example Vercel plus Supabase Realtime); ask before creating paid resources.
