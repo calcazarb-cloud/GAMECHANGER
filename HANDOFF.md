@@ -26,10 +26,17 @@ Read this first. It summarizes the project so far so a new conversation can cont
   - Buildings: town center, house, farm, lumber camp, mining camp, barracks. Units: villager, spearman, archer, cavalry, legionnaire (Iron Age).
   - Advance to the Iron Age, counter system, town center arrows, computer that builds, advances and attacks in waves.
   - Readability: team discs and glow on units, minimum on-screen size, dimmed map.
-- Animations (2026-11-04): walk (6 frames), attack (4), work (4), idle and a falling death, built at load time
-  from each unit sprite (`buildAnim` in index.html: legs split at the hip and swung, upper body leans and swings).
-  Melee damage lands on the strike frame and arrows leave on the release frame. Generated per-frame art with
-  Higgsfield is still possible later: that needs the user's OK because it spends credits.
+- Animations (2026-11-04): painted sprite sheets generated with Higgsfield (gpt_image_2_5, medium, transparent
+  background, the concept sprite as reference): `assets/<unit>-anim.webp`, 8 cells in a row (4 walk + 4 attack/work).
+  Cell size and foot anchor live in `SHEET` in index.html; on-map height in `DH`. Death is a fall-and-fade of a
+  walk frame. Raw generated sheets are in `concept-art/generados/`. The slicing script (alpha components -> cells,
+  feet aligned, body height 150 px) is described in the commit; regenerate the sheet and re-slice if a unit changes.
+- Ages change the look (2026-11-04): in the Iron Age every building uses its `*3.webp` version (stone and red tile
+  roofs) and spearmen and archers switch to iron gear (`spear3`, `archer3` sheets, `UT3` stats: more hp and damage),
+  including units already on the map.
+- Defense towers (2026-11-04): `tower` building (100 wood, 50 gold), shoots arrows (range 215; stronger in the Iron
+  Age, wooden tower becomes a stone tower). The computer also builds up to 2-3 towers.
+- Higgsfield: about 64 credits left after this round (each medium 1k image costs 0.5).
 - Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
   dense painted forest are blocked. The river can only be crossed at the two painted fords (top around map 700,165
   and bottom around 690,615). Units path with A* (`findPath`) and walk straight when the line is clear; buildings
@@ -39,7 +46,7 @@ Read this first. It summarizes the project so far so a new conversation can cont
 - Agreed next steps:
   1. Done: unit animations (procedural from the sprites).
   2. Done: rivers and forests block movement; cross only at fords.
-  3. Buildings change look with the age.
+  3. Done: buildings and soldiers change look with the age; defense towers added.
   4. Second civilization, classic match from zero, tutorial campaign, sound, English.
   5. Online play needs hosting outside the artifact (for example Vercel plus Supabase Realtime); ask before creating paid resources.
 
