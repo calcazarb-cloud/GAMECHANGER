@@ -48,7 +48,7 @@ Read this first. It summarizes the project so far so a new conversation can cont
 - Readability fixes (2026-11-04): attack and work animations slowed down (attack 0.8 s, hit lands on the strike
   frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
   on-map width so they stay sharp.
-- Higgsfield: 31.5 credits left (medium 1k image = 0.5, high 4K map = 4.25).
+- Higgsfield: about 29 credits left (medium 1k image = 0.5, high 4K map = 4.25).
 - Computer play (2026-11-04): left click selects (Shift adds), drag to box-select, right click orders (or sets the
   rally point / cancels placement), wheel zoom, arrows/WASD or screen edge to pan. Shortcuts: B build, P plan,
   H city, Q idle villagers, 1-4 groups, Space pause, Esc cancel. UI scales up on big screens; the controls are listed
@@ -75,6 +75,14 @@ Read this first. It summarizes the project so far so a new conversation can cont
   walls, gates, docks and boats are cheaper and faster.
 - Sound (2026-11-04): plus field ambience (wind, birds), select and order sounds per unit type, arrow impacts,
   victory and defeat tunes. Mute with the note button or the M key.
+- Map resources (2026-11-04, user feedback: buildings sat on painted forest and loose trees looked pasted on):
+  the painted forest itself is the wood. Every forest cell holds 70 wood (`WOOD`); villagers chop edge cells and a
+  chopped cell becomes open ground drawn as a clearing with stumps. No more loose tree sprites. The nav grid no
+  longer opens fake holes in the forest around bases (`nav3`), and `layoutBase` places each starting building on
+  free meadow (lumber camp by the forest, mining camp by the gold, berries near the town). New gold outcrop and
+  berry bush sprites (`gold2.webp`, `berry.webp`).
+- Menu (2026-11-04): painted icon tiles (`assets/ui-*.webp`: army, infantry, archers, cavalry, area, city, retreat,
+  stop, cancel, repeat, age up, move, idle, plan, rally, attack) with short labels and count badges.
 - User feedback still open: buildings still look a bit odd on the map; improve later (scale, ground, consistent
   perspective).
 - Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
