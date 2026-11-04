@@ -13,6 +13,7 @@ Read this first. It summarizes the project so far so a new conversation can cont
   - `estrategia/concept-art/`: civilizations, town across ages, maps, units, sprites.
 - Published prototype: https://claude.ai/artifact/DVcMQNPisX9hL7jgFcfCdt
 - Design document (Claude Docs): https://claude.ai/artifact/2kQCRJw1wEaLj3NjiFb3aS
+- Ideas gallery (civilizations, troops, animations, Bronze vs Iron buildings, proposed troops): https://claude.ai/artifact/1ykudfU59gz41xxYQpAdrT
 - Decisions so far:
   - 70% Age-of-Empires-style economy and ages, 30% StarCraft-style action.
   - Historical realism with a touch of magic. Three fictional civilizations: Imperio Áureo (Rome and Byzantium), Clanes de la Estepa (steppe horse peoples), Reino de las Arenas (ancient Egypt).
