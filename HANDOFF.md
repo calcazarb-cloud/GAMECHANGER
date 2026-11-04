@@ -48,7 +48,7 @@ Read this first. It summarizes the project so far so a new conversation can cont
 - Readability fixes (2026-11-04): attack and work animations slowed down (attack 0.8 s, hit lands on the strike
   frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
   on-map width so they stay sharp.
-- Higgsfield: about 29 credits left (medium 1k image = 0.5, high 4K map = 4.25).
+- Higgsfield: 28 credits left (medium 1k image = 0.5, high 4K map = 4.25).
 - Computer play (2026-11-04): left click selects (Shift adds), drag to box-select, right click orders (or sets the
   rally point / cancels placement), wheel zoom, arrows/WASD or screen edge to pan. Shortcuts: B build, P plan,
   H city, Q idle villagers, 1-4 groups, Space pause, Esc cancel. UI scales up on big screens; the controls are listed
@@ -83,8 +83,9 @@ Read this first. It summarizes the project so far so a new conversation can cont
   berry bush sprites (`gold2.webp`, `berry.webp`).
 - Menu (2026-11-04): painted icon tiles (`assets/ui-*.webp`: army, infantry, archers, cavalry, area, city, retreat,
   stop, cancel, repeat, age up, move, idle, plan, rally, attack) with short labels and count badges.
-- User feedback still open: buildings still look a bit odd on the map; improve later (scale, ground, consistent
-  perspective).
+- Buildings blend in (2026-11-04): at load `prepArt` colour-grades building sprites toward the map palette,
+  builds a soft shadow silhouette (cast down-right) and tints a cloth banner per team; each building stands on a
+  trampled-earth decal (`ground.webp`) and carries its team banner (`banner.webp`) instead of a coloured ring.
 - Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
   dense painted forest are blocked. The river can only be crossed at the two painted fords (top around map 700,165
   and bottom around 690,615). Units path with A* (`findPath`) and walk straight when the line is clear; buildings
