@@ -156,7 +156,7 @@ let nload=0; const ready=new Promise(r=>{ for (const n of NAMES){ const im=new I
 
 /* ---------- Definitions ---------- */
 const UT={
-  villager:{n:'Aldeano', d:'Recolecta comida, madera y oro, y construye.', hp:40, spd:38, dmg:3, range:10, cd:1.5, size:15, cost:{f:50}, time:16, cat:'eco'},
+  villager:{n:'Aldeano', d:'Recolecta comida, madera y oro, y construye.', hp:40, spd:38, dmg:3, range:10, cd:1.5, size:15, cost:{f:50}, time:12, cat:'eco'},
   spear:   {n:'Lancero', d:'Infantería barata. Fuerte contra caballería, débil contra arqueros.', hp:60, spd:40, dmg:6, range:12, cd:1.4, size:17, cost:{f:35,w:25}, time:16, cat:'inf', bonusCat:{cav:3}},
   archer:  {n:'Arquero', d:'Ataca de lejos. Fuerte contra infantería, débil contra caballería.', hp:35, spd:40, dmg:5, range:115, cd:1.6, size:17, cost:{w:25,g:40}, time:18, cat:'arc', ranged:true, bonus:{legion:.6}, bonusCat:{inf:1.5}},
   cav:     {n:'Caballero', d:'Rápido y fuerte. Fuerte contra arqueros y asedio, débil contra lanceros.', hp:115, spd:68, dmg:9, range:14, cd:1.5, size:24, cost:{f:80,g:60}, time:22, cat:'cav', age:3, bonusCat:{arc:2,siege:2}},
@@ -169,8 +169,8 @@ const UT={
   sunpriest:{n:'Sacerdote del Sol', hp:45, spd:36, dmg:0, range:0, cd:1, size:16, cost:{f:50,g:80}, time:24, cat:'sup', power:'beam', d:'Lanza un rayo de sol que quema a un grupo enemigo'},
   ram:     {n:'Ariete', d:'Solo ataca edificios y los rompe rápido. Aguanta flechas.', hp:280, spd:24, dmg:40, range:10, cd:2.4, size:26, cost:{w:160,g:60}, time:30, cat:'siege', age:3, siegeOnly:true, armorRanged:.25},
   scorpion:{n:'Escorpión', d:'Asedio a distancia. Rompe edificios y torres.', hp:90, spd:26, dmg:14, range:200, cd:3, size:26, cost:{w:140,g:70}, time:28, cat:'siege', age:3, ranged:true, bldBonus:2.5, bonusCat:{inf:1.3}},
-  fishboat:{n:'Barco pesquero', hp:60, spd:46, dmg:0, range:0, cd:1, size:24, cost:{w:60}, time:18, cat:'eco', boat:true, d:'Pesca en el río y lleva la comida al muelle'},
-  galley:  {n:'Galera', d:'Barco de guerra con arqueros. Ataca desde el río.', hp:150, spd:44, dmg:7, range:130, cd:1.8, size:28, cost:{w:90,g:45}, time:24, cat:'ship', boat:true, ranged:true, bonusCat:{ship:1.5}},
+  fishboat:{n:'Barco pesquero', hp:60, spd:46, dmg:0, range:0, cd:1, size:24, cost:{w:45}, time:12, cat:'eco', boat:true, d:'Pesca en el río y lleva la comida al muelle'},
+  galley:  {n:'Galera', d:'Barco de guerra con arqueros. Ataca desde el río.', hp:150, spd:44, dmg:7, range:130, cd:1.8, size:28, cost:{w:80,g:40}, time:18, cat:'ship', boat:true, ranged:true, bonusCat:{ship:1.5}},
   general: {n:'General Áureo', d:'Héroe. Muy fuerte; sus tropas cercanas pegan 25% más.', hp:420, spd:42, dmg:15, range:13, cd:1.3, size:20, cost:{f:250,g:200}, time:30, cat:'inf', hero:true},
   khan:    {n:'Gran Khan', d:'Héroe a caballo, muy rápido; sus tropas cercanas pegan 25% más.', hp:380, spd:76, dmg:13, range:15, cd:1.2, size:24, cost:{f:250,g:200}, time:30, cat:'cav', hero:true},
   queen:   {n:'Reina del Sol', d:'Héroe que ataca de lejos con fuego del sol; sus tropas cercanas pegan 25% más.', hp:320, spd:40, dmg:12, range:110, cd:1.6, size:18, cost:{f:250,g:200}, time:30, cat:'arc', ranged:true, hero:true},
@@ -188,7 +188,8 @@ const CIV={
     ai2:['khopesh','archer','spear'], ai3:['chariot','khopesh','archer']},
 };
 const civOf=team=>CIV[G.civ[team]];
-const trainsOf=b=>b.type==='tc'?['villager',civOf(b.team).hero]:b.type==='dock'?['fishboat','galley']:b.type==='barracks'?civOf(b.team).bar:b.type==='temple'?[civOf(b.team).priest]:[];
+const HEROES=false; // heroes are ready but switched off for now
+const trainsOf=b=>b.type==='tc'?(HEROES?['villager',civOf(b.team).hero]:['villager']):b.type==='dock'?['fishboat','galley']:b.type==='barracks'?civOf(b.team).bar:b.type==='temple'?[civOf(b.team).priest]:[];
 // art key for a unit: civ prefix for shared units, '3' for Iron Age gear
 const SHARED={villager:1,spear:1,archer:1}, ART={lightcav:'e-lightcav',horsearcher:'e-horsearcher',khopesh:'a-khopesh',chariot:'a-chariot',shaman:'e-shaman',sunpriest:'a-sunpriest'};
 function artKey(type,team){ if (!SHARED[type]) return ART[type]||type; const k=civOf(team).p+type, k3=k+'3'; return G.team[team].age>=3&&SHEET[k3]?k3:k; }
@@ -200,15 +201,15 @@ const BT={
   farm:    {n:'Granja', hp:200, r:36, w:82, cost:{w:60}, time:12, food:true, d:'Comida sin fin, 2 granjeros'},
   tower:   {n:'Torre', hp:700, r:24, w:58, cost:{w:100,g:50}, time:24, tower:true, d:'Dispara flechas a enemigos cercanos'},
   barracks:{n:'Cuartel', hp:850, r:52, w:116, cost:{w:150}, time:30, trains:true, d:'Entrena el ejército'},
-  wall:    {n:'Muralla', hp:450, r:12, w:34, cost:{w:6}, time:3, wall:true, d:'Toca el inicio y el final para trazarla'},
-  gate:    {n:'Puerta', hp:900, r:24, w:64, cost:{w:60}, time:12, gate:true, d:'Tus tropas pasan, el enemigo no'},
-  dock:    {n:'Muelle', hp:500, r:30, w:104, cost:{w:120}, time:22, trains:true, drop:['food'], dock:true, d:'Junto al río: barcos de pesca y galeras'},
+  wall:    {n:'Muralla', hp:450, r:12, w:34, cost:{w:4}, time:2, wall:true, d:'Toca el inicio y el final para trazarla'},
+  gate:    {n:'Puerta', hp:900, r:24, w:64, cost:{w:40}, time:8, gate:true, d:'Tus tropas pasan, el enemigo no'},
+  dock:    {n:'Muelle', hp:500, r:30, w:104, cost:{w:90}, time:14, trains:true, drop:['food'], dock:true, d:'Junto al río: barcos de pesca y galeras'},
   temple:  {n:'Templo', hp:600, r:40, w:96, cost:{w:120,g:60}, time:28, trains:true, d:'Entrena sacerdotes con poderes'},
 };
 const BUILD_LIST=['house','farm','lumber','mine','barracks','tower','temple','dock','wall','gate'];
 const AGE_COST={f:500,g:150}, AGE_TIME=45;
 const JOBS=['food','wood','gold','build'], JN={food:'Comida',wood:'Madera',gold:'Oro',build:'Construir'}, JC={food:'var(--food)',wood:'var(--wood)',gold:'var(--gold)',build:'#9fb7c9'};
-const RATE={food:1,wood:.92,gold:.8};
+const RATE={food:1.35,wood:1.25,gold:1.1}; // faster economy so there is time for walls, docks and boats
 
 /* ---------- Terrain: river and forests block movement; cross the river only at the two fords ---------- */
 const NW=168, NH=94, NC=8*K; // cells of 8 map px
@@ -272,7 +273,7 @@ function tutTick(){ if (!G||!G.tut||G.tut.done) return; const st=TUT[G.tut.i]; i
 function newGame(civ,tut){ audioOn(); sndBtn();
   civ=civ||'imperio'; const others=Object.keys(CIV).filter(k=>k!==civ);
   G={civ:[civ,others[Math.floor(Math.random()*others.length)]],beams:[],t:0,E:[],dead:[],projs:[],parts:[],texts:[],id:1,sel:[],selB:null,over:false,paused:false,
-     team:[{res:{food:320,wood:320,gold:180},plan:{food:40,wood:35,gold:25,build:0},assist:true,age:2,ageT:0,ageUp:false},{res:{food:320,wood:320,gold:180},plan:{food:45,wood:35,gold:20,build:0},assist:true,age:2,ageT:0,ageUp:false,wave:0,next:0}],
+     team:[{res:{food:400,wood:450,gold:220},plan:{food:40,wood:35,gold:25,build:0},assist:true,age:2,ageT:0,ageUp:false},{res:{food:400,wood:450,gold:220},plan:{food:45,wood:35,gold:20,build:0},assist:true,age:2,ageT:0,ageUp:false,wave:0,next:0}],
      cam:{x:470,y:670,z:1.05}, place:null, stats:{kills:0,lost:0}};
   // resources
   const trees=[[60,150],[120,200],[40,240],[360,250],[385,330],[425,290],[60,445],[140,450],[220,475],[300,450],[30,330],
@@ -294,7 +295,7 @@ function newGame(civ,tut){ audioOn(); sndBtn();
     for (let i=0;i<3;i++) sp('spear',tc.x+dir*150,tc.y+rand(-50,50));
     for (let i=0;i<2;i++) sp('archer',tc.x+dir*185,tc.y+rand(-50,50));
   }
-  G.team[1].next=200;
+  G.team[1].next=270;
   G.tut=tut?{i:0,at:0,cx:0,cy:0,cz:0,plan:false,cmd:false,done:false}:null;
   { const tc=G.E.find(e=>e.kind==='bld'&&e.type==='tc'&&e.team===0), r=$('app').getBoundingClientRect(); G.cam.z=clamp(r.height/560,1.05,1.5); G.cam.x=tc.x+r.width/G.cam.z*.22; G.cam.y=tc.y+20; }
   resize(); $('topbar').hidden=false; $('tray').hidden=false; $('mini').hidden=false; $('screen').hidden=true;
@@ -431,7 +432,7 @@ function updFish(u,dt){
     G.team[u.team].res.food+=u.carry.n; if (u.team===0) text(dk.x,dk.y-dk.r-10,'+'+Math.round(u.carry.n),'#9fd8ff'); u.carry={k:null,n:0}; return; }
   let n=u.target; if (!n||n.kind!=='res'||n.amount<=0){ let bd=1e9; n=null; for (const e of G.E){ if (e.kind!=='res'||e.rtype!=='fish'||e.amount<=0) continue; if (G.E.filter(o=>o.target===e).length>=3) continue; const d=dist(u,e); if (d<bd){ bd=d; n=e; } } u.target=n; if (!n) return; }
   if (dist(u,n)>n.r+u.r+6){ moveTo(u,n.x,n.y,dt,n.r+u.r+4); return; }
-  const a=Math.min(.95*dt*SPEED,n.amount); n.amount-=a; u.carry.k='food'; u.carry.n+=a; u.work=.2; u.face=n.x>u.x?1:-1;
+  const a=Math.min(1.3*dt*SPEED,n.amount); n.amount-=a; u.carry.k='food'; u.carry.n+=a; u.work=.2; u.face=n.x>u.x?1:-1;
 }
 function power(u,dt){
   u.pw=(u.pw||0)-dt; if (u.pw>0) return;
@@ -453,7 +454,7 @@ function updVillager(v,dt){
     if (!s){ s=nearestSite(v); v.target=s; }
     if (!s){ if (v.manual){ v.manual=false; } v.job=null; return; }
     if (dist(v,s)>s.r+v.r+6){ moveTo(v,s.x,s.y,dt,s.r+v.r+4); return; }
-    v.work=.2; v.face=s.x>v.x?1:-1; s.prog+=dt/s.D.time*SPEED*1.6; s.hp=Math.min(s.maxHp,s.hp+s.maxHp*dt/s.D.time*1.6);
+    v.work=.2; v.face=s.x>v.x?1:-1; s.prog+=dt/s.D.time*SPEED*2.4; s.hp=Math.min(s.maxHp,s.hp+s.maxHp*dt/s.D.time*2.4);
     if (Math.random()<.1){ burst(s.x+rand(-s.r,s.r)*.6,s.y-rand(0,s.r),'#d9b36b',1,20); sfx('build',s); }
     if (s.prog>=1){ s.prog=1; s.done=true; markBld(s,true); sfx('done',s); s.hp=Math.max(s.hp,s.maxHp*.98); if (s.team===0) toast(s.D.n+(['Torre','Casa','Granja'].includes(s.D.n)?' terminada':' terminado')); v.target=null; if (v.manual){ v.manual=false; v.job=null; } }
     return;
@@ -534,9 +535,9 @@ function aiTick(){
   const towers=bs.filter(b=>b.type==='tower').length;
   if (G.t>150 && towers<(T.age>=3?3:2) && sites<2 && canPay(1,BT.tower.cost) && army.length>=4){ const s=spot('tower'); if (s) placeBld('tower',1,s.x,s.y); }
   const dk=bs.find(b=>b.type==='dock');
-  if (G.t>200 && !dk && sites<2 && T.res.wood>=150){ const s=dockSpot(1); if (s) placeBld('dock',1,s.x,s.y); }
+  if (G.t>150 && !dk && sites<2 && T.res.wood>=120){ const s=dockSpot(1); if (s) placeBld('dock',1,s.x,s.y); }
   if (dk && dk.done && dk.queue.length<1){ const fb=us.filter(u=>u.type==='fishboat').length, gl=us.filter(u=>u.type==='galley').length; if (fb<3) train(dk,'fishboat'); else if (gl<3) train(dk,'galley'); }
-  if (G.t>320 && !us.some(u=>u.D.hero) && tc.queue.length<1 && canPay(1,UT[civOf(1).hero].cost)) train(tc,civOf(1).hero);
+  if (HEROES && G.t>320 && !us.some(u=>u.D.hero) && tc.queue.length<1 && canPay(1,UT[civOf(1).hero].cost)) train(tc,civOf(1).hero);
   const tem=bs.find(b=>b.type==='temple');
   if (G.t>240 && !tem && sites<2 && canPay(1,BT.temple.cost)){ const s=spot('temple'); if (s) placeBld('temple',1,s.x,s.y); }
   if (tem && tem.done && tem.queue.length<1 && army.filter(a=>a.D.cat==='sup').length<2) train(tem,civOf(1).priest);
@@ -557,7 +558,7 @@ function aiTick(){
   const need=7+T.wave*3;
   if (G.t>=T.next && army.length>=need){
     const ptc=blds(0).find(b=>b.type==='tc'); if (!ptc) return;
-    T.wave++; T.next=G.t+110;
+    T.wave++; T.next=G.t+135;
     for (const a of army){ a.tx=ptc.x+rand(-60,60); a.ty=ptc.y+rand(-60,60); a.state='move'; a.am=true; a.target=null; }
     toast('¡El enemigo ataca tu ciudad! Oleada '+T.wave); G.alarm=G.t; sfx('horn');
   }
@@ -578,7 +579,7 @@ function update(dt){
     const mv=Math.hypot(u.x-u.ox,u.y-u.oy); u.mv=mv/Math.max(dt,1e-3); u.wph+=mv/(DH[u.type]*.3); }
   for (const b of G.beams) b.a+=dt; G.beams=G.beams.filter(b=>b.a<.5);
   for (const d of G.dead) d.a+=dt; G.dead=G.dead.filter(d=>d.a<2.2);
-  for (const p of G.projs){ const t=p.t; if (t.hp<=0){ p.done=true; continue; } const dx=t.x-p.x, dy=(t.y-12)-p.y, d=Math.hypot(dx,dy), s=p.spd*dt; p.a=Math.atan2(dy,dx); if (d<=s+3){ p.done=true; hit(t,p.dmg,p.src); } else { p.x+=dx/d*s; p.y+=dy/d*s; } }
+  for (const p of G.projs){ const t=p.t; if (t.hp<=0){ p.done=true; continue; } const dx=t.x-p.x, dy=(t.y-12)-p.y, d=Math.hypot(dx,dy), s=p.spd*dt; p.a=Math.atan2(dy,dx); if (d<=s+3){ p.done=true; hit(t,p.dmg,p.src); sfx('thud',t); } else { p.x+=dx/d*s; p.y+=dy/d*s; } }
   G.projs=G.projs.filter(p=>!p.done);
   G.E=G.E.filter(e=>!(e.kind==='unit'&&e.hp<=0) && !(e.kind==='res'&&e.amount<=0));
   for (const p of G.parts){ p.l-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; } G.parts=G.parts.filter(p=>p.l>0);
@@ -615,10 +616,10 @@ function drawUnit(e,f,sc){ const A=ANIM[animKey(e)], k=DH[e.type]*sc/150; ctx.dr
 /* ---------- Sound: effects and a calm harp melody, synthesized in the browser ---------- */
 let ACX=null, MUS=null, SND={fx:true,music:true}; try { const v=JSON.parse(localStorage.getItem('mitos-snd')||'null'); if (v) SND=v; } catch(e){}
 const saveSnd=()=>{ try { localStorage.setItem('mitos-snd',JSON.stringify(SND)); } catch(e){} };
-function audioOn(){ if (ACX){ if (ACX.state==='suspended') ACX.resume(); return; } try { ACX=new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ return; } ACX.master=ACX.createGain(); ACX.master.gain.value=.6; ACX.master.connect(ACX.destination); if (SND.music) startMusic(); }
+function audioOn(){ if (ACX){ if (ACX.state==='suspended') ACX.resume(); return; } try { ACX=new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ return; } ACX.master=ACX.createGain(); ACX.master.gain.value=.6; ACX.master.connect(ACX.destination); if (SND.music) startMusic(); if (SND.fx) startAmb(); }
 function tone(f,d,type,vol,when,slide){ const t=ACX.currentTime+(when||0), o=ACX.createOscillator(), g=ACX.createGain(); o.type=type||'sine'; o.frequency.setValueAtTime(f,t); if (slide) o.frequency.exponentialRampToValueAtTime(slide,t+d); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.008); g.gain.exponentialRampToValueAtTime(.0008,t+d); o.connect(g); g.connect(ACX.master); o.start(t); o.stop(t+d+.05); }
 let NB=null; function noise(d,f,q,vol,type){ if (!NB){ NB=ACX.createBuffer(1,ACX.sampleRate,ACX.sampleRate); const a=NB.getChannelData(0); for (let i=0;i<a.length;i++) a[i]=Math.random()*2-1; } const t=ACX.currentTime, n=ACX.createBufferSource(), fl=ACX.createBiquadFilter(), g=ACX.createGain(); n.buffer=NB; fl.type=type||'bandpass'; fl.frequency.value=f; fl.Q.value=q||1; g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0008,t+d); n.connect(fl); fl.connect(g); g.connect(ACX.master); n.start(t,Math.random()*.5); n.stop(t+d+.05); }
-const lastS={}, GAP={sword:.07,bow:.08,chop:.14,mine:.14,build:.12,die:.06,click:.03};
+const lastS={}, GAP={thud:.05,selV:.1,selS:.1,selC:.1,ackV:.12,ackS:.12,sword:.07,bow:.08,chop:.14,mine:.14,build:.12,die:.06,click:.03};
 function sfx(k,at){
   if (!ACX||!SND.fx||ACX.state!=='running') return;
   if (at&&G){ const c=G.cam; if (Math.abs(at.x-c.x)>SW/2/c.z+60||Math.abs(at.y-c.y)>SH/2/c.z+60) return; }
@@ -638,6 +639,16 @@ function sfx(k,at){
     case 'horn': tone(147,1.3,'sawtooth',.07); tone(220,1.3,'sawtooth',.05,.15); break;
     case 'age': [392,523,659,784,1046].forEach((f,i)=>tone(f,.5,'triangle',.09,i*.12)); break;
     case 'heal': [880,1175,1568].forEach((f,i)=>tone(f,.3,'sine',.05*v,i*.06)); break;
+    case 'thud': noise(.06,900,1.2,.18*v,'lowpass'); tone(110,.06,'sine',.1*v); break;
+    case 'selV': tone(330,.07,'triangle',.06); tone(392,.07,'triangle',.05,.06); break;
+    case 'selS': noise(.05,5000,3,.06,'highpass'); tone(2200,.06,'square',.02); break;
+    case 'selC': tone(520,.18,'sawtooth',.03,0,780); tone(700,.15,'sawtooth',.02,.12,420); break;
+    case 'selB': tone(196,.12,'triangle',.07); break;
+    case 'ackV': tone(392,.08,'triangle',.06); tone(523,.1,'triangle',.05,.07); break;
+    case 'ackS': noise(.08,180,1,.35,'lowpass'); tone(98,.1,'sine',.18); noise(.08,180,1,.25,'lowpass'); break;
+    case 'attack': tone(196,.35,'sawtooth',.05); tone(294,.35,'sawtooth',.04,.05); noise(.1,200,1,.3,'lowpass'); break;
+    case 'win': [523,659,784,1046,784,1046,1318].forEach((f,i)=>tone(f,.5,'triangle',.09,i*.16)); break;
+    case 'lose': [392,349,311,262].forEach((f,i)=>tone(f,.7,'triangle',.08,i*.3)); break;
     case 'beam': noise(.5,1500,.6,.25*v); tone(600,.5,'sawtooth',.05*v,0,1800); break;
   }
 }
@@ -646,6 +657,11 @@ function startMusic(){ if (!ACX||MUS) return; const g=ACX.createGain(); g.gain.v
   const lp=ACX.createBiquadFilter(), dg=ACX.createGain(); lp.type='lowpass'; lp.frequency.value=300; dg.gain.value=.2; lp.connect(dg); dg.connect(g);
   MUS.drone=[73.4,110].map((f,i)=>{ const o=ACX.createOscillator(); o.type='sawtooth'; o.frequency.value=f; o.detune.value=i*6; o.connect(lp); o.start(); return o; });
   MUS.timer=setInterval(musicTick,150); }
+let AMB=null;
+function startAmb(){ if (!ACX||AMB) return; const len=ACX.sampleRate*3, buf=ACX.createBuffer(1,len,ACX.sampleRate), a=buf.getChannelData(0); let b=0; for (let i=0;i<len;i++){ b=(b+.02*(Math.random()*2-1))/1.02; a[i]=b*3; }
+  const src=ACX.createBufferSource(); src.buffer=buf; src.loop=true; const lp=ACX.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=700; const g=ACX.createGain(); g.gain.value=.05; src.connect(lp); lp.connect(g); g.connect(ACX.master); src.start();
+  AMB={src,g,timer:setInterval(()=>{ if (!SND.fx||!ACX||ACX.state!=='running'||Math.random()<.6) return; const f=rand(2400,3600), n=1+Math.floor(Math.random()*3); for (let i=0;i<n;i++) tone(f*rand(.95,1.08),.09,'sine',.012,i*.12,f*1.25); },1400)}; }
+function stopAmb(){ if (!AMB) return; clearInterval(AMB.timer); try { AMB.src.stop(); } catch(e){} AMB=null; }
 function stopMusic(){ if (!MUS) return; clearInterval(MUS.timer); try { MUS.drone.forEach(o=>o.stop()); } catch(e){} MUS.g.disconnect(); MUS=null; }
 function pluck(f,t,vol){ const at=ACX.currentTime+t, o=ACX.createOscillator(), o2=ACX.createOscillator(), g=ACX.createGain(), lp=ACX.createBiquadFilter(); o.type='triangle'; o2.type='sine'; o.frequency.value=f; o2.frequency.value=f*2; lp.type='lowpass'; lp.frequency.setValueAtTime(f*6,at); lp.frequency.exponentialRampToValueAtTime(f*1.5,at+1.2); g.gain.setValueAtTime(0,at); g.gain.linearRampToValueAtTime(.32*(vol||1),at+.01); g.gain.exponentialRampToValueAtTime(.001,at+1.8); o.connect(lp); o2.connect(lp); lp.connect(g); g.connect(MUS.g); o.start(at); o2.start(at); o.stop(at+1.9); o2.stop(at+1.9); }
 function musicTick(){ if (!MUS||!ACX||ACX.state!=='running') return; while (MUS.next<ACX.currentTime+.7){ const t=MUS.next-ACX.currentTime; MUS.step++;
@@ -777,7 +793,7 @@ const keys={}; addEventListener('keydown',e=>{ const k=e.key.toLowerCase(); keys
   if (!G||G.over||e.target.tagName==='INPUT'&&e.target.type!=='range') return;
   if (k==='escape'){ if (!$('sheet').hidden) $('sheet').hidden=true; else { G.place=null; G.sel=[]; G.selB=null; } renderTray(); return; }
   const grp=g=>{ G.sel=units(0).filter(u=>u.type!=='villager'&&u.type!=='fishboat'&&(g==='all'||u.D.cat===g)); G.selB=null; focusSel(); renderTray(); };
-  const act={' ':()=>$('bPause').click(), h:()=>{ const tc=blds(0).find(b=>b.type==='tc'); if (tc){ G.cam.x=tc.x+150; G.cam.y=tc.y; } }, b:openBuild, p:openPlan,
+  const act={m:()=>{ audioOn(); const on=SND.fx||SND.music; SND.fx=SND.music=!on; if (on){ stopMusic(); stopAmb(); toast('Sonido apagado (M para encender)'); } else { startMusic(); startAmb(); toast('Sonido encendido'); } saveSnd(); sndBtn(); }, ' ':()=>$('bPause').click(), h:()=>{ const tc=blds(0).find(b=>b.type==='tc'); if (tc){ G.cam.x=tc.x+150; G.cam.y=tc.y; } }, b:openBuild, p:openPlan,
     '1':()=>grp('inf'), '2':()=>grp('arc'), '3':()=>grp('cav'), '4':()=>grp('all'), q:()=>{ const v=units(0).filter(u=>u.type==='villager'&&!u.job&&u.state==='idle'); G.sel=v; G.selB=null; if (v[0]){ G.cam.x=v[0].x; G.cam.y=v[0].y; } renderTray(); }};
   if (act[k]){ e.preventDefault(); act[k](); } });
 const mouse={in:false,x:0,y:0}; cv.addEventListener('pointerleave',()=>mouse.in=false);
@@ -806,10 +822,11 @@ function tap(w,mouse,shift){
   const h=pick(w), now=performance.now();
   if (mouse && shift && h && h.kind==='unit' && h.team===0){ G.sel=G.sel.includes(h)?G.sel.filter(u=>u!==h):G.sel.concat([h]); G.selB=null; renderTray(); return; }
   if (mouse && !(h && h.team===0)){ if (h && h.kind==='res' && !G.sel.length){ h.prio=!h.prio; toast(h.prio?'Zona prioritaria: los aldeanos irán primero aquí':'Prioridad quitada'); return; } G.sel=[]; G.selB=null; renderTray(); return; }
-  if (mouse && h && h.kind==='bld'){ G.sel=[]; G.selB=h; renderTray(); return; }
+  if (mouse && h && h.kind==='bld'){ G.sel=[]; G.selB=h; sfx('selB'); renderTray(); return; }
   if (h && h.kind==='unit' && h.team===0){
     if (now-lastTap.t<380 && lastTap.type===h.type){ const c=G.cam, hw=SW/2/c.z, hh=SH/2/c.z; G.sel=units(0).filter(u=>u.type===h.type && Math.abs(u.x-c.x)<hw && Math.abs(u.y-c.y)<hh); }
     else G.sel=[h];
+    sfx(h.type==='villager'?'selV':h.D.cat==='cav'?'selC':'selS');
     G.selB=null; lastTap={t:now,type:h.type}; renderTray(); return;
   }
   if (h && h.kind==='bld' && h.team===0 && !G.sel.length){ G.selB=h; renderTray(); return; }
@@ -823,7 +840,7 @@ function focusSel(){ if (!G.sel.length) return; const c=G.cam, hw=SW/2/c.z, hh=S
 function command(w,h){
   if (!G.sel.length) return; h=h===undefined?pick(w):h;
   const mil=G.sel.filter(u=>u.type!=='villager'), vil=G.sel.filter(u=>u.type==='villager');
-  const enemy=h && h.team===1 && h.hp>0; if (G.tut && mil.length) G.tut.cmd=true;
+  const enemy=h && h.team===1 && h.hp>0; if (G.tut && mil.length) G.tut.cmd=true; sfx(enemy?'attack':mil.length?'ackS':'ackV');
   G.parts.push({x:w.x,y:w.y,vx:0,vy:0,l:.5,c:enemy?'#ff5a4a':'#7bd88f'});
   mil.forEach((u,i)=>{ if (u.type==='fishboat'){ if (h&&h.kind==='res'&&h.rtype==='fish'){ u.target=h; u.state='idle'; } else { u.tx=w.x; u.ty=w.y; u.state='move'; } return; } u.strike=null; u.shot=null; u.path=null; if (u.D.power||(u.D.siegeOnly&&h&&h.kind==='unit')){ u.tx=w.x+rand(-20,20); u.ty=w.y+rand(-20,20); u.state='move'; u.am=false; u.forced=true; u.target=null; return; } if (enemy){ u.target=h; u.state='attack'; u.forced=false; } else { const a=i*2.4, rr=6*Math.sqrt(i)*1.5; u.tx=w.x+Math.cos(a)*rr; u.ty=w.y+Math.sin(a)*rr; u.state='move'; u.am=false; u.forced=true; u.target=null; } });
   for (const v of vil){
@@ -936,7 +953,7 @@ for (const host of [$('tray'),$('sheet')]){
   host.addEventListener('pointerup',()=>{ clearTimeout(tipT); if (tipLong) setTimeout(()=>$('tip').hidden=true,1800); });
   host.addEventListener('click',e=>{ if (tipLong && e.target.closest('[data-tip]')){ e.stopPropagation(); e.preventDefault(); tipLong=false; } },true);
 }
-$('bSnd').onclick=()=>{ audioOn(); if (SND.music){ SND.music=false; stopMusic(); } else if (SND.fx) SND.fx=false; else { SND.fx=true; SND.music=true; startMusic(); } saveSnd(); sndBtn(); };
+$('bSnd').onclick=()=>{ audioOn(); if (SND.music){ SND.music=false; stopMusic(); } else if (SND.fx){ SND.fx=false; stopAmb(); } else { SND.fx=true; SND.music=true; startMusic(); startAmb(); } saveSnd(); sndBtn(); };
 $('bPause').onclick=()=>{ if (!G||G.over) return; G.paused=!G.paused; $('bPause').textContent=G.paused?'▶':'II'; toast(G.paused?'Pausa':'Continúa'); };
 
 /* ---------- HUD + screens ---------- */
@@ -952,14 +969,14 @@ function showStart(){
     <div class="civs">${Object.entries(CIV).map(([k,c])=>`<button class="civb" data-civ="${k}"><img alt="" src="${IMG['ic-'+(c.p||'')+'spear'].src}"><span><b>${c.n}</b><small>${c.d}</small></span></button>`).join('')}</div>
     <div class="card"><ul>
       <li><b>Un dedo</b> mueve el mapa, <b>dos dedos</b> hacen zoom. <b>Toca</b> una tropa y luego <b>toca el mapa</b> para mandarla; <b>doble toque</b> elige todas las de ese tipo.</li>
-      <li>Tus aldeanos trabajan solos según el <b>Plan</b>. Construye <b>torres</b>, <b>murallas</b> con <b>puertas</b>, un <b>templo</b> para sacerdotes con poderes y un <b>muelle</b> junto al río para pescar y tener galeras. Cada civilización tiene un <b>héroe</b>.</li>
-      ${matchMedia('(pointer:fine)').matches?`<li><b>En computadora:</b> clic para elegir (Shift suma), arrastra para encerrar tropas, <b>clic derecho</b> para mandar, rueda para zoom, mueve el mapa con flechas, WASD o el borde de la pantalla. Atajos: <b>B</b> construir, <b>P</b> plan, <b>H</b> ciudad, <b>Q</b> aldeanos sin trabajo, <b>1-4</b> grupos, <b>Espacio</b> pausa, <b>Esc</b> cancelar.</li>`:''}
+      <li>Tus aldeanos trabajan solos según el <b>Plan</b>. Construye <b>torres</b>, <b>murallas</b> con <b>puertas</b>, un <b>templo</b> para sacerdotes con poderes y un <b>muelle</b> junto al río para pescar y tener galeras. </li>
+      ${matchMedia('(pointer:fine)').matches?`<li><b>En computadora:</b> clic para elegir (Shift suma), arrastra para encerrar tropas, <b>clic derecho</b> para mandar, rueda para zoom, mueve el mapa con flechas, WASD o el borde de la pantalla. Atajos: <b>B</b> construir, <b>P</b> plan, <b>H</b> ciudad, <b>Q</b> aldeanos sin trabajo, <b>1-4</b> grupos, <b>Espacio</b> pausa, <b>M</b> silencio, <b>Esc</b> cancelar.</li>`:''}
       <li>En la <b>Edad del Hierro</b> tus soldados y edificios mejoran y aparecen tropas nuevas. Gana quien destruya el <b>Centro urbano</b> rival.</li>
     </ul></div></div>`;
   for (const el of s.querySelectorAll('[data-civ]')) el.onclick=()=>newGame(el.dataset.civ); $('tutGo').onclick=()=>newGame('imperio',true); resize();
 }
 function endGame(won){
-  G.over=true;
+  G.over=true; sfx(won?'win':'lose');
   setTimeout(()=>{ const s=$('screen'); s.hidden=false; const t=Math.floor(G.t);
     s.innerHTML=`<div class="wrap"><h1 class="logo" style="color:${won?'#f7dfa4':'#ff8a7a'}">${won?'Victoria':'Derrota'}</h1><p class="sub">${won?'Destruiste el Centro urbano rival':'Tu Centro urbano cayó'} · ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</p>
       <div class="stats"><div><small>Enemigos</small>${G.stats.kills}</div><div><small>Perdidos</small>${G.stats.lost}</div><div><small>Edad</small>${G.team[0].age>=3?'Hierro':'Bronce'}</div></div>

@@ -59,8 +59,8 @@ Read this first. It summarizes the project so far so a new conversation can cont
   - Fords are marked as shallow water (NAV value 3): land units and boats both pass there.
   - Dock (`dock`, must touch the river, not on a ford), fishing boats (fish spots in the river, food goes to the
     dock) and war galleys. Boats move only on water.
-  - One hero per civ, trained at the town center (max one alive): General Aureo, Gran Khan, Reina del Sol.
-    Nearby allies deal 25% more damage; heroes regenerate.
+  - One hero per civ (General Aureo, Gran Khan, Reina del Sol; aura +25% damage) is coded and has art, but is
+    switched off (`HEROES=false`) because the user does not want heroes yet.
   - Steppe houses (yurts) can be moved ("Mover yurta").
   - Sound: effects and a calm harp melody synthesized with Web Audio (no files); the note button cycles music+effects
     / effects only / silent. Generated music with Higgsfield costs about 13 credits per 90 s, so it was not used.
@@ -70,6 +70,11 @@ Read this first. It summarizes the project so far so a new conversation can cont
     tray describes the selected unit or building.
   - Player orders are obeyed: a move order is a plain move (no stopping to fight on the way), so you can pull units
     out of a fight; the group buttons no longer jump the camera to the middle of the map.
+- Pace (2026-11-04, user asked for time to build walls and boats): gathering +35%, building +50%, villagers train
+  in 12 s, more starting resources (400 food, 450 wood, 220 gold), first enemy wave at 4:30 and 2:15 between waves;
+  walls, gates, docks and boats are cheaper and faster.
+- Sound (2026-11-04): plus field ambience (wind, birds), select and order sounds per unit type, arrow impacts,
+  victory and defeat tunes. Mute with the note button or the M key.
 - User feedback still open: buildings still look a bit odd on the map; improve later (scale, ground, consistent
   perspective).
 - Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
