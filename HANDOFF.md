@@ -37,7 +37,19 @@ Read this first. It summarizes the project so far so a new conversation can cont
   including units already on the map.
 - Defense towers (2026-11-04): `tower` building (100 wood, 50 gold), shoots arrows (range 215; stronger in the Iron
   Age, wooden tower becomes a stone tower). The computer also builds up to 2-3 towers.
-- Higgsfield: about 64 credits left after this round (each medium 1k image costs 0.5).
+- Three playable civilizations (2026-11-04): chosen on the start screen; the computer gets another one at random.
+  `CIV` in index.html holds each civ's barracks roster, priest and AI unit mix. Imperio Aureo (legionary, cavalry,
+  scorpion, Sun Priestess heals), Clanes de la Estepa (light cavalry, horse archer, clan spearman is faster, wind
+  shaman speeds up nearby troops), Reino de las Arenas (khopesh guard, war chariot, desert archer has more range,
+  farms give +25% food, Sun Priest burns a group with a beam). Battering ram for everyone (only hits buildings).
+  New Temple building trains the priest. Art keys: civ prefix `e-` / `a-` (Imperio has none), `3` = Iron Age.
+- Map (2026-11-04): new sharp 4K painted map `assets/map-4k.webp` (same layout: river with two fords), minimap
+  `map-mini.jpg`; the navigation grid was re-traced from it (source copy in `concept-art/mapa-4k.jpg`).
+- Readability fixes (2026-11-04): attack and work animations slowed down (attack 0.8 s, hit lands on the strike
+  frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
+  on-map width so they stay sharp.
+- Higgsfield: about 31 credits left (medium 1k image = 0.5, high 4K map = 4.25).
+- Not done yet from the proposals: walls and gates, boats, heroes, movable yurts for the Steppe.
 - Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
   dense painted forest are blocked. The river can only be crossed at the two painted fords (top around map 700,165
   and bottom around 690,615). Units path with A* (`findPath`) and walk straight when the line is clear; buildings
@@ -48,7 +60,7 @@ Read this first. It summarizes the project so far so a new conversation can cont
   1. Done: unit animations (procedural from the sprites).
   2. Done: rivers and forests block movement; cross only at fords.
   3. Done: buildings and soldiers change look with the age; defense towers added.
-  4. Second civilization, classic match from zero, tutorial campaign, sound, English.
+  4. Done: second and third civilization. Still to do: classic match from zero, tutorial campaign, sound, English.
   5. Online play needs hosting outside the artifact (for example Vercel plus Supabase Realtime); ask before creating paid resources.
 
 ## Paused project: "Rift Keepers" (hero, base and duels)
