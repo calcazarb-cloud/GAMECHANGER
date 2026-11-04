@@ -48,7 +48,7 @@ Read this first. It summarizes the project so far so a new conversation can cont
 - Readability fixes (2026-11-04): attack and work animations slowed down (attack 0.8 s, hit lands on the strike
   frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
   on-map width so they stay sharp.
-- Higgsfield: about 31 credits left (medium 1k image = 0.5, high 4K map = 4.25).
+- Higgsfield: 31.5 credits left (medium 1k image = 0.5, high 4K map = 4.25).
 - Computer play (2026-11-04): left click selects (Shift adds), drag to box-select, right click orders (or sets the
   rally point / cancels placement), wheel zoom, arrows/WASD or screen edge to pan. Shortcuts: B build, P plan,
   H city, Q idle villagers, 1-4 groups, Space pause, Esc cancel. UI scales up on big screens; the controls are listed
