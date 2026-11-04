@@ -48,12 +48,30 @@ Read this first. It summarizes the project so far so a new conversation can cont
 - Readability fixes (2026-11-04): attack and work animations slowed down (attack 0.8 s, hit lands on the strike
   frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
   on-map width so they stay sharp.
-- Higgsfield: 38.5 credits left (medium 1k image = 0.5, high 4K map = 4.25).
+- Higgsfield: about 31 credits left (medium 1k image = 0.5, high 4K map = 4.25).
 - Computer play (2026-11-04): left click selects (Shift adds), drag to box-select, right click orders (or sets the
   rally point / cancels placement), wheel zoom, arrows/WASD or screen edge to pan. Shortcuts: B build, P plan,
   H city, Q idle villagers, 1-4 groups, Space pause, Esc cancel. UI scales up on big screens; the controls are listed
   on the start screen only on devices with a mouse. Phone controls are unchanged.
-- Not done yet from the proposals: walls and gates, boats, heroes, movable yurts for the Steppe.
+- Added (2026-11-04, second round):
+  - Walls (`wall`, drawn as a line: tap start, tap end) and gates (`gate`, only the owner passes). Finished walls
+    and gates write into the `DYN` grid that pathfinding reads; destroyed ones clear it.
+  - Fords are marked as shallow water (NAV value 3): land units and boats both pass there.
+  - Dock (`dock`, must touch the river, not on a ford), fishing boats (fish spots in the river, food goes to the
+    dock) and war galleys. Boats move only on water.
+  - One hero per civ, trained at the town center (max one alive): General Aureo, Gran Khan, Reina del Sol.
+    Nearby allies deal 25% more damage; heroes regenerate.
+  - Steppe houses (yurts) can be moved ("Mover yurta").
+  - Sound: effects and a calm harp melody synthesized with Web Audio (no files); the note button cycles music+effects
+    / effects only / silent. Generated music with Higgsfield costs about 13 credits per 90 s, so it was not used.
+  - Tutorial (start screen button): 9 guided steps, the enemy does not attack until it ends.
+  - Building placement shows green/red cells; buildings can sit closer. Buildings sit on a soft ground shadow.
+  - Train buttons show how many are queued; descriptions appear on hover (mouse) or long press (phone), and the
+    tray describes the selected unit or building.
+  - Player orders are obeyed: a move order is a plain move (no stopping to fight on the way), so you can pull units
+    out of a fight; the group buttons no longer jump the camera to the middle of the map.
+- User feedback still open: buildings still look a bit odd on the map; improve later (scale, ground, consistent
+  perspective).
 - Terrain (2026-11-04): a 168x94 navigation grid (`NAV`, 16 world units per cell) traced from map-h.jpg: water and
   dense painted forest are blocked. The river can only be crossed at the two painted fords (top around map 700,165
   and bottom around 690,615). Units path with A* (`findPath`) and walk straight when the line is clear; buildings
