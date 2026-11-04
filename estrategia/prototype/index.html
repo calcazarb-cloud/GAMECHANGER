@@ -1,4 +1,4 @@
-<title>Imperia Prototipo</title>
+<title>Mitos Prototipo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,7 @@ html{box-sizing:border-box;height:100%}
 body{height:100%;margin:0;background:var(--ink);color:var(--text);font-family:var(--body);overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
 button{font-family:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-#app{position:relative;height:100%;max-width:560px;margin:0 auto;overflow:hidden;background:#0c0a07}
+#app{position:relative;height:100%;width:100%;overflow:hidden;background:#0c0a07}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 .top{position:absolute;left:0;right:0;top:0;display:flex;gap:6px;align-items:center;padding:8px max(8px,env(safe-area-inset-right,0px)) 0 max(8px,env(safe-area-inset-left,0px));pointer-events:none}
 .res{display:flex;gap:8px;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:6px 10px;font:700 14px var(--body);font-variant-numeric:tabular-nums;pointer-events:auto;flex-wrap:wrap}
@@ -26,7 +26,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .age{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:5px 9px;font:700 14px var(--display);color:var(--gold);white-space:nowrap}
 .sp{flex:1}
 .rb{width:36px;height:36px;border-radius:10px;background:var(--panel);border:1px solid var(--edge);font:700 13px var(--body);pointer-events:auto;padding:0}
-#mini{position:absolute;right:max(8px,env(safe-area-inset-right,0px));top:52px;width:72px;height:129px;border:1px solid var(--edge);border-radius:8px;background:#000}
+#mini{position:absolute;left:max(8px,env(safe-area-inset-left,0px));bottom:max(8px,env(safe-area-inset-bottom,0px));width:150px;height:84px;border:1px solid var(--edge);border-radius:8px;background:#000;z-index:3}
 #toast{position:absolute;left:50%;top:56px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:6px 14px;font-weight:700;font-size:13px;max-width:calc(100% - 110px);text-align:center;pointer-events:none;transition:opacity .25s}
 .tray{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(12,10,7,.92) 28%);padding:22px max(8px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:6px}
 .row{display:flex;gap:6px;flex-wrap:wrap}
@@ -65,32 +65,55 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .play{width:100%;font:700 24px var(--display);padding:13px;border-radius:14px;border:none;background:linear-gradient(#f0c766,#c98d24);color:#2a1a04;box-shadow:0 4px 0 #7a5212}
 .stats{display:flex;gap:16px;justify-content:center;font:700 22px var(--display)}
 .stats small{display:block;font:700 10px var(--body);letter-spacing:.1em;color:var(--muted);text-transform:uppercase;text-align:center}
+.ri{width:20px;height:20px;border-radius:5px}
+.bi{width:24px!important;height:24px!important;border-radius:5px}
+.rotate{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(12,10,7,.94);text-align:center;font-size:15px;padding:0 24px}
+.rotate b{font:700 28px var(--display);color:var(--gold)}
+.rotate span{color:var(--muted)}
+.phone{width:44px;height:74px;border:3px solid var(--gold);border-radius:9px;animation:rot 2.2s ease-in-out infinite}
+@keyframes rot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+@media (prefers-reduced-motion:reduce){.phone{animation:none;transform:rotate(-90deg)}}
+@media (orientation:landscape){
+  .tray{left:170px;right:0;padding-top:16px;background:linear-gradient(90deg,transparent,rgba(12,10,7,.75) 12%,rgba(12,10,7,.88))}
+  .tray .row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .tray .btn{white-space:nowrap;flex:none}
+  .sheet{left:auto;right:0;top:0;bottom:0;width:min(400px,55%);max-height:none;border-radius:16px 0 0 16px;border-top:none;border-left:1px solid var(--edge)}
+  .wrap{margin-top:max(10px,3vh);gap:8px;max-width:470px}
+  .logo{font-size:clamp(34px,8vh,52px)}
+  .card{font-size:12px;line-height:1.3;padding:9px 12px}
+  .card ul{gap:2px}
+  .play{padding:9px;font-size:20px}
+  .screen{background:linear-gradient(90deg,rgba(12,10,7,.2),rgba(12,10,7,.75) 45%,rgba(12,10,7,.96)),var(--bg,none) left center/auto 100% no-repeat,#0c0a07;align-items:flex-end}
+  .screen .wrap{margin-right:4vw}
+  #toast{top:50px}
+}
 </style>
 
 <div id="app">
   <canvas id="cv"></canvas>
   <div class="top" id="topbar" hidden>
-    <div class="res"><span><i class="dot" style="background:var(--food)"></i><b id="rF">0</b></span><span><i class="dot" style="background:var(--wood)"></i><b id="rW">0</b></span><span><i class="dot" style="background:var(--gold)"></i><b id="rG">0</b></span><span>👤<b id="rP">0/0</b></span></div>
+    <div class="res"><span><img class="ri" alt="Comida" src="assets/ic-food.jpg"><b id="rF">0</b></span><span><img class="ri" alt="Madera" src="assets/ic-wood.jpg"><b id="rW">0</b></span><span><img class="ri" alt="Oro" src="assets/ic-gold.jpg"><b id="rG">0</b></span><span><img class="ri" alt="Población" src="assets/ic-pop.jpg"><b id="rP">0/0</b></span></div>
     <div class="age" id="ageL"></div><div class="sp"></div>
     <button class="rb" id="bPause" aria-label="Pausa">II</button>
   </div>
-  <canvas id="mini" width="144" height="258" hidden></canvas>
+  <canvas id="mini" width="256" height="144" hidden></canvas>
   <div id="toast" style="opacity:0"></div>
   <div class="tray" id="tray" hidden></div>
   <div class="sheet" id="sheet" hidden></div>
   <div class="screen" id="screen"></div>
+  <div class="rotate" id="rotate" hidden><div class="phone"></div><b>Gira el teléfono</b><span>Mitos se juega en horizontal.</span><button class="btn" id="stayV">Seguir en vertical</button></div>
 </div>
 
 <script>
 (() => {
 const $=id=>document.getElementById(id);
-const K=1.8, WW=752*K, WH=1344*K;
+const K=2, WW=1344*K, WH=752*K;
 const rand=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const TC_COL=['#4fa3ff','#ff5a4a'];
 const SPEED=.85;
 
 /* ---------- Assets ---------- */
-const IMG={}; const NAMES=['map.jpg','key.jpg','tc.webp','house.webp','lumber.webp','mine.webp','barracks.webp','farm.webp','villager.webp','spear.webp','archer.webp','cav.webp','legion.webp','tree.webp','gold.webp'];
+const IMG={}; const NAMES=['map-h.jpg','ic-food.jpg','ic-wood.jpg','ic-gold.jpg','ic-pop.jpg','ic-build.jpg','ic-plan.jpg','key.jpg','tc.webp','house.webp','lumber.webp','mine.webp','barracks.webp','farm.webp','villager.webp','spear.webp','archer.webp','cav.webp','legion.webp','tree.webp','gold.webp'];
 let nload=0; const ready=new Promise(r=>{ for (const n of NAMES){ const im=new Image(); im.onload=im.onerror=()=>{ if(++nload===NAMES.length) r(); }; im.src='assets/'+n; IMG[n.split('.')[0]]=im; } });
 
 /* ---------- Definitions ---------- */
@@ -120,24 +143,23 @@ const P=(x,y)=>({x:x*K,y:y*K});
 function newGame(){
   G={t:0,E:[],projs:[],parts:[],texts:[],id:1,sel:[],selB:null,over:false,paused:false,
      team:[{res:{food:320,wood:320,gold:180},plan:{food:40,wood:35,gold:25,build:0},assist:true,age:2,ageT:0,ageUp:false},{res:{food:320,wood:320,gold:180},plan:{food:45,wood:35,gold:20,build:0},assist:true,age:2,ageT:0,ageUp:false,wave:0,next:0}],
-     cam:{x:684,y:2050,z:.9}, place:null, stats:{kills:0,lost:0}};
+     cam:{x:480,y:680,z:.8}, place:null, stats:{kills:0,lost:0}};
   // resources
-  const trees=[[150,1180],[200,1228],[110,1245],[245,1285],[170,1305],[60,1270],[520,1095],[590,1080],[655,1105],[715,1150],[705,1240],[650,1290],
-    [180,30],[245,80],[120,45],[225,150],[40,60],[560,40],[640,60],[715,40],
-    [60,380],[130,420],[200,360],[80,480],[250,440],[560,740],[620,780],[690,720],[600,840],[700,820]];
+  const trees=[[60,150],[120,200],[40,240],[360,250],[385,330],[425,290],[60,445],[140,450],[220,475],[300,450],[30,330],
+    [1290,240],[1235,170],[1310,310],[935,450],[1005,470],[1280,455],[1300,525],[880,210],[950,250],
+    [470,210],[520,470],[560,520],[800,180],[840,230],[790,560],[840,620],[620,690],[700,40]];
   for (const [x,y] of trees) addRes('wood',x,y,160);
-  for (const [x,y] of [[670,925],[110,925],[85,170],[680,165]]) addRes('gold',x,y,1400);
-  for (const [x,y] of [[555,1212],[600,1236],[470,200],[520,232],[575,258]]) addRes('food',x,y,320);
-  // player base
-  const b0=[['tc',380,1205],['house',290,1268],['house',462,1278],['lumber',240,1212],['mine',622,968],['barracks',488,1165],['farm',380,1295]];
+  for (const [x,y] of [[225,82],[265,598],[995,112],[1220,590]]) addRes('gold',x,y,1400);
+  for (const [x,y] of [[352,148],[346,568],[1102,192],[1062,578]]) addRes('food',x,y,320);
+  const b0=[['tc',180,330],['house',105,280],['house',255,272],['lumber',95,400],['mine',240,160],['barracks',305,370],['farm',185,430]];
   for (const [t,x,y] of b0) addBld(t,0,x*K,y*K,true);
-  const b1=[['tc',375,78],['house',275,40],['house',470,45],['lumber',215,105],['mine',125,215],['barracks',270,150],['farm',380,175]];
+  const b1=[['tc',1170,360],['house',1095,300],['house',1245,305],['lumber',1255,425],['mine',1185,545],['barracks',1040,370],['farm',1165,460]];
   for (const [t,x,y] of b1) addBld(t,1,x*K,y*K,true);
   for (const team of [0,1]){
-    const tc=G.E.find(e=>e.kind==='bld'&&e.type==='tc'&&e.team===team);
-    for (let i=0;i<9;i++) addUnit('villager',team,tc.x+rand(-70,70),tc.y+(team?80:-80)+rand(-20,20));
-    for (let i=0;i<3;i++) addUnit('spear',team,tc.x+rand(-60,60),tc.y+(team?140:-150));
-    for (let i=0;i<2;i++) addUnit('archer',team,tc.x+rand(-60,60),tc.y+(team?170:-180));
+    const tc=G.E.find(e=>e.kind==='bld'&&e.type==='tc'&&e.team===team), dir=team?-1:1;
+    for (let i=0;i<9;i++) addUnit('villager',team,tc.x+dir*rand(60,110),tc.y+rand(-70,70));
+    for (let i=0;i<3;i++) addUnit('spear',team,tc.x+dir*150,tc.y+rand(-50,50));
+    for (let i=0;i<2;i++) addUnit('archer',team,tc.x+dir*185,tc.y+rand(-50,50));
   }
   G.team[1].next=200;
   resize(); $('topbar').hidden=false; $('tray').hidden=false; $('mini').hidden=false; $('screen').hidden=true;
@@ -273,7 +295,7 @@ function updBld(b,dt){
     if (units(b.team).length>=capOf(b.team)){ if (b.team===0 && !b.popWarn){ b.popWarn=true; toast('Población al límite: construye casas'); } return; }
     b.popWarn=false;
     b.qT+=dt*SPEED;
-    if (b.qT>=UT[q].time){ b.qT=0; b.queue.shift(); const u=addUnit(q,b.team,b.x+rand(-20,20),b.y+(b.team?b.r+16:-b.r-16)+rand(-8,8));
+    if (b.qT>=UT[q].time){ b.qT=0; b.queue.shift(); const u=addUnit(q,b.team,b.x+(b.team?-b.r-16:b.r+16)+rand(-8,8),b.y+rand(-20,20));
       if (q!=='villager' && b.rally){ u.tx=b.rally.x+rand(-24,24); u.ty=b.rally.y+rand(-24,24); u.state='move'; u.am=true; }
       if (q==='villager' && b.rally){ u.tx=b.rally.x; u.ty=b.rally.y; u.state='move'; }
       if (b.repeat && canPay(b.team,UT[b.repeat].cost)){ pay(b.team,UT[b.repeat].cost); b.queue.push(b.repeat); }
@@ -296,9 +318,9 @@ function aiTick(){
   const pop=us.length, cap=capOf(1), sites=bs.filter(b=>!b.done).length;
   T.plan = sites ? {food:40,wood:33,gold:15,build:12} : {food:46,wood:34,gold:20,build:0};
   if (T.age<3 && G.t>180) T.plan={food:48,wood:20,gold:32,build:sites?10:0};
-  const spot=(type)=>{ for (let i=0;i<30;i++){ const a=rand(0,Math.PI*2), d=rand(140,260); const x=tc.x+Math.cos(a)*d, y=clamp(tc.y+Math.abs(Math.sin(a))*d,60,600); if (canPlace(type,x,y,1)) return {x,y}; } return null; };
+  const spot=(type)=>{ for (let i=0;i<30;i++){ const a=rand(0,Math.PI*2), d=rand(140,260); const x=clamp(tc.x-Math.abs(Math.cos(a))*d,1900,WW-60), y=clamp(tc.y+Math.sin(a)*d,60,WH-60); if (canPlace(type,x,y,1)) return {x,y}; } return null; };
   if (cap-pop<=3 && cap<120 && !bs.some(b=>b.type==='house'&&!b.done) && T.res.wood>=30){ const s=spot('house'); if (s) placeBld('house',1,s.x,s.y); }
-  const foodNodes=G.E.filter(e=>e.kind==='res'&&e.rtype==='food'&&e.amount>0&&e.y<900).length, farms=bs.filter(b=>b.type==='farm').length;
+  const foodNodes=G.E.filter(e=>e.kind==='res'&&e.rtype==='food'&&e.amount>0&&e.x>1700).length, farms=bs.filter(b=>b.type==='farm').length;
   if (foodNodes<2 && farms<Math.ceil(vs.length/4) && T.res.wood>=60 && sites<2){ const s=spot('farm'); if (s) placeBld('farm',1,s.x,s.y); }
   if (vs.length<20 && tc.queue.length<1) train(tc,'villager');
   if (T.age<3 && !T.ageUp && G.t>200 && canPay(1,AGE_COST)) ageUp(tc);
@@ -306,7 +328,7 @@ function aiTick(){
     const pl=units(0); const pc=pl.filter(u=>u.type==='cav').length, pa=pl.filter(u=>u.type==='archer').length, pi=pl.filter(u=>u.D.cat==='inf').length;
     let pick = pc>pa && pc>=pi ? 'spear' : pa>pi ? (T.age>=3?'cav':'spear') : (T.age>=3?(Math.random()<.5?'legion':'cav'):'archer');
     if (!train(bar,pick)) train(bar, T.age>=3?'legion':'spear');
-    if (!bar.rally) bar.rally={x:tc.x,y:tc.y+170};
+    if (!bar.rally) bar.rally={x:tc.x-200,y:tc.y};
   }
   // defend
   const threat=units(0).find(u=>u.D.cat!=='eco' && dist(u,tc)<480);
@@ -317,7 +339,7 @@ function aiTick(){
     const ptc=blds(0).find(b=>b.type==='tc'); if (!ptc) return;
     T.wave++; T.next=G.t+110;
     for (const a of army){ a.tx=ptc.x+rand(-60,60); a.ty=ptc.y+rand(-60,60); a.state='move'; a.am=true; a.target=null; }
-    toast('⚔ ¡El enemigo ataca tu ciudad! Oleada '+T.wave); G.alarm=G.t;
+    toast('¡El enemigo ataca tu ciudad! Oleada '+T.wave); G.alarm=G.t;
   }
 }
 
@@ -347,8 +369,8 @@ let toastT=0; function toast(m){ const el=$('toast'); el.textContent=m; el.style
 const cv=$('cv'), ctx=cv.getContext('2d'); let SW=0,SH=0,DPR=1;
 function resize(){ const r=$('app').getBoundingClientRect(); SW=r.width; SH=r.height; DPR=Math.min(2,devicePixelRatio||1); cv.width=SW*DPR; cv.height=SH*DPR; }
 new ResizeObserver(resize).observe($('app'));
-const minZ=()=>Math.max(SW/WW, .3);
-function clampCam(){ const c=G.cam; c.z=clamp(c.z,minZ(),1.5); const hw=SW/2/c.z, hh=SH/2/c.z; c.x=clamp(c.x,Math.min(hw,WW/2),Math.max(WW-hw,WW/2)); c.y=clamp(c.y,Math.min(hh-60/c.z,WH/2),Math.max(WH-hh+140/c.z,WH/2)); }
+const minZ=()=>Math.max(SW/WW, SH/WH, .3);
+function clampCam(){ const c=G.cam; c.z=clamp(c.z,minZ(),1.5); const hw=SW/2/c.z, hh=SH/2/c.z; c.x=clamp(c.x,Math.min(hw,WW/2),Math.max(WW-hw,WW/2)); c.y=clamp(c.y,Math.min(hh-50/c.z,WH/2),Math.max(WH-hh+70/c.z,WH/2)); }
 const toWorld=(sx,sy)=>({x:(sx-SW/2)/G.cam.z+G.cam.x, y:(sy-SH/2)/G.cam.z+G.cam.y});
 function sprite(name,x,y,w,alpha,flip){ const im=IMG[name]; const h=w*(im.naturalHeight/im.naturalWidth||1); ctx.save(); ctx.globalAlpha=alpha??1; ctx.translate(x,y); if (flip) ctx.scale(-1,1); ctx.drawImage(im,-w/2,-h*.78,w,h); ctx.restore(); return h; }
 function bar(x,y,w,r,c){ ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillRect(x-w/2-1,y-1,w+2,5); ctx.fillStyle=c; ctx.fillRect(x-w/2,y,w*clamp(r,0,1),3); }
@@ -356,7 +378,7 @@ function draw(){
   clampCam(); const c=G.cam;
   ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#0c0a07'; ctx.fillRect(0,0,cv.width,cv.height);
   ctx.setTransform(DPR*c.z,0,0,DPR*c.z,DPR*(SW/2-c.x*c.z),DPR*(SH/2-c.y*c.z));
-  ctx.drawImage(IMG.map,0,0,WW,WH);
+  ctx.drawImage(IMG['map-h'],0,0,WW,WH);
   const objs=G.E.filter(e=>e.hp>0||e.kind==='res').sort((a,b)=>a.y-b.y);
   // selection rings below
   for (const e of G.sel){ ctx.strokeStyle='#7bd88f'; ctx.lineWidth=2/c.z; ctx.beginPath(); ctx.ellipse(e.x,e.y+2,e.r+5,(e.r+5)*.5,0,0,7); ctx.stroke(); }
@@ -399,7 +421,7 @@ function draw(){
 }
 const mini=$('mini'), mc=mini.getContext('2d');
 function drawMini(){
-  const k=mini.width/WW; mc.drawImage(IMG.map,0,0,mini.width,mini.height);
+  const k=mini.width/WW; mc.drawImage(IMG['map-h'],0,0,mini.width,mini.height);
   for (const e of G.E){ if (e.kind==='res'||e.hp<=0) continue; mc.fillStyle=TC_COL[e.team]; const s=e.kind==='bld'?5:2.4; mc.fillRect(e.x*k-s/2,e.y*k-s/2,s,s); }
   const c=G.cam, hw=SW/2/c.z, hh=SH/2/c.z; mc.strokeStyle='#fff'; mc.lineWidth=2; mc.strokeRect((c.x-hw)*k,(c.y-hh)*k,hw*2*k,hh*2*k);
 }
@@ -510,14 +532,14 @@ function renderTray(soft){
     const vil=G.sel.filter(u=>u.type==='villager').length, mil=G.sel.length-vil;
     const counts={}; for (const u of G.sel) counts[u.D.n]=(counts[u.D.n]||0)+1;
     h=`<div class="info"><b>${G.sel.length} seleccionados</b> · ${Object.entries(counts).map(([n,c])=>c+' '+n.toLowerCase()).join(', ')} · toca el mapa para dar la orden</div><div class="row">`;
-    if (vil) h+=`<button class="btn" id="build">🔨 Construir</button><button class="btn" id="plan2">↺ Volver al plan</button>`;
+    if (vil) h+=`<button class="btn" id="build"><img alt="" src="${IMG['ic-build'].src}" class="bi">Construir</button><button class="btn" id="plan2">↺ Volver al plan</button>`;
     if (mil) h+=`<button class="btn" id="retreat">⟲ Retirada</button><button class="btn" id="stop">■ Detener</button>`;
     h+=`<button class="btn" id="desel">✕</button></div>`;
   } else {
     const idle=units(0).filter(u=>u.type==='villager'&&!u.job&&u.state==='idle').length;
     const cnt=c=>units(0).filter(u=>u.type!=='villager'&&(c==='all'||u.D.cat===c)).length;
-    h=`<div class="row"><button class="btn gold" id="plan">⚖ Plan económico</button><button class="btn" id="build">🔨 Construir</button>${idle?`<button class="btn warn" id="idle">💤 ${idle} sin trabajo</button>`:''}</div>
-      <div class="row"><button class="btn" data-grp="all">⚔ Todo ${cnt('all')}</button><button class="btn" data-grp="inf"><img alt="" src="${IMG.spear.src}">${cnt('inf')}</button><button class="btn" data-grp="arc"><img alt="" src="${IMG.archer.src}">${cnt('arc')}</button><button class="btn" data-grp="cav"><img alt="" src="${IMG.cav.src}">${cnt('cav')}</button><button class="btn" id="home">🏛</button></div>`;
+    h=`<div class="row"><button class="btn gold" id="plan"><img alt="" src="${IMG['ic-plan'].src}" class="bi">Plan económico</button><button class="btn" id="build"><img alt="" src="${IMG['ic-build'].src}" class="bi">Construir</button>${idle?`<button class="btn warn" id="idle">${idle} aldeanos sin trabajo</button>`:''}
+      <button class="btn" data-grp="all"><img alt="" src="${IMG['ic-pop'].src}" class="bi">Todo ${cnt('all')}</button><button class="btn" data-grp="inf"><img alt="" src="${IMG.spear.src}">${cnt('inf')}</button><button class="btn" data-grp="arc"><img alt="" src="${IMG.archer.src}">${cnt('arc')}</button><button class="btn" data-grp="cav"><img alt="" src="${IMG.cav.src}">${cnt('cav')}</button><button class="btn" id="home" aria-label="Ir a la ciudad">⌂</button></div>`;
   }
   tr.innerHTML=h;
   const on=(id,f)=>{ const el=$(id); if (el) el.onclick=f; };
@@ -527,10 +549,10 @@ function renderTray(soft){
   on('desel',()=>{ G.sel=[]; renderTray(); });
   on('plan',openPlan); on('build',openBuild);
   on('plan2',()=>{ for (const u of G.sel) if (u.type==='villager'){ u.manual=false; u.job=null; u.state='idle'; } toast('Aldeanos devueltos al plan económico'); G.sel=[]; renderTray(); });
-  on('retreat',()=>{ const tc=blds(0).find(b=>b.type==='tc'); for (const u of G.sel){ u.tx=tc.x+rand(-60,60); u.ty=tc.y-90+rand(-20,20); u.state='move'; u.am=false; u.target=null; } });
+  on('retreat',()=>{ const tc=blds(0).find(b=>b.type==='tc'); for (const u of G.sel){ u.tx=tc.x+110+rand(-20,20); u.ty=tc.y+rand(-60,60); u.state='move'; u.am=false; u.target=null; } });
   on('stop',()=>{ for (const u of G.sel){ u.state='idle'; u.target=null; } });
   on('idle',()=>{ const v=units(0).filter(u=>u.type==='villager'&&!u.job&&u.state==='idle'); G.sel=v; if (v[0]){ G.cam.x=v[0].x; G.cam.y=v[0].y; } renderTray(); });
-  on('home',()=>{ const tc=blds(0).find(b=>b.type==='tc'); if (tc){ G.cam.x=tc.x; G.cam.y=tc.y-100; } });
+  on('home',()=>{ const tc=blds(0).find(b=>b.type==='tc'); if (tc){ G.cam.x=tc.x+150; G.cam.y=tc.y; } });
   on('rep',()=>{ const b=G.selB; b.repeat = b.repeat ? null : (b.lastT||b.D.trains[0]); renderTray(); });
   on('age',()=>{ ageUp(G.selB); renderTray(); });
   for (const el of tr.querySelectorAll('[data-train]')) el.onclick=()=>{ const b=G.selB; if (train(b,el.dataset.train)){ b.lastT=el.dataset.train; if (b.repeat) b.repeat=el.dataset.train; } renderTray(); };
@@ -570,7 +592,7 @@ function hud(){
 }
 function showStart(){
   const s=$('screen'); s.style.setProperty('--bg',`url("${IMG.key.src}")`); s.hidden=false;
-  s.innerHTML=`<div class="wrap"><h1 class="logo">Imperia</h1><p class="sub">Prototipo · partida rápida contra la computadora · Edad del Bronce</p>
+  s.innerHTML=`<div class="wrap"><h1 class="logo">Mitos</h1><p class="sub">Nombre provisional · partida rápida contra la computadora · Edad del Bronce</p>
     <div class="card"><ul>
       <li><b>Dos dedos</b> mueven el mapa y hacen zoom. <b>Un dedo arrastrando</b> selecciona tropas.</li>
       <li><b>Toca</b> una tropa para elegirla, <b>doble toque</b> elige todas las de ese tipo, y luego <b>toca el mapa</b> para mandarlas.</li>
@@ -589,8 +611,11 @@ function endGame(won){
     $('go').onclick=()=>newGame(); },1200);
 }
 let last=performance.now(), trayT=0;
+let stayV=false;
+$('stayV').onclick=()=>{ stayV=true; $('rotate').hidden=true; };
 function loop(now){
   const dt=Math.min(.05,(now-last)/1000); last=now;
+  $('rotate').hidden = stayV || !G || G.over || SW>=SH;
   if (G){ keyPan(dt); if (!G.paused&&!G.over) update(dt); draw(); hud(); trayT-=dt; if (trayT<=0){ trayT=.5; renderTray(true); } }
   requestAnimationFrame(loop);
 }
