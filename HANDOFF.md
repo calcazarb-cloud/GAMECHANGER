@@ -106,7 +106,10 @@ Read this first. It summarizes the project so far so a new conversation can cont
   125 ms; the guest renders it (`applySnap` + `guestFrame` interpolation) and every player change goes through
   `act()` -> `runAct(team, action)` on the host. `ME` is the local team (0 host / solo, 1 guest); own units are
   drawn blue on each screen. supabase-js is vendored in `vendor/` and loaded only when going online.
-  Hosting on Vercel is pending: the Vercel connector needs the user to approve access to team `calcazarb`.
+  Website: https://mitos-calcazarb.vercel.app (Vercel project `mitos`, id `prj_f2JhAo3KOarXTIRRzyUYaMUBWVY6`, team
+  `calcazarb`, Hobby, root directory `estrategia/prototype`, no build). Production branch is `main`; the first
+  production deploy was made from branch `claude/focused-rubin-edx0ff`. Previews keep Vercel Authentication;
+  production is public. After merging to `main`, pushes to `main` redeploy the site automatically.
 - User feedback still open: the game is hard to read and play; asked to improve graphics.
 - Agreed next steps:
   1. Done: unit animations (procedural from the sprites).
