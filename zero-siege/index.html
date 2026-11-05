@@ -1,0 +1,489 @@
+<title>Zero Siege</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@500;800&display=swap">
+<style>
+/* Layout: one-screen app. HUD strip, blueprint board, tool tray. Single dark "drafting table" look. */
+:root{
+  --bg:#10223f; --panel:#173057; --path:#21426f; --line:#9fc1ff; --chalk:#eef4ff; --muted:#93abd0;
+  --accent:#ffb547; --good:#5ee0a0; --bad:#ff6b6b;
+  --t1:#7cc4ff; --t2:#b9abff; --t5:#ffb547; --th:#5ee0a0; --t10:#ff8fb1;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html{box-sizing:border-box;height:100%}
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:inherit}
+body{height:100%;background:var(--bg);color:var(--chalk);font-family:var(--display);font-size:15px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#app{height:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:8px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hud{display:flex;align-items:center;gap:10px}
+.brand{font-weight:800;font-size:19px;letter-spacing:-.02em;line-height:.95;white-space:nowrap}
+.brand span{color:var(--accent)}
+.stats{display:flex;gap:5px;flex:1;justify-content:flex-end;min-width:0}
+.stat{display:flex;flex-direction:column;align-items:center;min-width:46px;padding:3px 6px;border-radius:8px;background:var(--panel)}
+.stat small{font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.stat b{font-family:var(--mono);font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+#hLives{color:var(--bad)} #hCoins{color:var(--accent)}
+button{font:inherit;color:inherit;background:var(--panel);border:1px solid rgba(159,193,255,.22);border-radius:10px;padding:10px 12px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:var(--accent);color:var(--bg);border-color:transparent;font-weight:800}
+.icon{width:40px;height:40px;padding:0;font-family:var(--mono);font-weight:800;flex:none}
+#boardWrap{flex:1;min-height:0;position:relative;display:grid;place-items:center}
+canvas{display:block;border-radius:12px;touch-action:none}
+.toast{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:var(--chalk);color:var(--bg);padding:7px 14px;border-radius:999px;font-weight:700;font-size:13.5px;white-space:nowrap;max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.tray{display:flex;flex-direction:column;gap:6px}
+.tip{font-size:12px;color:var(--muted);text-align:center;min-height:1.3em}
+.palette{display:grid;grid-template-columns:repeat(auto-fit,minmax(52px,1fr));gap:6px}
+.tool{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px;border-width:2px}
+.tool .op{font-family:var(--mono);font-weight:800;font-size:18px;color:var(--c)}
+.tool .cost{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.tool.sel{border-color:var(--c);background:color-mix(in srgb,var(--c) 20%,var(--panel))}
+.tool.poor .op{opacity:.35}
+.actions{display:grid;grid-template-columns:auto auto 1fr;gap:6px}
+#hintCount{font-family:var(--mono);color:var(--accent)}
+.overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;overflow-y:auto;background:rgba(10,22,42,.84);backdrop-filter:blur(4px);
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.card{width:min(440px,100%);background:var(--panel);border:1px solid rgba(159,193,255,.18);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.card h1{margin:0;font-size:46px;font-weight:800;line-height:.9;letter-spacing:-.035em;text-wrap:balance}
+.card h1 em{font-style:normal;color:var(--accent)}
+.card h2{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+.card p{margin:0;color:var(--muted);line-height:1.45}
+.card ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;line-height:1.4}
+.card ol b{color:var(--chalk)}
+.card .label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.levels{display:flex;flex-direction:column;gap:6px}
+.lvl{display:flex;justify-content:space-between;align-items:center;text-align:left}
+.lvl .n{font-family:var(--mono);font-weight:800;color:var(--accent);margin-right:10px}
+.lvl .stars{font-family:var(--mono);color:var(--accent);letter-spacing:.1em}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row button{flex:1}
+.bigstars{font-size:40px;color:var(--accent);letter-spacing:.12em;font-family:var(--mono)}
+</style>
+
+<div id="app">
+  <header class="hud">
+    <div class="brand">Zero<br><span>Siege</span></div>
+    <div class="stats">
+      <div class="stat"><small>Level</small><b id="hLevel">1</b></div>
+      <div class="stat"><small>Wave</small><b id="hWave">0/4</b></div>
+      <div class="stat"><small>Lives</small><b id="hLives">5</b></div>
+      <div class="stat"><small>Coins</small><b id="hCoins">50</b></div>
+    </div>
+    <button id="btnMenu" class="icon" aria-label="Pause and open menu">II</button>
+  </header>
+  <div id="boardWrap"><canvas id="board" aria-label="Game board"></canvas><div id="toast" class="toast" hidden></div></div>
+  <div class="tray">
+    <div id="tip" class="tip">Pick a tower, then tap a + spot next to the path.</div>
+    <div id="palette" class="palette"></div>
+    <div class="actions">
+      <button id="btnHint">Hint <span id="hintCount">3</span></button>
+      <button id="btnSpeed" aria-label="Game speed">1×</button>
+      <button id="btnGo" class="primary">Start wave</button>
+    </div>
+  </div>
+</div>
+<div id="overlay" class="overlay"><div id="card" class="card"></div></div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const css = getComputedStyle(document.documentElement);
+const V = n => css.getPropertyValue(n).trim();
+const COL = {bg:V('--bg'),panel:V('--panel'),path:V('--path'),line:V('--line'),chalk:V('--chalk'),muted:V('--muted'),accent:V('--accent'),good:V('--good'),bad:V('--bad')};
+const MONO = 'JetBrains Mono, ui-monospace, Menlo, monospace';
+const COLS = 7, ROWS = 10, LIVES = 5;
+
+const TT = {
+  m1:{label:'−1', cost:10, color:V('--t1'), apply:v=>v-1},
+  m2:{label:'−2', cost:15, color:V('--t2'), apply:v=>v-2},
+  m5:{label:'−5', cost:25, color:V('--t5'), apply:v=>v-5},
+  h: {label:'÷2', cost:30, color:V('--th'), apply:v=>v%2===0 ? v/2 : v},
+  m10:{label:'−10',cost:40, color:V('--t10'),apply:v=>v-10},
+};
+const LEVELS = [
+  {name:'Warm-up', path:[[0,1],[5,1],[5,4],[1,4],[1,7],[5,7],[5,9]], towers:['m1','m2','m5'], coins:50, speed:.9, gap:4.2,
+   waves:[[3,5],[4,6,2],[7,3,8],[9,1,6,4]]},
+  {name:'Halfway', path:[[6,0],[6,2],[1,2],[1,5],[5,5],[5,8],[0,8]], towers:['m1','m2','m5','h'], coins:70, speed:1, gap:3.8,
+   waves:[[10,12],[16,7,9],[20,14,11,6],[24,13,18,9,15]]},
+  {name:'Crunch', path:[[3,0],[3,3],[1,3],[1,6],[5,6],[5,9]], towers:['m1','m2','m5','h','m10'], coins:90, speed:1.15, gap:3.2,
+   waves:[[25,18,30],[13,27,9,22],[40,33,17,28,11],[36,19,44,7,31,26]]},
+];
+
+const store = {
+  get(){ try { return JSON.parse(localStorage.getItem('zero-siege') || '{}'); } catch(e){ return {}; } },
+  set(v){ try { localStorage.setItem('zero-siege', JSON.stringify(v)); } catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}}, store.get());
+
+const canvas = $('board'), ctx = canvas.getContext('2d');
+let cell = 40, dpr = 1, G = null, speedMul = 1;
+
+function expand(wp){
+  const out = [];
+  for (let i=0;i<wp.length-1;i++){
+    let [x,y] = wp[i]; const [x2,y2] = wp[i+1];
+    const dx = Math.sign(x2-x), dy = Math.sign(y2-y);
+    while (x!==x2 || y!==y2){ out.push([x,y]); x+=dx; y+=dy; }
+  }
+  out.push(wp[wp.length-1]);
+  return out;
+}
+
+function loadLevel(i){
+  const L = LEVELS[i], path = expand(L.path);
+  const pk = new Map(path.map((c,k)=>[c[0]+','+c[1],k]));
+  const slots = new Map();
+  for (let y=0;y<ROWS;y++) for (let x=0;x<COLS;x++){
+    const k = x+','+y; if (pk.has(k)) continue;
+    const adj = [];
+    for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const kk=(x+dx)+','+(y+dy); if (pk.has(kk)) adj.push(pk.get(kk)); }
+    if (adj.length) slots.set(k,{x,y,adj});
+  }
+  G = {li:i, L, path, slots, towers:new Map(), cellTowers:path.map(()=>[]), enemies:[], fx:[], queue:[], spawnT:0,
+       wave:0, lives:LIVES, coins:L.coins, hints:3, hintT:0, state:'build', tool:null, nextId:1, order:0, flash:0};
+  buildPalette();
+  setTip('Pick a tower, then tap a + spot next to the path.');
+}
+
+function rebuildCellTowers(){
+  G.cellTowers = G.path.map(()=>[]);
+  for (const t of G.towers.values()) for (const a of t.adj) G.cellTowers[a].push(t);
+  for (const list of G.cellTowers) list.sort((a,b)=>a.order-b.order);
+}
+
+/* ---------- UI ---------- */
+function buildPalette(){
+  const p = $('palette'); p.innerHTML = '';
+  const tools = [...G.L.towers, 'sell'];
+  for (const k of tools){
+    const b = document.createElement('button');
+    b.className = 'tool'; b.dataset.k = k; b.id = 'tool-'+k;
+    if (k==='sell'){ b.style.setProperty('--c', COL.bad); b.innerHTML = '<span class="op">$</span><span class="cost">sell</span>'; }
+    else { b.style.setProperty('--c', TT[k].color); b.innerHTML = `<span class="op">${TT[k].label}</span><span class="cost">${TT[k].cost}c</span>`; }
+    b.onclick = () => {
+      G.tool = G.tool===k ? null : k;
+      setTip(G.tool==='sell' ? 'Tap a tower to sell it for half its price.' : G.tool ? 'Tap a + spot to build. Each tower hits an enemy once.' : 'Tap a tower to switch it ON or OFF.');
+    };
+    p.appendChild(b);
+  }
+}
+const txtCache = new WeakMap();
+function setText(el, v){ if (txtCache.get(el)!==v){ txtCache.set(el,v); el.textContent=v; } }
+function setTip(t){ setText($('tip'), t); }
+function updateHud(){
+  setText($('hLevel'), String(G.li+1));
+  setText($('hWave'), G.wave+'/'+G.L.waves.length);
+  setText($('hLives'), String(G.lives));
+  setText($('hCoins'), String(G.coins));
+  setText($('hintCount'), String(G.hints));
+  const go = $('btnGo');
+  go.disabled = G.state!=='build';
+  setText(go, G.state==='wave' ? 'Wave running…' : 'Start wave '+(G.wave+1));
+  for (const b of $('palette').children){
+    const k = b.dataset.k;
+    b.classList.toggle('sel', G.tool===k);
+    b.classList.toggle('poor', k!=='sell' && G.coins < TT[k].cost);
+  }
+}
+let toastTimer = 0;
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.hidden=true,1700); }
+
+$('btnGo').onclick = startWave;
+$('btnSpeed').onclick = () => { speedMul = speedMul===1 ? 2 : 1; $('btnSpeed').textContent = speedMul+'×'; };
+$('btnHint').onclick = () => {
+  if (G.state!=='wave' || !G.enemies.length) return toast('Hints work while enemies are on the board.');
+  if (G.hints<=0) return toast('No hints left on this level.');
+  G.hints--; G.hintT = 4.5;
+};
+$('btnMenu').onclick = () => { if (G && (G.state==='build'||G.state==='wave')){ G.resume=G.state; G.state='paused'; } showMenu(); };
+
+function stars(n){ return '★'.repeat(n)+'☆'.repeat(3-n); }
+function showOverlay(html){ $('card').innerHTML = html; $('overlay').hidden = false; }
+function hideOverlay(){ $('overlay').hidden = true; }
+
+function showMenu(){
+  const canResume = G && G.state==='paused';
+  const lv = LEVELS.map((L,i)=>{
+    const locked = i+1 > progress.unlocked;
+    const s = progress.stars[i] || 0;
+    return `<button class="lvl" data-l="${i}" ${locked?'disabled':''}><span><span class="n">${i+1}</span>${L.name}</span><span class="stars">${locked?'locked':stars(s)}</span></button>`;
+  }).join('');
+  showOverlay(`
+    <h1>Zero<br><em>Siege</em></h1>
+    <p>Bring every number down to exactly zero before it reaches your gate.</p>
+    <span class="label">How to play</span>
+    <ol>
+      <li>Each enemy carries a <b>number</b>. Towers change it as it walks past.</li>
+      <li>It is destroyed only at <b>exactly 0</b>.</li>
+      <li>Go below zero and it <b>splits into two</b>.</li>
+      <li><b>Tap a tower</b> to switch it on or off. Different numbers need different towers.</li>
+    </ol>
+    ${canResume?'<button id="resume" class="primary">Resume</button>':''}
+    <span class="label">Levels</span>
+    <div class="levels">${lv}</div>`);
+  if (canResume) $('resume').onclick = () => { G.state = G.resume; hideOverlay(); };
+  for (const b of document.querySelectorAll('.lvl')) b.onclick = () => { loadLevel(+b.dataset.l); hideOverlay(); };
+}
+
+/* ---------- Game logic ---------- */
+function startWave(){
+  if (G.state!=='build') return;
+  G.queue = [...G.L.waves[G.wave]]; G.wave++; G.state='wave'; G.spawnT = .6;
+  setTip('Tap a tower to switch it ON or OFF.');
+}
+function spawn(v){ G.enemies.push({id:G.nextId++, val:v, d:-0.8, cell:-1, hits:new Set(), dead:false, wob:Math.random()*6}); }
+
+function center(x,y){ return [(x+.5)*cell, (y+.5)*cell]; }
+function posAt(d){
+  const P=G.path, n=P.length;
+  if (d<=0){ const a=P[0], b=P[1]; return [a[0]+(a[0]-b[0])*-d, a[1]+(a[1]-b[1])*-d]; }
+  if (d>=n-1){ const a=P[n-1], b=P[n-2], k=d-(n-1); return [a[0]+(a[0]-b[0])*k, a[1]+(a[1]-b[1])*k]; }
+  const i=Math.floor(d), f=d-i, a=P[i], b=P[i+1];
+  return [a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f];
+}
+function fxText(gx,gy,txt,color,size){ G.fx.push({k:'text',x:gx,y:gy,txt,color,size:size||.42,t:0,life:.9}); }
+
+function processCell(e, c){
+  for (const t of G.cellTowers[c]){
+    if (e.dead) return;
+    if (!t.on || e.hits.has(t.id)) continue;
+    e.hits.add(t.id);
+    const [ex,ey] = posAt(e.d);
+    G.fx.push({k:'beam',x1:t.x,y1:t.y,x2:ex,y2:ey,color:TT[t.type].color,t:0,life:.28});
+    t.pulse = 1;
+    const before = e.val;
+    if (t.type==='h' && before%2!==0){ fxText(ex,ey-.35,'odd ✗',COL.muted,.3); continue; }
+    let v = TT[t.type].apply(before);
+    fxText(ex,ey-.35,TT[t.type].label,TT[t.type].color);
+    if (v===0){
+      e.dead=true; G.coins+=4;
+      G.fx.push({k:'ring',x:ex,y:ey,color:COL.good,t:0,life:.55});
+      fxText(ex,ey-.7,'+4',COL.accent,.32);
+      return;
+    }
+    if (v<0){
+      v=-v; e.val=v;
+      const cl = {id:G.nextId++, val:v, d:e.d-.4, cell:c, hits:new Set(e.hits), dead:false, wob:Math.random()*6};
+      G.enemies.push(cl);
+      fxText(ex,ey-.7,'SPLIT',COL.bad,.32);
+      G.fx.push({k:'ring',x:ex,y:ey,color:COL.bad,t:0,life:.45});
+      processCell(cl, c);
+    } else e.val=v;
+  }
+}
+
+function predict(e){
+  let v=e.val; const hits=new Set(e.hits);
+  for (let c=e.cell+1;c<G.path.length;c++){
+    for (const t of G.cellTowers[c]){
+      if (!t.on || hits.has(t.id)) continue;
+      hits.add(t.id);
+      if (t.type==='h'){ if (v%2===0) v/=2; continue; }
+      v = TT[t.type].apply(v);
+      if (v===0) return 0;
+      if (v<0) v=-v;
+    }
+  }
+  return v;
+}
+
+function update(dt){
+  for (const f of G.fx) f.t+=dt;
+  G.fx = G.fx.filter(f=>f.t<f.life);
+  for (const t of G.towers.values()) t.pulse = Math.max(0,(t.pulse||0)-dt*4);
+  G.flash = Math.max(0, G.flash-dt*2);
+  if (G.hintT>0) G.hintT-=dt;
+  if (G.state!=='wave') return;
+
+  G.spawnT -= dt;
+  if (G.queue.length && G.spawnT<=0){ spawn(G.queue.shift()); G.spawnT = G.L.gap; }
+  const n = G.path.length;
+  for (let i=0;i<G.enemies.length;i++){
+    const e = G.enemies[i]; if (e.dead) continue;
+    e.d += G.L.speed*dt;
+    const c = Math.round(e.d);
+    if (c>e.cell && c>=0 && c<n){ e.cell=c; processCell(e,c); }
+    if (!e.dead && e.d > n-1+.8){
+      e.dead=true; G.lives--; G.flash=1;
+      toast(`A ${e.val} got through. ${Math.max(G.lives,0)} lives left.`);
+      if (G.lives<=0){ lose(); return; }
+    }
+  }
+  G.enemies = G.enemies.filter(e=>!e.dead);
+  if (!G.queue.length && !G.enemies.length){
+    if (G.wave>=G.L.waves.length) win();
+    else { G.state='build'; G.coins+=10; toast(`Wave ${G.wave} cleared. +10 coins`); setTip('Build or rearrange, then start the next wave.'); }
+  }
+}
+
+function win(){
+  G.state='won';
+  const s = G.lives>=5 ? 3 : G.lives>=3 ? 2 : 1;
+  progress.stars[G.li] = Math.max(progress.stars[G.li]||0, s);
+  progress.unlocked = Math.max(progress.unlocked, Math.min(LEVELS.length, G.li+2));
+  store.set(progress);
+  const hasNext = G.li < LEVELS.length-1;
+  showOverlay(`<span class="label">Level ${G.li+1} · ${G.L.name}</span><h2>Gate held</h2>
+    <div class="bigstars">${stars(s)}</div>
+    <p>${G.lives} of ${LIVES} lives left. ${s<3?'Finish with all 5 lives for 3 stars.':'Perfect run.'}</p>
+    <div class="row">${hasNext?'<button id="next" class="primary">Next level</button>':''}<button id="again">Replay</button><button id="menu">Levels</button></div>
+    ${hasNext?'':'<p>That is every level in this prototype.</p>'}`);
+  if (hasNext) $('next').onclick = () => { loadLevel(G.li+1); hideOverlay(); };
+  $('again').onclick = () => { loadLevel(G.li); hideOverlay(); };
+  $('menu').onclick = showMenu;
+}
+function lose(){
+  G.state='lost';
+  showOverlay(`<span class="label">Level ${G.li+1} · ${G.L.name}</span><h2>The gate fell</h2>
+    <p>You reached wave ${G.wave} of ${G.L.waves.length}. Try switching towers off for small numbers, and watch out for overshooting into a split.</p>
+    <div class="row"><button id="again" class="primary">Retry</button><button id="menu">Levels</button></div>`);
+  $('again').onclick = () => { loadLevel(G.li); hideOverlay(); };
+  $('menu').onclick = showMenu;
+}
+
+/* ---------- Input ---------- */
+canvas.addEventListener('pointerdown', ev => {
+  if (!G || (G.state!=='build' && G.state!=='wave')) return;
+  const r = canvas.getBoundingClientRect();
+  const x = Math.floor((ev.clientX-r.left)/cell), y = Math.floor((ev.clientY-r.top)/cell);
+  const k = x+','+y;
+  const t = G.towers.get(k);
+  if (t){
+    if (G.tool==='sell'){
+      const refund = Math.floor(TT[t.type].cost/2);
+      G.towers.delete(k); G.coins += refund; rebuildCellTowers();
+      toast(`Sold for ${refund} coins`);
+    } else {
+      t.on = !t.on; t.pulse = 1;
+    }
+    return;
+  }
+  const s = G.slots.get(k);
+  if (!s) return;
+  if (!G.tool || G.tool==='sell') return toast('Pick a tower below, then tap a + spot.');
+  const T = TT[G.tool];
+  if (G.coins < T.cost) return toast(`Need ${T.cost} coins. You have ${G.coins}.`);
+  G.coins -= T.cost;
+  G.towers.set(k, {id:'t'+(G.nextId++), type:G.tool, x:s.x+.5, y:s.y+.5, gx:s.x, gy:s.y, adj:s.adj, on:true, order:G.order++, pulse:1});
+  rebuildCellTowers();
+});
+
+/* ---------- Render ---------- */
+function resize(){
+  const w = $('boardWrap'); dpr = Math.min(window.devicePixelRatio||1, 3);
+  cell = Math.max(16, Math.floor(Math.min(w.clientWidth/COLS, w.clientHeight/ROWS)));
+  const cw = cell*COLS, ch = cell*ROWS;
+  canvas.style.width = cw+'px'; canvas.style.height = ch+'px';
+  canvas.width = cw*dpr; canvas.height = ch*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+new ResizeObserver(resize).observe($('boardWrap'));
+
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x,y,w,h,r) : ctx.rect(x,y,w,h); }
+
+function draw(){
+  const W=cell*COLS, H=cell*ROWS;
+  ctx.fillStyle = COL.panel; ctx.fillRect(0,0,W,H);
+  // blueprint grid
+  ctx.strokeStyle = 'rgba(159,193,255,.08)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x=1;x<COLS;x++){ ctx.moveTo(x*cell+.5,0); ctx.lineTo(x*cell+.5,H); }
+  for (let y=1;y<ROWS;y++){ ctx.moveTo(0,y*cell+.5); ctx.lineTo(W,y*cell+.5); }
+  ctx.stroke();
+  // path
+  ctx.fillStyle = COL.path;
+  for (const [x,y] of G.path){ ctx.fillRect(x*cell, y*cell, cell, cell); }
+  ctx.strokeStyle = 'rgba(159,193,255,.35)'; ctx.setLineDash([cell*.12, cell*.14]); ctx.lineWidth = 2;
+  ctx.beginPath();
+  G.path.forEach(([x,y],i)=>{ const [px,py]=center(x,y); i?ctx.lineTo(px,py):ctx.moveTo(px,py); });
+  ctx.stroke(); ctx.setLineDash([]);
+  // gate + entry labels
+  const last = G.path[G.path.length-1], first = G.path[0];
+  ctx.font = `800 ${cell*.2}px ${MONO}`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle = COL.muted; ctx.fillText('IN', ...center(first[0],first[1]));
+  ctx.strokeStyle = G.flash>0 ? COL.bad : COL.accent; ctx.lineWidth = 3;
+  rr(last[0]*cell+4,last[1]*cell+4,cell-8,cell-8,6); ctx.stroke();
+  ctx.fillStyle = COL.accent; ctx.fillText('GATE', ...center(last[0],last[1]));
+  // slots
+  const building = G.tool && G.tool!=='sell';
+  for (const s of G.slots.values()){
+    if (G.towers.has(s.x+','+s.y)) continue;
+    const [cx,cy] = center(s.x,s.y);
+    if (building && G.state!=='lost'){
+      ctx.strokeStyle = 'rgba(238,244,255,.35)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx-cell*.12,cy); ctx.lineTo(cx+cell*.12,cy); ctx.moveTo(cx,cy-cell*.12); ctx.lineTo(cx,cy+cell*.12); ctx.stroke();
+    } else {
+      ctx.fillStyle = 'rgba(159,193,255,.18)'; ctx.beginPath(); ctx.arc(cx,cy,2,0,7); ctx.fill();
+    }
+  }
+  // towers
+  for (const t of G.towers.values()){
+    const T = TT[t.type], [cx,cy] = center(t.gx,t.gy);
+    // reach ticks toward the path cells this tower covers
+    ctx.strokeStyle = t.on ? T.color : 'rgba(147,171,208,.35)'; ctx.lineWidth = 3;
+    for (const a of t.adj){
+      const [px,py] = center(...G.path[a]); const dx=(px-cx)/cell, dy=(py-cy)/cell;
+      ctx.beginPath(); ctx.moveTo(cx+dx*cell*.36, cy+dy*cell*.36); ctx.lineTo(cx+dx*cell*.6, cy+dy*cell*.6); ctx.stroke();
+    }
+    const s = cell*(.66 + (t.pulse||0)*.08);
+    rr(cx-s/2, cy-s/2, s, s, cell*.14);
+    if (t.on){ ctx.fillStyle = T.color; ctx.fill(); }
+    else { ctx.fillStyle = COL.bg; ctx.fill(); ctx.strokeStyle = 'rgba(147,171,208,.5)'; ctx.lineWidth = 2; ctx.stroke(); }
+    ctx.fillStyle = t.on ? COL.bg : COL.muted;
+    ctx.font = `800 ${cell*(T.label.length>2?.27:.33)}px ${MONO}`;
+    ctx.fillText(T.label, cx, cy - (t.on?0:cell*.07));
+    if (!t.on){ ctx.font = `800 ${cell*.15}px ${MONO}`; ctx.fillText('OFF', cx, cy+cell*.17); }
+  }
+  // beams
+  for (const f of G.fx) if (f.k==='beam'){
+    ctx.globalAlpha = 1 - f.t/f.life; ctx.strokeStyle = f.color; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(f.x1*cell, f.y1*cell); ctx.lineTo((f.x2+.5)*cell, (f.y2+.5)*cell); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  // enemies
+  const now = performance.now()/1000;
+  for (const e of G.enemies){
+    const [gx,gy] = posAt(e.d); const cx=(gx+.5)*cell, cy=(gy+.5)*cell + Math.sin(now*5+e.wob)*cell*.025;
+    const r = cell*.33;
+    ctx.fillStyle = COL.chalk; ctx.beginPath(); ctx.arc(cx,cy,r,0,7); ctx.fill();
+    ctx.strokeStyle = COL.bg; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = COL.bg; ctx.font = `800 ${cell*(String(e.val).length>1?.3:.36)}px ${MONO}`;
+    ctx.fillText(String(e.val), cx, cy+1);
+    if (G.hintT>0){
+      const p = predict(e), ok = p===0, label = ok ? '→0 ✓' : '→'+p;
+      ctx.font = `800 ${cell*.2}px ${MONO}`;
+      const w = ctx.measureText(label).width + cell*.2;
+      ctx.globalAlpha = Math.min(1, G.hintT);
+      rr(cx-w/2, cy-r-cell*.34, w, cell*.26, cell*.13); ctx.fillStyle = ok ? COL.good : COL.bad; ctx.fill();
+      ctx.fillStyle = COL.bg; ctx.fillText(label, cx, cy-r-cell*.21);
+      ctx.globalAlpha = 1;
+    }
+  }
+  // rings + texts
+  for (const f of G.fx){
+    const k = f.t/f.life;
+    if (f.k==='ring'){
+      ctx.globalAlpha = 1-k; ctx.strokeStyle = f.color; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc((f.x+.5)*cell,(f.y+.5)*cell, cell*(.3+k*.5), 0, 7); ctx.stroke();
+    } else if (f.k==='text'){
+      ctx.globalAlpha = 1-k*k; ctx.fillStyle = f.color; ctx.font = `800 ${cell*f.size}px ${MONO}`;
+      ctx.fillText(f.txt, (f.x+.5)*cell, (f.y+.5-k*.5)*cell);
+    }
+  }
+  ctx.globalAlpha = 1;
+  if (G.flash>0){ ctx.fillStyle = `rgba(255,107,107,${G.flash*.18})`; ctx.fillRect(0,0,W,H); }
+}
+
+let lastT = performance.now();
+function loop(t){
+  const dt = Math.min(.05,(t-lastT)/1000)*speedMul; lastT = t;
+  if (G){ if (G.state!=='paused') update(dt); draw(); updateHud(); }
+  requestAnimationFrame(loop);
+}
+
+loadLevel(0); resize(); showMenu(); requestAnimationFrame(loop);
+})();
+</script>
