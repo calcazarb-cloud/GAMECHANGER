@@ -97,6 +97,16 @@ Read this first. It summarizes the project so far so a new conversation can cont
   within reach, walk back home if pulled away). Toggle tile in the selected-army menu; new units inherit the last
   choice. Explicit attack orders are always obeyed.
 - Buildings under construction can be moved or cancelled (refund of the unbuilt part); Steppe yurts can move any time.
+- Online 1v1 (2026-11-05, website only, hidden inside the Claude artifact because its sandbox blocks outside
+  connections): Supabase project `mitos` (ref `wkarevblhfhbxxdedefz`, us-west-1, org Carlos Alcazar Inc, about
+  USD 10/month on the Pro plan) used only for Realtime broadcast + presence, no tables. The publishable key is in
+  `NETCFG` in index.html (public by design). Flow: "Jugar en línea" -> pick civ -> "Crear partida" gives a 4-letter
+  code and a link `?p=CODE` (Copy / Share buttons; nothing is sent automatically) -> the friend opens the link,
+  picks a civ, "Unirme". The host's browser runs the game (`G.ai=null`, team 1 = guest) and sends `snap()` every
+  125 ms; the guest renders it (`applySnap` + `guestFrame` interpolation) and every player change goes through
+  `act()` -> `runAct(team, action)` on the host. `ME` is the local team (0 host / solo, 1 guest); own units are
+  drawn blue on each screen. supabase-js is vendored in `vendor/` and loaded only when going online.
+  Hosting on Vercel is pending: the Vercel connector needs the user to approve access to team `calcazarb`.
 - User feedback still open: the game is hard to read and play; asked to improve graphics.
 - Agreed next steps:
   1. Done: unit animations (procedural from the sprites).
