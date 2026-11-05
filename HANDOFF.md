@@ -91,6 +91,12 @@ Read this first. It summarizes the project so far so a new conversation can cont
   and bottom around 690,615). Units path with A* (`findPath`) and walk straight when the line is clear; buildings
   cannot be placed on blocked cells; choppable trees sit on the forest edges. If map-h.jpg changes, the grid must be
   regenerated (color threshold on the image, then manual fixes at the fords and the river ends).
+- Units no longer get stuck on buildings (2026-11-05): every building writes its footprint into the `DYN` path grid
+  (value 21, `footBld`/`rebuildDyn`), so paths go around buildings; the soft push only nudges at the edge.
+- Army stance (2026-11-05): "Ataque" (hunt enemies within ~170) or "Defensa" (hold position, fight only what comes
+  within reach, walk back home if pulled away). Toggle tile in the selected-army menu; new units inherit the last
+  choice. Explicit attack orders are always obeyed.
+- Buildings under construction can be moved or cancelled (refund of the unbuilt part); Steppe yurts can move any time.
 - User feedback still open: the game is hard to read and play; asked to improve graphics.
 - Agreed next steps:
   1. Done: unit animations (procedural from the sprites).
