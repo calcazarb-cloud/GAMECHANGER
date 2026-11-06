@@ -1,5 +1,16 @@
+<!--web-head--><!doctype html>
+<html lang="es"><head>
 <meta charset="utf-8">
-<title>Mitos Prototipo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0c0a07">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mitos">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!--/web-head-->
+<title>Mitos</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,6 +154,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   <div class="top" id="topbar" hidden>
     <div class="res"><span><img class="ri" alt="Comida" src="assets/ic-food.jpg"><b id="rF">0</b></span><span><img class="ri" alt="Madera" src="assets/ic-wood.jpg"><b id="rW">0</b></span><span><img class="ri" alt="Oro" src="assets/ic-gold.jpg"><b id="rG">0</b></span><span><img class="ri" alt="Población" src="assets/ic-pop.jpg"><b id="rP">0/0</b></span></div>
     <div class="age" id="ageL"></div><div class="sp"></div>
+    <button class="rb" id="bFull" aria-label="Pantalla completa" title="Pantalla completa" hidden>⛶</button>
     <button class="rb" id="bSnd" aria-label="Sonido">♪</button>
     <button class="rb" id="bPause" aria-label="Pausa">II</button>
   </div>
@@ -1094,13 +1106,22 @@ async function netOpen(code,host,civ,onState){
     .on('broadcast',{event:'start'},({payload})=>{ if (!NET.host && !NET.started && payload && Array.isArray(payload.civs) && payload.civs.every(c=>CIV[c])){ NET.started=true; clearInterval(NET.hello); newGame(payload.civs[1],false,{host:false,civs:payload.civs}); } })
     .on('broadcast',{event:'end'},({payload})=>{ if (!NET.host && G && !G.over && payload){ G.stats={kills:payload.kills|0,lost:payload.lost|0}; endGame(payload.win===ME); } })
     .on('presence',{event:'sync'},()=>{ const st=ch.presenceState(), keys=Object.keys(st), other=keys.some(k=>k.startsWith(host?'guest-':'host-'));
+      // the guest says its civilization in presence too, so the match starts even if the first hello was missed
+      if (host && !NET.started){ const gk=keys.find(k=>k.startsWith('guest-')), gp=gk&&st[gk]&&st[gk][0]; if (gp&&CIV[gp.civ]){ NET.started=true; const civs=[NET.civ,gp.civ]; NET.send('start',{civs}); newGame(NET.civ,false,{host:true,civs}); return; } }
       if (NET.rival && !other && G && !G.over && NET.started){ toast('Tu rival se desconectó'); if (NET.host){ G.paused=true; $('bPause').textContent='▶'; } }
       if (!NET.rival && other && G && NET.started) toast('Tu rival está conectado');
       NET.rival=other; onState&&onState(other); });
-  await new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error('timeout')),12000); ch.subscribe(st=>{ if (st==='SUBSCRIBED'){ clearTimeout(to); res(); } else if (st==='CHANNEL_ERROR'||st==='TIMED_OUT'){ clearTimeout(to); rej(new Error(st)); } }); });
-  await ch.track({role:host?'host':'guest'});
+  await new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error('sin respuesta del servidor')),20000); ch.subscribe(st=>{ if (st==='SUBSCRIBED'){ clearTimeout(to); res(); } else if (st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED'){ clearTimeout(to); rej(new Error(st)); } }); });
+  await ch.track({role:host?'host':'guest',civ});
   if (!host){ const hi=()=>NET&&!NET.started&&NET.send('hello',{civ}); hi(); NET.hello=setInterval(hi,1200); }
 }
+document.addEventListener('visibilitychange',async()=>{
+  if (document.hidden||!NET) return; const st=NET.ch&&NET.ch.state;
+  if (st==='joined'){ if (!NET.host&&NET.started) NET.send('full',{}); return; }
+  const {code,host,civ,started}=NET, keep=NET; toast('Reconectando…');
+  try { await netOpen(code,host,civ); NET.started=started; if (!host&&started){ NET.got=keep.got; NET.gotCl=keep.gotCl; NET.send('full',{}); } toast('Conectado de nuevo'); }
+  catch(e){ toast('No se pudo reconectar: revisa tu internet'); }
+});
 function snap(full){
   const u=[],b=[],r=[];
   for (const e of G.E){
@@ -1161,23 +1182,36 @@ function showOnline(code){
   for (const el of s.querySelectorAll('[data-oc]')) el.onclick=()=>{ civ=el.dataset.oc; for (const o of s.querySelectorAll('[data-oc]')) o.classList.toggle('tutb',o===el); };
   const stat=m=>$('ostat').innerHTML=m;
   const join=async c=>{ c=(c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if (c.length<4){ stat('Escribe el código de 4 letras que te pasó tu amigo.'); return; }
-    stat('Conectando…'); try { await netOpen(c,false,civ); stat('Conectado. Esperando a que empiece la partida…'); } catch(e){ stat('No se pudo conectar. Revisa tu internet y el código.'); } };
-  $('ohost').onclick=async()=>{ audioOn(); if (code) return join(code);
+    stat('Conectando…'); try { await netOpen(c,false,civ); stat('Conectado. Esperando a que tu amigo tenga abierta la página del juego… Si él cambió de app, pídele que vuelva a Mitos.'); }
+    catch(e){ stat('No se pudo conectar ('+e.message+'). Revisa tu internet y el código. <button class="civb" id="oretry"><span><b>Reintentar</b></span></button>'); $('oretry').onclick=()=>join(c); } };
+  $('ohost').onclick=async()=>{ audioOn(); if (MOBILE) goFull(); if (code) return join(code);
     const c=Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random()*24)]).join(''), link=location.origin+location.pathname+'?p='+c;
     stat('Conectando…'); try { await netOpen(c,true,civ,on=>{ if (on&&!NET.started) stat('¡Tu amigo entró! Empezando…'); });
-      stat(`Código: <b style="font-size:20px;letter-spacing:.15em">${c}</b><br>Pásale este enlace a tu amigo: <b id="olink" style="user-select:all;word-break:break-all">${link}</b><br><span class="orow" style="margin-top:6px">${navigator.share?'<button class="civb tutb" id="oshare"><span><b>Compartir (WhatsApp…)</b></span></button>':''}<button class="civb" id="ocopy"><span><b>Copiar enlace</b></span></button></span>Esperando a tu amigo…`);
+      stat(`Código: <b style="font-size:20px;letter-spacing:.15em">${c}</b><br>Pásale este enlace a tu amigo: <b id="olink" style="user-select:all;word-break:break-all">${link}</b><br><span class="orow" style="margin-top:6px">${navigator.share?'<button class="civb tutb" id="oshare"><span><b>Compartir (WhatsApp…)</b></span></button>':''}<button class="civb" id="ocopy"><span><b>Copiar enlace</b></span></button></span>Esperando a tu amigo… Después de compartir, <b>vuelve a esta pantalla</b>: la partida empieza cuando tu amigo entre.`);
       $('ocopy').onclick=()=>{ navigator.clipboard?.writeText(link).then(()=>toast('Enlace copiado'),()=>toast('Mantén presionado el enlace para copiarlo')); };
       if ($('oshare')) $('oshare').onclick=()=>{ navigator.share({title:'Mitos',text:'¡Juguemos Mitos! Entra con este enlace (código '+c+'):',url:link}).catch(()=>{}); };
-    } catch(e){ stat('No se pudo crear la partida. Revisa tu internet e intenta de nuevo.'); } };
-  if (!code) $('ojoin').onclick=()=>{ audioOn(); join($('ocode').value); };
+    } catch(e){ stat('No se pudo crear la partida ('+e.message+'). Revisa tu internet. <button class="civb" id="oretry"><span><b>Reintentar</b></span></button>'); $('oretry').onclick=()=>$('ohost').click(); } };
+  if (!code) $('ojoin').onclick=()=>{ audioOn(); if (MOBILE) goFull(); join($('ocode').value); };
   $('oback').onclick=()=>{ netClose(); showStart(); };
   resize();
 }
 
+// full screen: the Fullscreen API where it exists (Android, computers); on iPhone, add to the home screen
+const FS_OK=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const STANDALONE=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isFull=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+function goFull(){ if (!FS_OK||isFull()) return; const el=document.documentElement, rq=el.requestFullscreen||el.webkitRequestFullscreen; try { const r=rq.call(el,{navigationUI:'hide'}); if (r&&r.then) r.then(()=>{ try { screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{}); } catch(e){} }).catch(()=>{}); } catch(e){} }
+function toggleFull(){ if (isFull()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); } else goFull(); }
+const MOBILE=matchMedia('(pointer:coarse)').matches;
+$('bFull').hidden=!FS_OK; $('bFull').onclick=toggleFull;
+function fullTip(){ if (FS_OK) return `<button class="civb" id="fsGo"><span><b>⛶ Pantalla completa</b><small>Juega sin las barras del navegador.</small></span></button>`;
+  if (IOS && !STANDALONE && !/claude/.test(location.hostname)) return `<div class="card"><b>Pantalla completa en iPhone:</b> toca el botón <b>Compartir</b> del navegador y luego <b>Agregar a pantalla de inicio</b>. Abre Mitos desde ese ícono y se verá como una app.</div>`; return ''; }
 function showStart(){
   const s=$('screen'); s.style.setProperty('--bg',`url("${IMG.key.src}")`); s.hidden=false;
   s.innerHTML=`<div class="wrap"><h1 class="logo">Mitos</h1><p class="sub">Partida rápida contra la computadora · elige tu civilización</p>
     ${ONLINE_OK?`<button class="civb tutb" id="onGo"><span><b>Jugar en línea</b><small>1 contra 1 con un amigo, cada uno en su celular o computadora.</small></span></button>`:''}
+    ${fullTip()}
     <button class="civb tutb" id="tutGo"><span><b>Tutorial</b><small>Aprende a jugar paso a paso con el Imperio Áureo. El enemigo no ataca hasta que termines.</small></span></button>
     <div class="civs">${Object.entries(CIV).map(([k,c])=>`<button class="civb" data-civ="${k}"><img alt="" src="${IMG['ic-'+(c.p||'')+'spear'].src}"><span><b>${c.n}</b><small>${c.d}</small></span></button>`).join('')}</div>
     <div class="card"><ul>
@@ -1186,7 +1220,7 @@ function showStart(){
       ${matchMedia('(pointer:fine)').matches?`<li><b>En computadora:</b> clic para elegir (Shift suma), arrastra para encerrar tropas, <b>clic derecho</b> para mandar, rueda para zoom, mueve el mapa con flechas, WASD o el borde de la pantalla. Atajos: <b>B</b> construir, <b>P</b> plan, <b>H</b> ciudad, <b>Q</b> aldeanos sin trabajo, <b>1-4</b> grupos, <b>Espacio</b> pausa, <b>M</b> silencio, <b>Esc</b> cancelar.</li>`:''}
       <li>En la <b>Edad del Hierro</b> tus soldados y edificios mejoran y aparecen tropas nuevas. Gana quien destruya el <b>Centro urbano</b> rival.</li>
     </ul></div></div>`;
-  for (const el of s.querySelectorAll('[data-civ]')) el.onclick=()=>newGame(el.dataset.civ); $('tutGo').onclick=()=>newGame('imperio',true); if ($('onGo')) $('onGo').onclick=()=>showOnline(); resize();
+  if ($('fsGo')) $('fsGo').onclick=goFull; for (const el of s.querySelectorAll('[data-civ]')) el.onclick=()=>{ if (MOBILE) goFull(); newGame(el.dataset.civ); }; $('tutGo').onclick=()=>newGame('imperio',true); if ($('onGo')) $('onGo').onclick=()=>showOnline(); resize();
 }
 function endGame(won){
   G.over=true; sfx(won?'win':'lose');

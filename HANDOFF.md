@@ -110,6 +110,15 @@ Read this first. It summarizes the project so far so a new conversation can cont
   `calcazarb`, Hobby, root directory `estrategia/prototype`, no build). Production branch is `main`; the first
   production deploy was made from branch `claude/focused-rubin-edx0ff`. Previews keep Vercel Authentication;
   production is public. After merging to `main`, pushes to `main` redeploy the site automatically.
+- Phones (2026-11-06): index.html now starts with a real web head between `<!--web-head-->` and
+  `<!--/web-head-->` (doctype, viewport, PWA metas, `manifest.webmanifest`, `icon-192/512.png`). Without the viewport
+  line phones rendered the site at desktop width. When publishing the Claude artifact, publish a copy with that block
+  removed (the artifact adds its own skeleton). Fullscreen: Fullscreen API (button on the start screen, top-bar
+  button, automatic when a phone starts a match); iPhone has no Fullscreen API, so the start screen tells iPhone
+  users to "Agregar a pantalla de inicio" (the manifest opens it full screen).
+- Online robustness (2026-11-06): the guest also puts its civ in presence so the host starts even if a hello was
+  missed (e.g. the host was in WhatsApp sharing the link); on returning to the page, a dropped channel reconnects
+  and the guest asks for a full snapshot; lobby errors show the reason and a Reintentar button.
 - User feedback still open: the game is hard to read and play; asked to improve graphics.
 - Agreed next steps:
   1. Done: unit animations (procedural from the sprites).
