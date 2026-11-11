@@ -248,6 +248,8 @@ const NAV=new Uint8Array(NW*NH); // 0 open, 1 forest, 2 water
 { const S="0z0r2o0z0z0e1a011t02180118012o1t0c14011q0315031z1u2e1z110a1x0117031z1u2e1z11091w0316041n031z142e1z11071y0117031n051z152e1z051z18021o061z162d1z031z18031o071z16012f15021z1w061o0a1z13042d12061r0211021w071o0b1z13042e071o081w061o0b1z15032e071m091x051p0a1z16042d071l0a1x041p0a1z16052c081k0a1y031p0a1z17052c091j081z11021j0314091z17062c091i081z11021i06110b1z110113072b091i081z12021j0i1x0d2a0b1h091z11021k06110b1p04120e280e1f0f1v021l0415081o0z0a1b0i1u021v081c07130z0c190k1t021y0a160z0p130o1s031z0z0z0w1r041z0v1102120j220z0b1r031z110q1a0f270z0d1n031z150i1f0d290c1302120t1m031z160b1m0c2a0a190t1m021z17091o0b2d06190x1j021a061r071q0c2c051806110t1h0219081r051r0911032d031703160t1g02180e1301190118041t02110413042c031701170u1f02170v15051x0315032c031f0v1d02160z061q02150417022d021g0u1c02160z061p04130617032c021g0t1c02150z061p0f17042b011h0t1b02140z061p0j13062b1h0v12011603110z081m0x2a1f0z01150z0c1k0z012a1e0z02140z0d1h09120s2a1e0z02130z0d1b011409140s291g0z01110z0d1b0e150u281g0z0z0d1d0c150w281f0z0z0c1f0a140z291e0z0z0b1g0a120z02281f0z0z0b1f09140z01291e0z0z0b1e0a1502110x291c0z0z0b1f0a190x281303130z0z0f1e0b1102150y280z0z0o1e0e130z290z0z0o1e01120a140y2902120z0z0k1i08160w2b140z0z0i1k06160e160d2a190z07120z051l05150e180c291b0y1104150z051l05130e1b092a1b0x1302170z061k05110f1d062a1c0x1302180z061k0k1e042a1c0y1302190z061k0k1c042a1d0x14021a0z081h0m19042a1e0w15021b01110z061h0m1705291g0u16021e0z041j0n1108291h0u16021f0z021l0u291h0v16021f0z021n0r291h0v17021g0z011o0p291h0u19021h02120w1o0n291i0t1a021n0v1n0m291j04130g12031b021p03110q1n0j2a1l021502120a1h021q01130p1n0h2b17021p081i021v09140c1l0f2d17041p051k021v08160c1l0c2e190416011j021l021v07180c1l0a2c1d0b1q051a021l0118071a0c1k082d1f0a1p0917021k0415091a0c1i092c1h0a1n0b16021k0j190e1d0c2a021g0d1k0b17021k0k190h180d29041d0g1i0c17021k03110h190h150e2909110p1g0d17021l011301120e19011203110a110i250z051e0e16021t0e1g0z0p120d1d0d16021t0e1g0z0o150e1b0c16021u0113081i01110z091505180f12051304120417021z0713011h0z0717031a0m1104140218021y0911031h0z0519011c0r1d0217021n0f1i01120n210711031p0q1c0216051k0f1n06110b2101250413011r0q1a0316061j0e1o05130929021x0o1c0217071h0911041o0415062c011x0l1f0218071h02130114021q0217052d1y0j1g02180a1z1r062d1w0813071h02190a1z1s052e1u0619031h02190c12021z1n062e1s041c011i021a02110d1z1o072d1b031b041w021e0c1z1p03122o0818021x021f0211091z1e011a01132o091z17021j071z1e031d2o091z17031e0211091z1c05152v0a1z150z0z0h2v0z0h", D="0123456789abcdefghijklmnopqrstuvwxyz"; let i=0; for (let j=0;j<S.length;j+=2){ const v=+S[j], n=D.indexOf(S[j+1]); NAV.fill(v,i,i+n); i+=n; } }
 // fords: open land cells with river water just above and below become shallow water (3): land units and boats both pass
 for (let y=4;y<NH-4;y++) for (let x=60;x<120;x++){ const c=y*NW+x; if (NAV[c]!==0) continue; let up=0, dn=0; for (let k=1;k<=5;k++){ if (NAV[(y-k)*NW+x]===2) up=1; if (NAV[(y+k)*NW+x]===2) dn=1; } if (up&&dn) NAV[c]=3; }
+// painted grass gap south of the east meadow down to the bottom road: the trace had it as forest
+for (const [x0,x1,y0,y1] of [[127,131,60,67],[124,129,66,69]]) for (let y=y0;y<=y1;y++) for (let x=x0;x<=x1;x++) if (NAV[y*NW+x]===1) NAV[y*NW+x]=0;
 const NAV0=NAV.slice(); // pristine terrain, restored each game (chopping clears forest cells)
 const WOOD=new Float32Array(NW*NH), WOODOBJ=new Map(); let EDGES=null;
 const cellXY=c=>({x:(c%NW+.5)*NC,y:((c/NW|0)+.5)*NC});
@@ -296,7 +298,7 @@ function findPath(sx,sy,tx,ty,stop,team,boat){
 let G=null, ME=0, NET=null; // ME: the team this screen plays; NET: online match (host runs the game, guest mirrors it)
 const P=(x,y)=>({x:x*K,y:y*K});
 const TUT=[
-  {t:'Mueve el mapa: arrastra con un dedo (en computadora, flechas o el borde) y haz zoom con dos dedos o la rueda.', ok:()=>Math.hypot(G.cam.x-G.tut.cx,G.cam.y-G.tut.cy)>140||Math.abs(G.cam.z-G.tut.cz)>.15},
+  {t:'Mueve el mapa: arrastra con un dedo o con el mouse (en el trackpad, desliza con dos dedos) y haz zoom con dos dedos o la rueda.', ok:()=>Math.hypot(G.cam.x-G.tut.cx,G.cam.y-G.tut.cy)>140||Math.abs(G.cam.z-G.tut.cz)>.15},
   {t:'Toca un aldeano para elegirlo. Abajo verás qué hace.', ok:()=>G.sel.some(u=>u.type==='villager')},
   {t:'Con el aldeano elegido, toca Construir y elige Casa. Ponla en la zona verde y confirma.', ok:()=>blds(0).filter(b=>b.type==='house').length>2},
   {t:'Abre el Plan: ahí decides cuántos aldeanos van a comida, madera, oro y construcción.', ok:()=>G.tut.plan},
@@ -320,13 +322,16 @@ function newGame(civ,tut,net){ audioOn(); sndBtn(); ME=net&&!net.host?1:0; if (!
   for (const [x,y] of [[225,82],[265,598],[995,112],[1220,590]]) addRes('gold',x,y,1400);
   { const pts=[]; for (let c=0;c<NW*NH;c++){ if (NAV[c]!==2) continue; const x=(c%NW+.5)*NC, y=((c/NW|0)+.5)*NC; if (y<120||y>WH-120) continue; let deep=true; for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if (NAV[c+dy*NW+dx]!==2) deep=false; if (deep && pts.every(q=>Math.hypot(q[0]-x,q[1]-y)>210)) pts.push([x,y]); }
     for (const [x,y] of pts) addRes('fish',x/K,y/K,450); }
+  // logging trail from the east meadow down to the bottom-right gold (the forest sealed it off from that base)
+  for (let c=0;c<NW*NH;c++){ const p=cellXY(c); if (NAV[c]===1 && p.x>2410&&p.x<2480 && p.y>990&&p.y<1150) clearCell(c); }
   layoutBase(0,190*K,345*K); layoutBase(1,1150*K,345*K);
   for (const team of [0,1]){
     const tc=G.E.find(e=>e.kind==='bld'&&e.type==='tc'&&e.team===team), dir=team?-1:1;
     const sp=(t,x,y)=>{ const p=nearestFree(x,y)||{x,y}; addUnit(t,team,p.x,p.y); };
     for (let i=0;i<9;i++) sp('villager',tc.x+dir*rand(60,110),tc.y+rand(-70,70));
-    for (let i=0;i<3;i++) sp('spear',tc.x+dir*150,tc.y+rand(-50,50));
-    for (let i=0;i<2;i++) sp('archer',tc.x+dir*185,tc.y+rand(-50,50));
+    const camp=openSpot(tc.x+dir*170,tc.y-30,team)||{x:tc.x+dir*150,y:tc.y}; // starting army waits in open ground, not in a work lane
+    for (let i=0;i<3;i++) sp('spear',camp.x+rand(-20,20),camp.y+rand(-30,30));
+    for (let i=0;i<2;i++) sp('archer',camp.x+dir*35,camp.y+rand(-30,30));
   }
   } else { NAV.set(NAV0); DYN.fill(0); WOOD.fill(0); WOODOBJ.clear(); EDGES=null; G.cleared=[]; }
   G.team[1].next=270;
@@ -421,18 +426,22 @@ function moveTo(u,x,y,dt,stop){
   stop=stop||3; const D0=Math.hypot(x-u.x,y-u.y); if (D0<=stop){ u.path=null; return true; }
   let gx=x, gy=y; const k=(D0-stop+2)/D0;
   const tm=u.team, bt=u.D.boat;
-  if (!los(u.x,u.y,u.x+(x-u.x)*k,u.y+(y-u.y)*k,tm,bt)){
+  // stuck guard: barely moving for a while -> follow the grid path (no corner cutting) and slip through the crowd briefly
+  if ((u.mv||0)<u.D.spd*.25) u.stk=(u.stk||0)+dt; else u.stk=0;
+  if (u.stk>1.2){ u.stk=0; u.ghost=G.t+1.2; u.forceP=G.t+2.5; u.pT=0; }
+  const fp=G.t<(u.forceP||0);
+  if (fp || !los(u.x,u.y,u.x+(x-u.x)*k,u.y+(y-u.y)*k,tm,bt)){
     const stale=!u.path || Math.hypot(u.pgx-x,u.pgy-y)>40 || G.t>u.pT;
     if (stale && pathBudget>0){ pathBudget--; u.path=findPath(u.x,u.y,x,y,stop,tm,bt); u.pgx=x; u.pgy=y; u.pT=G.t+(u.state==='attack'?.8:2.5); }
     const P=u.path;
-    if (P){ while (P.pts.length>1 && los(u.x,u.y,P.pts[1].x,P.pts[1].y,tm,bt)) P.pts.shift();
+    if (P){ while (!fp && P.pts.length>1 && los(u.x,u.y,P.pts[1].x,P.pts[1].y,tm,bt)) P.pts.shift();
       while (P.pts.length && Math.hypot(P.pts[0].x-u.x,P.pts[0].y-u.y)<5) P.pts.shift();
       if (!P.pts.length){ u.path=null; if (P.partial) return true; } else { gx=P.pts[0].x; gy=P.pts[0].y; } }
     else if (!stale) return false;
   } else u.path=null;
   const dx=gx-u.x, dy=gy-u.y, d=Math.hypot(dx,dy)||1, s=Math.min(d,u.D.spd*dt*(u.haste>G.t?1.3:1));
   const nx=u.x+dx/d*s, ny=u.y+dy/d*s, here=free(u.x,u.y,tm,bt);
-  if (free(nx,ny,tm,bt)||!here){ u.x=nx; u.y=ny; } else if (free(nx,u.y,tm,bt)) u.x=nx; else if (free(u.x,ny,tm,bt)) u.y=ny; else u.pT=0;
+  if (free(nx,ny,tm,bt)||!here){ u.x=nx; u.y=ny; } else if (free(nx,u.y,tm,bt)) u.x=nx; else if (free(u.x,ny,tm,bt)) u.y=ny; else { u.pT=0; u.forceP=G.t+2; }
   if (Math.abs(dx)>1) u.face=dx>0?1:-1; return false;
 }
 function enemyNear(u,R){ let best=null,bd=R; const bo=u.D&&u.D.siegeOnly, melee=u.D&&!u.D.ranged&&u.kind==='unit'&&!u.D.boat; for (const e of G.E){ if (e.hp<=0||e.team===u.team||e.team<0||(e.kind!=='unit'&&e.kind!=='bld')||(bo&&e.kind!=='bld')||(melee&&e.D&&e.D.boat)||(u.D&&u.D.boat&&!u.D.ranged)) continue; const d=dist(u,e)-(e.kind==='bld'?e.r:0); if (d<bd){bd=d;best=e;} } return best; }
@@ -576,6 +585,11 @@ function dockSpot(team){ const tc=blds(team).find(b=>b.type==='tc'); if (!tc) re
 function placeBld(type,team,x,y,dir){ const D=BT[type]; if (!canPay(team,D.cost)||!canPlace(type,x,y,team)) return null; pay(team,D.cost); const b=addBld(type,team,x,y,false); if (dir!==undefined) b.dir=dir; return b; }
 
 /* ---------- Enemy commander (computer) ---------- */
+function openSpot(x,y,team){ // nearest point with room around it: no forest/water/building within ~70
+  for (let r=0;r<=320;r+=24) for (let a=0;a<6.28;a+=r?24/r:7){ const px=x+Math.cos(a)*r, py=y+Math.sin(a)*r; let ok=free(px,py,team);
+    for (let k=0;ok&&k<8;k++) for (const rr of [35,70]) if (!free(px+Math.cos(k*.785)*rr,py+Math.sin(k*.785)*rr,team)) ok=false;
+    if (ok && G.E.every(b=>b.kind!=='bld'||Math.hypot(b.x-px,b.y-py)>b.r+70)) return {x:px,y:py}; }
+  return null; }
 function aiTick(){
   const T=G.team[1], us=units(1), vs=us.filter(u=>u.type==='villager'), army=us.filter(u=>u.type!=='villager'&&u.type!=='fishboat'), bs=blds(1), tc=bs.find(b=>b.type==='tc'), bar=bs.find(b=>b.type==='barracks'&&b.done);
   if (!tc) return;
@@ -602,7 +616,7 @@ function aiTick(){
     const mix=T.age>=3?C.ai3:C.ai2; let pick = pc>pi+2 ? 'spear' : mix[Math.floor(Math.random()*mix.length)];
     if (T.age>=3 && army.filter(a=>a.type==='ram').length<2 && Math.random()<.25) pick='ram';
     if (!train(bar,pick)) train(bar,'spear');
-    if (!bar.rally) bar.rally={x:tc.x-200,y:tc.y};
+    if (!bar.rally) bar.rally=openSpot(tc.x-230,tc.y-40,1)||{x:tc.x-200,y:tc.y};
   }
   // defend
   const threat=units(0).find(u=>u.D.cat!=='eco' && dist(u,tc)<480);
@@ -628,8 +642,9 @@ function update(dt){
   for (const e of G.E){ if (e.hp<=0 && e.kind!=='res') continue; if (e.kind==='unit') updUnit(e,dt*SPEED); else if (e.kind==='bld') updBld(e,dt); if (G.over) return; }
   // separation
   const us=G.E.filter(e=>e.kind==='unit'&&e.hp>0);
-  for (let i=0;i<us.length;i++) for (let j=i+1;j<us.length;j++){ const a=us[i], b=us[j], dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy), m=a.r+b.r; if (d<m&&d>0){ const p=(m-d)/2; a.x-=dx/d*p; a.y-=dy/d*p; b.x+=dx/d*p; b.y+=dy/d*p; } }
-  for (const u of us){ for (const b of G.E){ if (b.kind!=='bld'||b.hp<=0) continue; const d=dist(u,b), m=(b.D.wall?b.r*.6:b.r*.6)+u.r; if (u.D.boat) continue; if (d<m&&d>0 && !(u.target===b)){ u.x=b.x+(u.x-b.x)/d*m; u.y=b.y+(u.y-b.y)/d*m; } } u.x=clamp(u.x,8,WW-8); u.y=clamp(u.y,8,WH-8); if (!free(u.x,u.y,u.team,u.D.boat) && free(u.ox,u.oy,u.team,u.D.boat)){ u.x=u.ox; u.y=u.oy; }
+  const yw=u=>(u.mv>6||u.state==='move'||u.path)?1:3; // idle units step aside for walking ones
+  for (let i=0;i<us.length;i++) for (let j=i+1;j<us.length;j++){ const a=us[i], b=us[j]; if (a.ghost>G.t||b.ghost>G.t) continue; const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy), m=a.r+b.r; if (d<m&&d>0){ const wa=yw(a), wb=yw(b), p=(m-d)/(wa+wb); a.x-=dx/d*p*wa; a.y-=dy/d*p*wa; b.x+=dx/d*p*wb; b.y+=dy/d*p*wb; } }
+  for (const u of us){ for (const b of G.E){ if (b.kind!=='bld'||b.hp<=0) continue; const d=dist(u,b), m=(b.D.wall?b.r*.6:b.r*.6)+u.r; if (u.D.boat) continue; if (d<m&&d>0 && !(u.target===b)){ u.x=b.x+(u.x-b.x)/d*m; u.y=b.y+(u.y-b.y)/d*m; } } u.x=clamp(u.x,8,WW-8); u.y=clamp(u.y,8,WH-8); if (!free(u.x,u.y,u.team,u.D.boat)){ if (free(u.ox,u.oy,u.team,u.D.boat)){ u.x=u.ox; u.y=u.oy; } else if (u.state==='idle' && !(u.work>0)){ const q=nearestFree(u.x,u.y,160,u.team,u.D.boat); if (q){ u.x+=(q.x-u.x)*.25; u.y+=(q.y-u.y)*.25; } } }
     const mv=Math.hypot(u.x-u.ox,u.y-u.oy); u.mv=mv/Math.max(dt,1e-3); u.wph+=mv/(DH[u.type]*.3); }
   for (const b of G.beams) b.a+=dt; G.beams=G.beams.filter(b=>b.a<.5);
   for (const d of G.dead) d.a+=dt; G.dead=G.dead.filter(d=>d.a<2.2);
@@ -733,8 +748,12 @@ function resize(){ const r=$('app').getBoundingClientRect(); SW=r.width; SH=r.he
   for (const id of ['topbar','tray','sheet','mini','toast','rotate','tip','tut']) $(id).style.zoom=UI;
   for (const w of document.querySelectorAll('#screen .wrap')) w.style.zoom=UI; }
 new ResizeObserver(resize).observe($('app'));
-const minZ=()=>Math.max(SW/WW, SH/WH, .3);
-function clampCam(){ const c=G.cam; c.z=clamp(c.z,minZ(),1.8); const hw=SW/2/c.z, hh=SH/2/c.z; c.x=clamp(c.x,Math.min(hw,WW/2),Math.max(WW-hw,WW/2)); c.y=clamp(c.y,Math.min(hh-50/c.z,WH/2),Math.max(WH-hh+70/c.z,WH/2)); }
+function sideUI(){ // width of the side menu that covers the right of the map on computers (0 on phones: the tray sits at the bottom)
+  const t=$('tray'); if (!t||t.hidden) return 0; const r=t.getBoundingClientRect(), a=$('app').getBoundingClientRect();
+  return r.width && r.height>SH*.6 && r.left>a.left+SW/2 ? a.right-r.left : 0; }
+const minZ=()=>Math.max((SW-sideUI())/WW, SH/WH, .3);
+function clampCam(){ const c=G.cam; c.z=clamp(c.z,minZ(),1.8); const hw=SW/2/c.z, hh=SH/2/c.z, sr=(sideUI()+40)/c.z, sl=40/c.z; // the map edges can be scrolled clear of the side menu
+  c.x=clamp(c.x,Math.min(hw-sl,WW/2),Math.max(WW-hw+sr,WW/2)); c.y=clamp(c.y,Math.min(hh-50/c.z,WH/2),Math.max(WH-hh+70/c.z,WH/2)); }
 const toWorld=(sx,sy)=>({x:(sx-SW/2)/G.cam.z+G.cam.x, y:(sy-SH/2)/G.cam.z+G.cam.y});
 /* Buildings are colour-graded to the map, cast a soft shadow and stand on a patch of trampled earth */
 const GIMG={}, SHD={}, BAN=[];

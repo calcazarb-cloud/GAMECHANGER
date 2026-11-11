@@ -52,7 +52,22 @@ Read this first. It summarizes the project so far so a new conversation can cont
 - Computer play (2026-11-04, revised 2026-11-11): left click selects (Shift adds), left-drag pans the map (like on
   phones), Shift+drag or the Área button box-selects, right click orders (or sets the rally point / cancels
   placement). Trackpad two-finger swipe pans, pinch (ctrl+wheel) or mouse wheel zooms, arrows/WASD pan. No edge
-  scrolling: on a Mac/laptop it moved the map whenever the mouse went to the side menus. Shortcuts: B build, P plan,
+  scrolling: on a Mac/laptop it moved the map whenever the mouse went to the side menus.
+- Laptop and map fixes (2026-11-11):
+  - The camera can scroll the map edges clear of the right-hand menu on computers (`sideUI()` in `clampCam`).
+    Before, the menu covered the east edge and the bottom-right gold.
+  - At game start a logging trail is cleared (`clearCell`) from the east meadow down to the bottom-right gold. The
+    painted forest had sealed it off from the east base: about 170 path cells, now 31. The painted grass gap
+    south of the east meadow down to the bottom road was traced as forest; it is now open (in `NAV0`).
+  - Units get stuck less:
+    - idle units step aside for walking ones (weighted separation);
+    - a unit that barely moves for 1.2 s follows the grid path without cutting corners and slips through the crowd
+      for a moment (`stk`/`forceP`/`ghost`);
+    - the AI rally point and both starting armies stand in open ground (`openSpot`), not in the lane between the
+      lumber camp, the barracks and the forest;
+    - idle units left inside a footprint walk out.
+  - A Higgsfield outpaint of the map to 21:9 was tried (2 credits) and not used. It re-rendered the whole map at a
+    lower resolution and added side rivers. Shortcuts: B build, P plan,
   H city, Q idle villagers, 1-4 groups, Space pause, Esc cancel. UI scales up on big screens; the controls are listed
   on the start screen only on devices with a mouse. Phone controls are unchanged.
 - Added (2026-11-04, second round):
