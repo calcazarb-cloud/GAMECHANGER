@@ -190,7 +190,9 @@ const SPEED=.85;
 /* ---------- Assets ---------- */
 const SHEET={"villager":{"cw":136,"ch":177,"ax":63,"foot":175},"spear":{"cw":156,"ch":154,"ax":49,"foot":152},"spear3":{"cw":167,"ch":154,"ax":52,"foot":152},"archer":{"cw":134,"ch":180,"ax":57,"foot":178},"archer3":{"cw":122,"ch":167,"ax":47,"foot":165},"cav":{"cw":144,"ch":155,"ax":64,"foot":153},"legion":{"cw":170,"ch":155,"ax":58,"foot":153},"e-villager":{"cw":119,"ch":187,"ax":59,"foot":185},"e-spear":{"cw":181,"ch":154,"ax":52,"foot":152},"e-spear3":{"cw":180,"ch":154,"ax":51,"foot":152},"e-archer":{"cw":131,"ch":165,"ax":53,"foot":163},"e-archer3":{"cw":128,"ch":163,"ax":57,"foot":161},"e-lightcav":{"cw":174,"ch":177,"ax":88,"foot":175},"e-horsearcher":{"cw":163,"ch":167,"ax":81,"foot":165},"e-shaman":{"cw":141,"ch":177,"ax":66,"foot":175},"a-villager":{"cw":142,"ch":180,"ax":68,"foot":178},"a-spear":{"cw":170,"ch":154,"ax":50,"foot":152},"a-spear3":{"cw":171,"ch":154,"ax":50,"foot":152},"a-archer":{"cw":148,"ch":178,"ax":58,"foot":176},"a-archer3":{"cw":152,"ch":181,"ax":63,"foot":179},"a-khopesh":{"cw":169,"ch":158,"ax":54,"foot":156},"a-chariot":{"cw":174,"ch":179,"ax":80,"foot":177},"a-sunpriest":{"cw":210,"ch":203,"ax":47,"foot":201},"priestess":{"cw":147,"ch":202,"ax":62,"foot":200},"scorpion":{"cw":250,"ch":155,"ax":111,"foot":153},"ram":{"cw":187,"ch":154,"ax":89,"foot":152},"fishboat":{"cw":188,"ch":154,"ax":66,"foot":152},"galley":{"cw":166,"ch":161,"ax":77,"foot":159},"general":{"cw":242,"ch":161,"ax":121,"foot":159},"khan":{"cw":164,"ch":168,"ax":72,"foot":166},"queen":{"cw":223,"ch":198,"ax":56,"foot":196}};
 const BLD_KEYS=['tc','house','lumber','mine','farm','tower','barracks'];
-const IMG={}; const MAPT=[]; for (let j=0;j<2;j++) for (let i=0;i<3;i++) MAPT.push({k:'map8-'+i+j,i,j}); const NAMES=[...MAPT.map(t=>t.k+'.webp'),'map8-mini.jpg','ic-food.jpg','ic-wood.jpg','ic-gold.jpg','ic-pop.jpg','ic-build.jpg','ic-plan.jpg','key.jpg','gold2.webp','berry.webp','ground.webp','banner.webp',...['army','inf','arc','cav','area','city','retreat','stop','cancel','repeat','ageup','move','idle','plan2','rally','attack'].map(k=>'ui-'+k+'.webp'),'temple.webp','e-temple.webp','a-temple.webp','wall.webp','e-wall.webp','a-wall.webp','gate.webp','e-gate.webp','a-gate.webp','dock.webp','e-dock.webp','a-dock.webp',
+const IMG={}; // map tiles: sharper 8K set (4x2) on computers with a big screen, lighter 5.7K set (3x2) on phones
+const HDMAP=!matchMedia('(pointer:coarse)').matches && Math.max(screen.width,screen.height)*(devicePixelRatio||1)>=1600, MCOLS=HDMAP?4:3, MROWS=2;
+const MAPT=[]; for (let j=0;j<MROWS;j++) for (let i=0;i<MCOLS;i++) MAPT.push({k:(HDMAP?'map8hd-':'map8-')+i+j,i,j}); const NAMES=[...MAPT.map(t=>t.k+'.webp'),'map8-mini.jpg','ic-food.jpg','ic-wood.jpg','ic-gold.jpg','ic-pop.jpg','ic-build.jpg','ic-plan.jpg','key.jpg','gold2.webp','berry.webp','ground.webp','banner.webp','relic.webp','bridge-h.webp','bridge-v.webp',...['army','inf','arc','cav','area','city','retreat','stop','cancel','repeat','ageup','move','idle','plan2','rally','attack'].map(k=>'ui-'+k+'.webp'),'temple.webp','e-temple.webp','a-temple.webp','wall.webp','e-wall.webp','a-wall.webp','gate.webp','e-gate.webp','a-gate.webp','dock.webp','e-dock.webp','a-dock.webp',
   ...BLD_KEYS.flatMap(k=>[k,k+'3']).map(k=>k+'.webp'),
   ...['e-','a-'].flatMap(p=>BLD_KEYS.flatMap(k=>[p+k].concat(['tc','house','barracks','tower'].includes(k)?[p+k+'3']:[]))).map(k=>k+'.webp'),
   ...Object.keys(SHEET).flatMap(k=>[k+'-anim.webp','ic-'+k+'.webp'])];
@@ -257,8 +259,16 @@ const RATE={food:1.35,wood:1.25,gold:1.1}; // faster economy so there is time fo
 /* ---------- Terrain: river and forests block movement; cross the river only at the two fords ---------- */
 const NW=336, NH=189, NC=8*K; // cells of 8 map px
 const NAV=new Uint8Array(NW*NH); // 0 open, 1 forest, 2 water
-{ const S="1k031z12011z1z1h023z31021p031z1c011e011z1z18011z1a021z1z1a013z31031p021z1y051z1z1z18031x021z19013z31031p021z1x0712031z1z1z12041t061b021a021i013z31031z12041z1i0e1q031z1a021v041r071a0419031h013z310418021l0212071z1g0f1o041z1z1z1408190415011o3z310417041i0g1z1b0i1n051z1z18021u0a16021v3z310417041h0h1z1b0e13011p031z1z1z170b1z113z310418031h0i1z190e1u041z1z1z170b1x023z31051q0j1z190e1b021i0218011z1z1m011a0f1o0212043z31091m0c130318031z15081b031n01110315011z1z1f03190f1l0b3z310c1803130g150217051z15041e031n0514031z1z190213031404120f1b01130r2108210222012203230i150l140415061z15041f011o0515031z1z1d031305110g180m1307240123012h0k120v110815011z031z150516041z14021z160z0h110314082q0z0p15021z1z190416041z14021z150z0h19082r09130z05130416011z1z1a0217051z1z1a0z0h1b062s07140z051l081z1c021p041f031z011r0z0b1i052t05150z051j0d1z18041p031h011z0h1702120z0212071j032u041702120z011503130l1z16081m031l0413011n0z0u14051k042r061c0z0w1z150a1m021j07120114011g0z0v15041l052r051e0z0v1z1401130113011z1906180a160z0v16031m052r061e0z09120l180a1d011d011z1905190d120f1101130z0d14031n052r061d0z091304120g140e1a031d011z19041b0n13021a03110z0b1n052t051d0z0914021b0s12091d011z19051206130k1h02140z081n062s061c0z061n0z021z1d021402120d140j1o0z061o062s06190z071p03110y1z1b04120h150i1p0z071n062t05190z071u0x1z1b05110h140g1s0z0b1j072t04190z081u0x1z190z081t0z0d1a0116072u04180z081u0z1e051k0z0b1u0z0c1h0628042i05170z081w0z0716071h0z0b1y0z081c0214052713052g06150z0511031w0z0617081g0z0a1z0z071d0214052617032f06160z031z120z051a071e0z0a1z110z081i052519032f05160z021z120z061a071d0z0c1y0z091h062401120b2e05160z021a031m0z0b17071b0z0f1n02180z091h0624130b2e05170z011a051j0z0e15071b0z0g1m03190z061i0623140712032d05180z1a071g0z0g18021b0z0i1l041a0z031j0623140712032d05190y1b061f0z0i1k0z0i1h0113031b0z031k0523140712032d041a0x1c051g0z0i1m0z0g1k031b0z031l03210123140d2b041b0x1c041h0z0h1o0z0f1l031a0v12041m0325140d2b041b01160r1d011j01120z0c1p0z0e1n03190a110k13021n0325150314042c041g0t1z110z0c1q0z0b1z1209120l11031m0425150215042c041g0u1x0z0e1q0z0b1z0a130k1m09261a052c051e0n11081w0z0f1q0z091z0b130k1l0b2519052c061f0d1103130113071w0z0f1r0z071z1206120114021205120412021m0b2615072c061g0c130119071w0z0d1p0z0a1d011n051d0315011r0c2613072c061i0213041f071k011b0z0c1o0z0c1c031a011a061d021v0h25062c01210713011s011a07180317031b0z0b1d02190z0d1c02190318061z190l260329022102210712031r021c051301120613051b0z0a1e021a0z0c1o0316071z170n2h0j1z1705160d1c0z081f021f03140z1o0512081z160j23012m0g1z1707150e1a0z081f021g02140z011e07120f1z02130j2v0c1z17071301110d1a0z0a1f011m0z05190n1z110o2y0h1z0p180z0d1z0z09170m1z120j2z270g1w0p170z0812061w0t140e1203110n11021w0b22052z2b0f1u0r130z0816041w0t1602120z061u0b2z2n0d1r0z0z0418021e021i0t1a0z051s0c2z2q0c1d011b0z09110u1n031l0t180z041q0d2z2s0b1o0z08150r1o0312011j0t1a01110z041l0b2z2v0a1n0z0312031a0l1p0412031k0q1f0z0118011a0c2z2y091l0z031g0l1p0115011n0q1f0z1j0b2z2z0b1i0z041g0l1o021t04120l1e0z1i0b2z2z240a1g0z041g0i11031x0214021d031408120b1d0z1h0c2z2z26081e0z051h0h1z120413041j06140211081c0z011e0e2z2z27081j0x1i0712071z0615041i0617081c0z021d0d2z2z28091j0v1k0613061z1c031i0519071c0z011e0c2z260121032z22051j0u1n0315051z1c011k031b031g0y1g0b2z220b2z22041j0v1w031z1c0111011h031u0y1g0c2u03220513072z041j0x1u061z19031g031u0y1i0a2v08160a2v051i0z011q091z17031e061q0z021g092x08180212052v091e0z021q0919021z1c091l0i110k1e0a2w091e052u0a1d0a130q1o0a1z1n091i0j130e12021c0e2q0712041f072t091d0a130t1m091q011v091g0b110a140b1e0g2q0714031f0a2q091e09150d130d1k0a1c0316051u0b1b0d1807120a1b0h2t0616031c0d2o0a1h07140c180d1h0112061b0f1t0d180b1c0j130o2t071605160i2n0a1h0m1a0d1e0115051a0g1t0e150d1d0j110o2t07160n14042m0a1h0l1b03120a19051405130n1n01160e120b1g0z0b2r07140p16032o0c1e0i1j0b1706120w1v0o1i0z0121092q07130p18042m0f1d01130c1m0b150k3e061w0m1f0z01260121052p08130p1a042p0b1m031r0z3e061r02130l1a03120z012a032o041105110r1a042q0a1z1h0z3e21051q03130f1303190o250224052b032p03140w19042q0a1z1g0z013e2104211e311b0l1307120h21062e022f022p02160x17042r0a1v05150z0a3e230221051539160z0b27022z2p03150z0115052q0d19061603130z0e25023e260631123b130z092z2z2203160e1202150f12072p0z0z0222072f3e26063e0z082z2e022n05150412091301160p2o0z0x26052g3e26063e0z052z2h032m05150214091302150q2m0z032209230b230228032h3e26063e0w21042f022z22052l051501150a1203130r2m0s22062k022i012j3e26063e0k220124032k092v072k061301160z0a2m0522042101220b2e072z2e3e260122033e0j2t0214062u062l0a1a0i140i2o032d032h0b2z2d3e2a01213e04210121082w021a022u042l061207180g150h2o032w02110414032z2b3e2c3e0325042y021b032t032m051606150j120i2p022v03120117022z2b3e2c3e042z26021b052z2h061608120l120719022p012u0518042z2a3e2c3e0121022z2603120711052z2h051708130l110619042z2j0j2z293e2c3e2z2904120e2z2h041708130k130517062z2j0k2z283e2c3e2z2805120713042z2h041708140j120517072z2i03140e2z283e2c3e2z2802150715032q012o061707140q15082z2h03150e2z283e2c3e2z2802150814032q012n0221051609110z052z2i02150f2z273e2c3e2z2802150f2p032p05170z0f2o012r02150e2z283e2c3e2z2901150e2r022o05180b120p14082o022q02150e2z283e2c3e2z28031b072r032n041a0a130n16072o022q031b062z293e2c3e2z290519062s022m041b0a130m17072n042q031b062z283e2c3e2z2a0518062t022k051c0a160h18062o032r031b052z293e2c3e2z2a0616062r0121022n041601150d120h19042o052q04150311062z293e2c3e2z2b0614062r062n041c0v19042o052q05130a2z210126023e022301263e2z2d0d2f012801210121062n061b0v18042n052u0f2z210224033e06263e2z2e0b2g02250c2m071g0r16052n052v0b2z240321053e06263e2z2i0122042f0l2l0a1d0s14062n042z22052z240a3e06263e2z2x0s2m0a1c0f120c13062n032z2z280e3e06263e2z2w0k11082o081c0f140a13052o032z2z280e3e062202223e012z2s0m13082o061d0f170811052o042z2z270f3e062202223e0128022p052c02250e1304130215062o061402170h150e2o052z2j012b0k12033e062203213e02220822022509220a280o14021c052p0121031304150z022o062z2g022c0k13023d14093e0b2305230z0g1j042t031106110z042o082f012w052305220k150131133915083e0c210z0n1k052t0a1105130t2p092e022h012e0z150131143718063e0z0y1n052t081304130e130b2q0a290123032105210e2102230w1i3718063e0z0y1p032u071304140b16092s0a21012404210z0j12061k35190z0z0k1k0114022u08120512071a092t0z0z0414051s051102130t140x120j1502190511042s01210e1206170c2u0z0z0217081n08140s170t140q190a2w0j170b2w0z0z0119091k0915021a0c1101180a110h150n1f082x0i140b2y0c130z0k1b091j081n061b04180g130o1i072x0v2y0b170z0e1f091k071a011e031c021b03110z031k072z240m2z061202180z0a1202140219081m0619031z1b0z0314031c072z260c2z27071e0z0313011903190113011q01120119031z1d0z0211051d072z290121022z2a061g08130n11021f021z1z1p02180z081d062z2z2j091h08130m1k031z1z1n03180z071e062z2z2i091g0b120i1o021z1z1o031702130z011f072z2z2h071i0u1q021s021z1t011f0y1g0b2z2z2c051j0v1q0115011n021z150212031x0y1g0c2z2z27091i0w1w021n011z130e13021o0x1g0d2z2z240a1j0v1o0414041m011z120m1m0w1f04110a2z2z220c1j0u1l0j1h011z120r1i0w16011101160413092z2z220b1b02170u1k0l1f031z0t1g0w1g0413092z2y0a1f03160v1h0o1a0211031z110t1c0z031f02130b2z2w0a1h03120z011d0u15071z110u1a0z061d02130313062z2v0a1l0z041b0v13081v0z01180z071d01150115092z2q0b1l0z061a0z061u0z04130z051u092z2n0e1m0z0a150z061u0z0z0c1v092z2m0813021m0z0z0m1u0z0z091y0b2z2j091r0z0z0m1r0z0k120o1z0f2z2e091r0z02110z0j1s0z0k160k1z120e2z280b1u04120k13041101150z0d1m03180z0f1b0j1e021q0c2z240b1u04140j14011903120z071p01170z0f1c0a13071d031q02120a25012r0d1w02150i1f02130z091v0z091i0a13071d031v0411062203270121012f0c1z01160a1q0z0b1o02130z091j0a14071d021w01150a2508270f1n041f091s0z0b1p0z0d1j09150818061z1409230b260223091m091c0718011l0z0b1n01110z0e1i09170714091l031f07240613042b071i0f1a0718041i0z0c13051i0z0f1j061807120b13061a041g05240615042b061g0i130d18041h0z0n1g0z0g1j0211011a0t17041i05230418052a071e0z18041h0z0n1g0z0h1w0u16041i052303130b2a081b0z011a021i0z0m1h0z0i1w0v12031m052103140c2a07190z021w0z0j1j0z0e1z110z021l042203140c2909180z011y0z0h1k0z0e1f011l0z011l042103140e2908160z021z120z0f1e01180z0a1f041j0z011l042102150e2907170z011z130z0f1e02180z071h051i0z021b0316042201150d2a07180z1z140z0e1o0z061f0211051h0s120a190415052102140d2b051a0z18031l02140z0e1p0z051f0211051e0u130a1905140521031a062b051a0z0117031l03130z0e1o0z0613041c041d0w120b15031303130522031a052b051c0z16031l04120z0612031r0z0c1e021e0y1607130313031404230318062b061b0z0115041l03120z061v0z0b1w0z1408140215011504220g2d051a0z0313051l0z0a1w0z0b1w0z0c1h05220e2e06180z0511061l0z0a1x0z0a1v0z0c1i05240c2d061a0z091n0z091f021k01140z031t0z0a1k0625082g051c0z081n0z091f031o0z031s0z0a1j072a022j031d0z081o0z071h011q0z031r0z0a1j082u031d0z071b011d0z061z1a0z051p0z091m062u031e0z051c021b0z041z1d0z0614011h0z0a1n062u031f0z041c011b0z051z1d08110b120t180z0e1n062u041e0z051k0z071z1j021309130z0z0f1o052s061g0z0c180z0515021z1o07140z0z0f1o052s061g0z0z0o17011z1o07130d120z0z011n062t051904120z0z0q120113011z1o07130c140z0z011l082s06180z0z0d120c13061i031z16021202140c150i1304130z0b1h092r06170z0j110s130b15051f071z15021202150b170a12041401160z0c1d0c2p07160z0j130d120b15091q091i061f0218061202190715011d0z0g1202150c2p05160z0k1501130714021305160311031h06130b1g081o051g041j0z0n120a2r07110z0k12011c041c0218021k08110d1e091q021j011i0z0s3z310p130y1g011q021g0r1c0a1z1u09130z0g3z310p140x1z18021f0k13041c0c1z1u07150v130g3z310e11051301170u1h021p021f0j15031a0f1z1v05160l1206150f3z310c14041b0t1z1r0i17011b05110b1z1z140l14051601130a3z310919011b0p1z1v0j1k04110412061v021z150l15011e093z31081l0q1z1u0k1l01130413051w021z130l1p053z31081f02140o1z1x0b11061q0511061z1z120m1o053z31071h04120m1z021w0a13041q0d1z1w01140m1o053z31071p0l1z12031t0815031r0b13021z1z1103130c1i0117043z31061s0c130414011u011x0815031r0b1z11021z1a081l0117043z31051u0a16011z1z110616031u0412021z11011z1b071u043z31051v091n011z1k041702170112031z1r011r011j041w043z31041x0214011z1z1b021h0213011z1p031r011z1k043z31031z1z1z1z12011z1t031z1z1d043z31021z1z1z1z150112", D="0123456789abcdefghijklmnopqrstuvwxyz"; let i=0; for (let j=0;j<S.length;j+=2){ const v=+S[j], n=D.indexOf(S[j+1]); NAV.fill(v,i,i+n); i+=n; } }
+{ const S="1z1z1z1z19013z31021z1z1z1z1z1z1z1z1h013z31031z1z1z1z1z1z1z15021z19013z31031z1z1z1z1z1z1z12061z18013z31031z12041z1z1z1z1z1v061z18013z31041v0212071z1z1z1z1z1t071z183z31041t0g1z1z1z1z1z1r0a1z143z31041s0h1z1z1z1z1z1t0b1z113z31041s0i1z1z1z1z1z1t0b1x023z31051q0j1z1z1z1z1z1h011a0f1o0212043z31091m0c130318031z1z1z1z1z1603190f1l0b3z310c1803130g150217051z1z1z1z1z15031404120f1b01130r2108210222012203230i150l140415061z1z1z1z1z15031305110g180m1307240123012h0k120v11081z1z1z1z1z160z0h110314082q0z0p1z1z1z1z1z160z0h19082r09130z0513041z1z1z1z1z160z0h1b062s07140z051l081z1z1z1q011r0z0b1i052t05150z051j0d1z1z1z1n0h1702120z0212071j032u041801120z011503130l1z1z1p041r0z0u14051k042r061c0z0w1z1z1n0717011g0z0v15041l052r051e0z0v1z1z1m06180a160z0v16031m052r061e0z09120l180a1z1z1205190d120f1101130z0d14031n052r061d0z091304120g140e1a031z1n041b0n13021a03110z0b1n052t051d0z0914021b0s12091z1n051206130k1h02140z081n062s061c0z061n0z021z1d021402120d140j1o0z061o062s06190z071p03110y1z1b04120h150i1p0z071n062t05190z071u0x1z1b05110h140g1s0z0b1j072t04190z081u0x1z190z081t0z0c1i072u04180z081u0z1z140z0b1u0z0b1i0628042i05170z081w0z071u0z0b1y0z081i052714042g06150z0511031w0z061v0z0a1z0z071j052617032f06160z031z120z051v0z0a1z110z081i052519032f05160z021z120z061u0z0c1y0z091h0624140a2e05160z021z0z0b1p0z0f1y0z081h0624130b2e05170z011y0z0e1n0z0g1y0z061i0623140712032d05180z1x0z0g1l0z0i1z0z031j0623140712032d05190y1w0z0i1k0z0i1z0z031k0523140712032d041a0x1x0z0i1m0z0g1y0z031l03210123140d2b041c0w1x0z0h1o0z0f1y0v12041m0325140d2b041i0r1x01120z0c1p0z0e1z0a110k13021n0325150314042c041g0t1z110z0c1q0z0b1z1209120l1q0425160115042c041g0u1x0z0e1q0z0b1z0a130k1m09261a052c051e0n11081w0z0f1q0z091z0b130k1l0b2519052c061f0d1103130113071w0z0f1r0z071z1206120115011205120412021m0b2615072c061g0c130119071w0z0d1p0z0a1z12051d0315011r0c2613072c061i0213041f071k011b0z0c1q0z0a1p011a061d021v0g1125062c01210713011z1407180317031b0z0b1q0z0b1o0218061z190k1126032912211101210712031z1605160613051b0z0a1s0z0a1o0316071z170m112h140f1z1705160d1c0z081w03140z1o0512081z160j23112m110f1z1707150e1a0z081x02140z011e07120f1z02130j2v0c1z17071301110d1a0z0a1z130z05190n1z110o2y0h1z0p180z0d1z0z09170m1z120j2z270g1w0p170z0812061x0s140e1203110n11021w0b22052z2b0f1u0r130z0816041y0r1602120z061u0b2z2n0d1r0z0z0418021z0s1a0z051s0c2z2q0c1p0z09110u1z1c0t180z041q0d2z2s0b1o0z08150r1z1e0t1a01110z031m0b2z2v0a1n0z0312031a0l1z1j0q1f0z011j0c2z2y091l0z031g0l1z1k0q1f0z1j0b2z2z0b1i0z041g0l1z1k04120l1e0z1i0b2z2z240a1g0z041g0i11031z1k021408120b1d0z1h0c2z2z26081h0z021h0h1z1w06140211081c0z011e0e2z2z27081j0x1i0712071z1x0617081c0z011e0d2z2z28091j0v1k0613061z1x0519071c0z011e0c2z26112111022z22051j0u1n0315051z1x031b031g0y1g0b2z220412052z22041j0v1w031z1w031u0y1g0c2u03220514062z041j0x1u061z1s031u0y1i0a2v08160a2v051i0z011q091z1o061q0z021g092x08180212052v091e0z021q091z1n091l0i110k1e0a2w091e052u0a1d0a130q1o0a1z1n091i0j130e12021c0e2q0712041f072t091d0a130t1m091q011v091g0b110a140b1e0g2q0714031f0a2q091e09150d130d1k0a1c0316051u0b1b0d1807120a1b0h2t0616031c0d2o0a1h07140c180d1h0112061b0f1t0d180b1c0j130o2t071605160i2n0a1h0m1a0d1e0115051a0g1t0e150d1d0j110o2t07160n14042m0a1h0l1b03120a19051405130n1u0e120b1g0z0b2r07140p16032o0c1e0i1j0b1706120w1v0o1i0z0121092q07130p18042m110e1d01130c1m0b150k3e061w0m1f0z01260121052p08130p1a042p0b1m031r0z3e061r02130l1a03120z012a032o11031105110r1a042q0a1z1h0z3e21051q03130f1303190o250224052b032p03140w19042q0a1z1g0z013e2104211e311b0l1307120h21062e022f122p02160x17042r0a1v05150z0a3e231221051539160z0b27022z2p03150z0115052q0d19061603130z0e25023e260631123b130z092z2z2203160e1202150f12072p0z0z0222072f3e26063e0z082z2e122n05160312091301160p2o0z0x26052g3e26063e0z052z2h132m05160114091302150q2m0z032209230b230228032h3e26063e0w21042f122z22152l051b0a1203130r2m0s22062k022i112j3e2611053e0k220124032k192v172k061301160z0a2m0522042101220b2e072z2e3e261122033e0j2t1a022u162l0a1a0i140i2o032d032h0b2z2d3e2a01213e04210121082w021a022u142l061207180g150h2o12012w02110414032z2b3e2c3e0325042y021b032t132m051606150j120i2p122v03120117022z2b3e2c3e042z26021b052z2h061608120l120719022p112u0518042z2a3e2c3e012101112z2603120711052z2h051708130l110619042z2j0j2z293e2c3e2z2904120e2z2h041708130k130517062z2j0k2z283e2c3e2z2811011201120713042z2h041708140j120517072z2i03140e2z283e2c3e2z2802150715032q112o061707140q15082z2h1102150e2z283e2c3e2z281101150814032q112n110121051609110z052z2i02150f2z273e2c3e2z281101150f2p132p05170z0f2o112r01160e2z283e2c3e2z2901150e2r122o05180b120p14082o122q02160d2z283e2c3e2z2811021b072r132n041a0a130n16072o122q031b062z293e2c3e2z29110419062s122m041b0a130m17072n142q031b062z283e2c3e2z2a0518062t122k11041c0a160h18062o032r031b052z293e2c3e2z2a0616062r0121022n041c0d120h19042o052q04150311062z293e2c3e2z2b0614062r062n041c0v19042o052q1104130a2z211126023e022311263e2z2d0d2f112801210121062n061b0v18042n052u0f2z21110124033e0511263e2z2e0b2g02250c2m071g0r16052n052v0b2z240321053e06263e2z2i0122042f0l2l0a1d0s14062n042z22052z240a3e06263e2z2x0s2m091d0f120c13062n032z2z280e3e06263e2z2w0k11082o081c0f140a13052o032z2z280e3e06221101223e012z2s0m13082o061d0f170811052o042z2z270f3e062202223e012801112p052c02250e1304130215062o061402170h150e2o052z2j112b0k12033e062203213e02220822022509220a280o14021c052p0121031304150z022o062z2g022c0k13023d14093e0b2305230z0g1j042t031106110z042o082f112w052305220k1501311339150111063e0c210z0n1k052t0a1105130t2p092e022h012e0z1631143718063e0z0y1n052t081304130e130b2q0a290123032105210e2102230w1i3718063e0z0y1p032u071304140b16092s0a21012404210z0j12061k35190z0z0k1k0114022u08120512071a092t0z0z0414051y02130t140x120j1h0411042s11210e1206170c2u0z0z0217081u01140s170t140o1b0a2w0j170b2w0z0z0119091s0115021a0c1101180a110h150n1f082x0i140b2y0c130z0k1b091z1f061b04180g130o1i072x0v2y0b170z0e1f091z1h031c021b03110z031k072z240m2z061202180z0a12021f081z1z1g0z0314031c072z260c2z27071e0z0313011l0113011z1z1k0z0211051d072z290121022z2a061g08130n11021z1z1z1h0z081d062z2z2j11081h08130m1z1z1z1m0z071e062z2z2i091g0b120i1z1z1z1p02130z011f072z2z2h071i0u1z1z1z1x0y1g0b2z2z2c051j0v1w011z1u0212031x0y1g0c2z2z27091i0w1w021z1r0e13021o0x1g0d2z2z240a1j0v1o0414041z1p0m1m0w1f04110a2z2z220c1j0u1l0j1z1k0r1i0w1f0413092z2z220b1k0u1k0l1f011z120t1g0w1h0313092z2y0a1o0v1h0o1a0211031z110t1c0z031f02130b2z2w0a1m0z011d0u15071z110u1a0z051f01130313062z2v0a1l0z041b0v13081v0z01180z071j0115092z2q0b1l0z061a0z061u0z04130z051u092z2n0e1m0z0a150z061u0z0z0c1v092z2m0813021m0z0z0m1u0z0z091y0b2z2j091r0z0z0m1r0z0k120o1z0f2z2e091r0z02110z0j1s0z0k160k1z120e2z280b1u04120k13041101150z0d1x0z0f1b0j1e021q0c2z240b1u04140j14011903120z071x0z0f1c0a13071d031q02120a25112r0d1w02150i1f02130z091v0z091i0a13071d031v041106220211270121012f110b1z01160a1q0z0b1t0z091j0a14071d021w0115091125071127150a1n041f091s0z0b1q0z0c1j09150818061z1409230b261223091m091c071u0z0b1q0z0d1i09170714091l031f07240613042b071i0f1a071u0z0c13051i0z0f1j061807120b13061b031g05240615042b061g0i130d1t0z0m1h0z0g1j0211011a0t17041i05230418052a071e0z1t0z0m1h0z0g1x0u16041i052303130b2a081b0z011u0z0m1h0z0g1y0v12031m052103140c2a07190z021w0z0j1j0z0e1z110z021l042203140c2909180z011y0z0h1l0z0d1z120z011l042103140e2908160z021z120z0f1n0z0a1z130z011l042102150e2907170z011z130z0f1o0z071z150z021k042201150d2a07180z1z140z0e1o0z061z150s120a1i052102140d2b051a0z18031l01150z0e1p0z051z120u130a1i0521031a062b051a0z0117031l03130z0e1o0z0613041t0w120b1h0522031a052b051c0z16031m03120z0612031r0z0c1u0y16071g04230318062b061b0z0115041l03120z061v0z0b1w0z14081h04220g2d051a0z0313051l0z0a1w0z0b1w0z0c1h05220e2e06180z0511061l0z0a1x0z0a1v0z0c1i05240c2d061a0z091n0z091z1201140z031t0z0a1k0625082g051c0z081n0z091z170z031s0z0a1k062a022j031d0z081o0z071z190z031r0z0a1k072u031d0z071p0z061z1a0z051p0z091m062u031e0z051p0z041z1d0z0614011h0z0a1n062u031f0z041o0z051z1e07110b120t180z0e1n062u041e0z051k0z071z1j021309130z0z0f1o052s11051g0z0c180z051z1v07140z0z0f1o052s061g0z0z0o1z1w07130d120z0z011n062t051904120z0z0q12011z1s07130c140z0z011l082s06180z0z0d120c13051z1s021202140c150i1304130z0b1h092r06170z0j110s130b15051z1r021201160b170a12041401160z0c1d0c2p07160z0j130d120b15091z1z140218061202190715011d0z0g1202150c2p05160z0k1501130714021305160311031z1z1f051g041j0z0n120a2r07110z0k12011c041c0218021z1z1l021j011j0z0r3z310p130y1g011q021z1z1z1p09130z0g3z310p140x1z19011z1z1z1q07150v130g3z310e11051301170u1z1z1z1z1z1405160l1206150f3z310c14041b0t1z1z1z1z1z1f0l14051601130a3z310919011b0p1z1z1z1z1z1k0l15011e093z31081l0q1z1z1z1z1z1j0l1p053z31081l0o1z1z1z1z1z1l0m1o053z31071n0m1z1z1z1z1z1m0m1o053z31071p0l1z1z1z1z1z1o03130c1q043z31061s0c13021z1z1z1z1z1x081t043z31051u0a1z1z1z1z1z1z14071u043z31051v091z1z1z1z1z1z15041w043z31041x0214011z1z1z1z1z1z1z17043z31031z1z1z1z1z1z1z1z1e033z31021z1z1z1z18", D="0123456789abcdefghijklmnopqrstuvwxyz"; let i=0; for (let j=0;j<S.length;j+=2){ const v=+S[j], n=D.indexOf(S[j+1]); NAV.fill(v,i,i+n); i+=n; } }
 // fords (3) are traced into the grid: shallow stony crossings at the four map edges, land units and boats both pass
+// bridges replace the painted stony fords: only the deck is walkable (3 = land units and boats both pass under/over)
+const BRIDGES=[{k:'bridge-h',x:2690,y:95,w:660,band:[2392,2988,40,150]},{k:'bridge-h',x:2690,y:2905,w:660,band:[2392,2988,2850,2960]},
+  {k:'bridge-v',x:205,y:1520,h:660,band:[150,262,1210,1830]},{k:'bridge-v',x:5171,y:1520,h:660,band:[5114,5226,1210,1830]}];
+for (let c=0;c<NAV.length;c++) if (NAV[c]===3) NAV[c]=2;
+for (const b of BRIDGES){ const [x0,x1,y0,y1]=b.band; for (let y=Math.floor(y0/NC);y<=Math.floor(y1/NC);y++) for (let x=Math.floor(x0/NC);x<=Math.floor(x1/NC);x++){ const c=y*NW+x; if (NAV[c]!==1) NAV[c]=3; } }
+// the Altar of the Myths stands in the centre of the ruins: whoever holds it earns gold, and holding it long enough wins
+const RELIC={x:2688,y:1452,r:46,cap:200,need:20,win:480};
+for (let y=0;y<NH;y++) for (let x=0;x<NW;x++){ if (Math.hypot((x+.5)*NC-RELIC.x,(y+.5)*NC-RELIC.y)<RELIC.r) NAV[y*NW+x]=1; }
 const NAV0=NAV.slice(); // pristine terrain, restored each game (chopping clears forest cells)
 const WOOD=new Float32Array(NW*NH), WOODOBJ=new Map(); let EDGES=null;
 const cellXY=c=>({x:(c%NW+.5)*NC,y:((c/NW|0)+.5)*NC});
@@ -320,15 +330,15 @@ const TUT=[
 function tutShow(){ const el=$('tut'); if (!G||!G.tut||G.tut.done){ el.hidden=true; return; } const st=TUT[G.tut.i]; el.hidden=false; el.innerHTML=`<div class="tr"><small>Tutorial · paso ${G.tut.i+1} de ${TUT.length}</small><button id="tutX">Saltar</button></div><div>${st.t}</div>`; $('tutX').onclick=tutEnd; }
 function tutEnd(){ if (!G||!G.tut) return; G.tut.done=true; for (const T of G.team) if (T.ai) T.next=G.t+90; $('tut').hidden=true; }
 function tutTick(){ if (!G||!G.tut||G.tut.done) return; const st=TUT[G.tut.i]; if (!st.ok()) return; G.tut.i++; G.tut.at=G.t; sfx('done'); if (G.tut.i>=TUT.length) return tutEnd(); if (TUT[G.tut.i].enter) TUT[G.tut.i].enter(); tutShow(); }
-function newGame(civ,tut,net,nPlayers){ audioOn(); sndBtn(); ME=net&&!net.host?1:0; if (!net) netClose();
-  civ=civ||'imperio'; const keys=Object.keys(CIV), N=net?2:tut?2:clamp(nPlayers||PLAYERS,2,8);
+function newGame(civ,tut,net,nPlayers){ audioOn(); sndBtn(); ME=net?(net.host?0:net.me|0):0; if (!net) netClose();
+  civ=civ||'imperio'; const keys=Object.keys(CIV), N=net?clamp(net.civs.length,2,8):tut?2:clamp(nPlayers||PLAYERS,2,8);
   const civs=net?net.civs.slice():[civ]; while (civs.length<N){ const o=keys.filter(k=>k!==civs[civs.length-1]); civs.push(o[Math.floor(Math.random()*o.length)]); }
-  const team=[]; for (let i=0;i<N;i++) team.push({res:{food:400,wood:450,gold:220},plan:{food:42,wood:35,gold:23,build:0},assist:true,age:2,ageT:0,ageUp:false,stance:'atk',wave:0,next:270+i*25,ai:!net&&i!==0,out:false,slot:i});
+  const team=[]; for (let i=0;i<N;i++) team.push({res:{food:400,wood:450,gold:220},plan:{food:42,wood:35,gold:23,build:0},assist:true,age:2,ageT:0,ageUp:false,stance:'atk',wave:0,next:270+i*25,ai:net?!!(net.ai&&net.ai[i]):i!==0,out:false,slot:i});
   G={civ:civs,N,online:!!net,beams:[],t:0,E:[],dead:[],projs:[],parts:[],texts:[],id:1,sel:[],selB:null,over:false,paused:false,team,
      cam:{x:470,y:670,z:1.05}, place:null, stats:{kills:0,lost:0}};
   if (!net || net.host){
   // resources
-  NAV.set(NAV0); DYN.fill(0); WOOD.fill(0); WOODOBJ.clear(); EDGES=null; G.cleared=[]; for (let c=0;c<NW*NH;c++) if (NAV[c]===1) WOOD[c]=70;
+  NAV.set(NAV0); DYN.fill(0); WOOD.fill(0); WOODOBJ.clear(); EDGES=null; G.cleared=[]; for (let c=0;c<NW*NH;c++) if (NAV[c]===1&&Math.hypot(cellXY(c).x-RELIC.x,cellXY(c).y-RELIC.y)>RELIC.r+8) WOOD[c]=70;
   for (const [x,y] of GOLDS) addRes('gold',x,y,3000); // 18 mines: one per home, expansions between homes, river islands and the centre
   { const pts=[]; for (let c=0;c<NW*NH;c++){ if (NAV[c]!==2) continue; const x=(c%NW+.5)*NC, y=((c/NW|0)+.5)*NC; if (y<120||y>WH-120) continue; let deep=true; for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if (NAV[c+dy*NW+dx]!==2) deep=false; if (deep && pts.every(q=>Math.hypot(q[0]-x,q[1]-y)>260)) pts.push([x,y]); }
     for (const [x,y] of pts) addRes('fish',x/K,y/K,450); }
@@ -342,7 +352,7 @@ function newGame(civ,tut,net,nPlayers){ audioOn(); sndBtn(); ME=net&&!net.host?1
     for (let i=0;i<2;i++) sp('archer',camp.x+dir*35,camp.y+rand(-30,30));
   }
   } else { NAV.set(NAV0); DYN.fill(0); WOOD.fill(0); WOODOBJ.clear(); EDGES=null; G.cleared=[]; }
-  fogReset();
+  fogReset(); G.relic={owner:-1,cap:-1,prog:0,held:0,warn:0};
   G.tut=tut?{i:0,at:0,cx:0,cy:0,cz:0,plan:false,cmd:false,done:false}:null;
   { const tc=G.E.find(e=>e.kind==='bld'&&e.type==='tc'&&e.team===ME)||{x:SLOTS[ME][0]*K,y:SLOTS[ME][1]*K}, r=$('app').getBoundingClientRect(); G.cam.z=clamp(r.height/560,1.05,1.5); G.cam.x=tc.x+(tc.x<WW/2?1:-1)*r.width/G.cam.z*.12; G.cam.y=tc.y+20; }
   resize(); $('topbar').hidden=false; $('tray').hidden=false; $('mini').hidden=false; $('screen').hidden=true;
@@ -478,15 +488,24 @@ function die(t,src){
   if (t.kind==='bld'){ rebuildDyn(); sfx('crash',t); if (t.type==='tc' && t.done) return eliminate(t.team); }
   G.sel=G.sel.filter(e=>e!==t); if (G.selB===t) G.selB=null;
 }
+function relicTick(dt){ const R=G.relic; if (!R||G.over) return;
+  const near=new Array(G.N).fill(0); for (const u of G.E) if (u.kind==='unit'&&u.hp>0&&!u.inBoat&&!u.D.boat&&Math.hypot(u.x-RELIC.x,u.y-RELIC.y)<RELIC.cap) near[u.team]++;
+  const here=near.map((n,i)=>n?i:-1).filter(i=>i>=0);
+  if (here.length===1 && here[0]!==R.owner){ const t=here[0]; if (R.cap!==t){ R.cap=t; R.prog=0; } R.prog+=dt/RELIC.need;
+    if (R.prog>=1){ R.owner=t; R.prog=0; R.cap=-1; R.held=0; R.warn=0; sfx('age'); for (let i=0;i<G.N;i++) notify(i,i===t?'¡Tomaste el Altar de los Mitos! Ganas oro, y si lo mantienes '+(RELIC.win/60)+' minutos, ganas la partida.':'¡'+TC_NAME[t]+' tomó el Altar de los Mitos en las ruinas del centro! Si lo mantiene '+(RELIC.win/60)+' minutos, gana.'); } }
+  else if (!here.length || here.length>1 || here[0]===R.owner) R.prog=Math.max(0,R.prog-dt/RELIC.need*(here.length>1?0:.5));
+  if (R.owner>=0){ if (G.team[R.owner].out){ R.owner=-1; return; } R.held+=dt; G.team[R.owner].res.gold+=1.2*dt;
+    if (R.held>RELIC.win-120 && !R.warn){ R.warn=1; for (let i=0;i<G.N;i++) if (i!==R.owner) notify(i,'¡Quedan 2 minutos: '+TC_NAME[R.owner]+' ganará con el Altar de los Mitos!'); }
+    if (R.held>=RELIC.win){ if (NET&&NET.host) NET.send('end',{win:R.owner,relic:1}); G.relicWin=1; endGame(R.owner===ME); } } }
 function eliminate(team){ // a player whose Town Center falls is out: the rest of their town crumbles
   const T=G.team[team]; if (!T||T.out) return; T.out=true;
   for (const e of G.E) if (e.team===team && e.hp>0 && e.kind!=='res'){ e.hp=0; if (e.kind==='unit') G.dead.push({kind:'dead',type:e.type,key:animKey(e),D:e.D,team:e.team,x:e.x,y:e.y,face:e.face,r:e.r,a:0,hp:1}); else burst(e.x,e.y,'#8a7a66',14,70); }
   rebuildDyn(); G.sel=G.sel.filter(e=>e.hp>0); if (G.selB&&G.selB.hp<=0) G.selB=null;
   const left=G.team.map((x,i)=>i).filter(i=>!G.team[i].out);
   if (team!==ME && G.N>2 && !G.team[ME].out) notify(ME,'¡'+TC_NAME[team]+' ('+CIV[G.civ[team]].n+') fue derrotado! Quedan '+left.length+' jugadores.');
-  if (NET&&NET.host&&left.length<=1) NET.send('end',{win:left[0],kills:G.stats.lost,lost:G.stats.kills});
-  if (team===ME) return endGame(false);
+  if (NET&&NET.host){ NET.send('out',{team}); if (left.length<=1) NET.send('end',{win:left[0]}); }
   if (left.length<=1) return endGame(left[0]===ME);
+  if (team===ME){ if (NET&&NET.started) { toast('Tu Centro urbano cayó: quedas fuera. Puedes seguir mirando la partida.'); sfx('lose'); return; } return endGame(false); }
 }
 function updUnit(u,dt){
   u.flash=Math.max(0,u.flash-dt); u.atk-=dt; u.bob+=dt*9; u.aT+=dt; u.work=Math.max(0,u.work-dt);
@@ -671,11 +690,11 @@ function aiTick(me){
 }
 
 /* ---------- Main loop ---------- */
-let plannerT=0, aiT=0;
+let plannerT=0, aiT=0, relicT=0;
 function update(dt){
   G.t+=dt; pathBudget=8; G.heroes=G.E.filter(e=>e.kind==='unit'&&e.D.hero&&e.hp>0);
   for (const e of G.E) if (e.kind==='unit'){ e.ox=e.x; e.oy=e.y; }
-  buildSpatial();
+  buildSpatial(); relicT=(relicT||0)-dt; if (relicT<=0){ relicTick(.5-relicT); relicT=.5; }
   plannerT-=dt; if (plannerT<=0){ plannerT=1; for (let i=0;i<G.N;i++) if (!G.team[i].out) planner(i); }
   aiT-=dt; if (aiT<=0){ aiT=2/Math.max(1,G.N-1); const ais=G.team.map((t,i)=>i).filter(i=>G.team[i].ai&&!G.team[i].out); if (ais.length){ G.aiI=((G.aiI||0)+1)%ais.length; aiTick(ais[G.aiI]); } }
   for (const e of G.E){ if (e.hp<=0 && e.kind!=='res') continue; if (e.kind==='unit') updUnit(e,dt*SPEED); else if (e.kind==='bld') updBld(e,dt); if (G.over) return; }
@@ -840,7 +859,7 @@ function draw(){
   clampCam(); const c=G.cam;
   ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#0c0a07'; ctx.fillRect(0,0,cv.width,cv.height);
   ctx.setTransform(DPR*c.z,0,0,DPR*c.z,DPR*(SW/2-c.x*c.z),DPR*(SH/2-c.y*c.z));
-  ctx.imageSmoothingQuality='high'; { const tw=WW/3, th=WH/2, vx0=c.x-SW/2/c.z, vx1=c.x+SW/2/c.z, vy0=c.y-SH/2/c.z, vy1=c.y+SH/2/c.z; // map tiles, only those on screen
+  ctx.imageSmoothingQuality='high'; { const tw=WW/MCOLS, th=WH/MROWS, vx0=c.x-SW/2/c.z, vx1=c.x+SW/2/c.z, vy0=c.y-SH/2/c.z, vy1=c.y+SH/2/c.z; // map tiles, only those on screen
     for (const t of MAPT){ const x=t.i*tw, y=t.j*th; if (x>vx1||x+tw<vx0||y>vy1||y+th<vy0) continue; ctx.drawImage(IMG[t.k],x,y,tw+.6,th+.6); } }
   ctx.fillStyle='rgba(16,18,8,.12)'; ctx.fillRect(0,0,WW,WH);
   if (G.cleared.length){ if (!IMG.stump){ const k=document.createElement('canvas'); k.width=k.height=64; const g=k.getContext('2d'), gr=g.createRadialGradient(32,32,6,32,32,32); gr.addColorStop(0,'rgba(118,92,58,.95)'); gr.addColorStop(.6,'rgba(104,84,50,.8)'); gr.addColorStop(1,'rgba(90,74,44,0)'); g.fillStyle=gr; g.beginPath(); g.arc(32,32,32,0,7); g.fill(); IMG.stump=k;
@@ -848,8 +867,9 @@ function draw(){
     for (const q of G.cleared){ ctx.drawImage(IMG.stump,q.x-15,q.y-12,30,24); } for (const q of G.cleared) if (q.k<.55) ctx.drawImage(IMG.stump2,q.x-6+q.k*8,q.y-6,13,13); }
   for (const o of WOODOBJ.values()) if (o.prio){ ctx.fillStyle='#e7b54a'; ctx.fillRect(o.x,o.y-30,2,24); ctx.beginPath(); ctx.moveTo(o.x+2,o.y-30); ctx.lineTo(o.x+16,o.y-24); ctx.lineTo(o.x+2,o.y-18); ctx.fill(); }
   fogT-=1/60; if (fogT<=0){ fogT=.2; fogUpdate(); }
+  for (const b of BRIDGES){ const im=IMG[b.k]; if (!im||!im.naturalWidth) continue; const w=b.w||b.h*im.naturalWidth/im.naturalHeight, h=b.h||b.w*im.naturalHeight/im.naturalWidth; const dy=b.w?h*.24:h*.5; ctx.drawImage(im,b.x-w/2,b.y-dy,w,h); }
   const vx0=c.x-SW/2/c.z-120, vx1=c.x+SW/2/c.z+120, vy0=c.y-SH/2/c.z-120, vy1=c.y+SH/2/c.z+200, inView=e=>e.x>vx0&&e.x<vx1&&e.y>vy0&&e.y<vy1;
-  const objs=G.E.filter(e=>(e.hp>0||e.kind==='res')&&!e.inBoat&&inView(e)&&shown(e)).concat(G.dead.filter(d=>inView(d)&&(d.team===ME||seen(d)))).sort((a,b)=>a.y-b.y);
+  const objs=G.E.filter(e=>(e.hp>0||e.kind==='res')&&!e.inBoat&&inView(e)&&shown(e)).concat(G.dead.filter(d=>inView(d)&&(d.team===ME||seen(d)))).concat(G.relic&&known(RELIC)?[{kind:'relic',x:RELIC.x,y:RELIC.y+20}]:[]).sort((a,b)=>a.y-b.y);
   // selection rings below
   for (const e of G.sel){ const sc=e.D?usc(e.D,c.z):1; ctx.strokeStyle='#b6ff9a'; ctx.lineWidth=2.5/c.z; ctx.beginPath(); ctx.ellipse(e.x,e.y+2,e.r*sc*2.1+3,(e.r*sc*2.1+3)*.5,0,0,7); ctx.stroke(); }
   if (G.selB){ const b=G.selB; ctx.strokeStyle='#7bd88f'; ctx.lineWidth=2.5/c.z; ctx.beginPath(); ctx.ellipse(b.x,b.y,b.r+10,(b.r+10)*.55,0,0,7); ctx.stroke(); if (b.rally){ ctx.setLineDash([6/c.z,6/c.z]); ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(b.rally.x,b.rally.y); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle='#7bd88f'; ctx.beginPath(); ctx.arc(b.rally.x,b.rally.y,5/c.z+2,0,7); ctx.fill(); } }
@@ -872,6 +892,14 @@ function draw(){
       if (!e.done) bar(e.x,e.y-h*.5,e.D.w*.6,e.prog,'#e7b54a');
       else if (e.hp<e.maxHp || G.selB===e) bar(e.x,e.y-h*.62,e.D.w*.55,e.hp/e.maxHp,tcol(e.team));
       if (e.queue.length && e.done) bar(e.x,e.y+e.r*.55+6,e.D.w*.5,e.queue[0]==='age'?e.qT/AGE_TIME:e.qT/UT[e.queue[0]].time,'#fff');
+    } else if (e.kind==='relic'){ const R=G.relic, own=R.owner, pulse=.5+.5*Math.sin(G.t*2.5); ctx.globalAlpha=1;
+      ctx.fillStyle=own>=0?trgba(own,.22+.12*pulse):'rgba(255,215,110,'+(.10+.08*pulse)+')'; ctx.beginPath(); ctx.ellipse(RELIC.x,RELIC.y+14,RELIC.cap*.55,RELIC.cap*.3,0,0,7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(RELIC.x,RELIC.y+14,RELIC.cap,RELIC.cap*.55,0,0,7); ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=7; ctx.stroke();
+      ctx.setLineDash([16,12]); ctx.lineDashOffset=-G.t*14; ctx.strokeStyle=own>=0?tcol(own):'#ffd76a'; ctx.lineWidth=4; ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset=0;
+      sprite('relic',RELIC.x,RELIC.y+34,170);
+      ctx.font='700 17px "Cormorant SC",Georgia,serif'; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='rgba(0,0,0,.75)'; const lb=own>=0?'Altar de los Mitos · '+TC_NAME[own]:'Altar de los Mitos'; ctx.strokeText(lb,RELIC.x,RELIC.y-176); ctx.fillStyle=own>=0?tcol(own):'#ffe7a0'; ctx.fillText(lb,RELIC.x,RELIC.y-176);
+      if (R.prog>0&&R.cap>=0) bar(RELIC.x,RELIC.y-150,110,R.prog,tcol(R.cap));
+      if (own>=0) bar(RELIC.x,RELIC.y-160,90,R.held/RELIC.win,tcol(own));
     } else if (e.kind==='dead'){
       const D=e.D, sc=usc(D,c.z), f=unitFrame(e), fall=Math.min(1,e.a/.45);
       ctx.save(); ctx.globalAlpha=clamp((2.2-e.a)/1.2,0,1); ctx.translate(e.x,e.y+2); if (e.face<0) ctx.scale(-1,1); ctx.rotate(-fall*fall*1.35);
@@ -981,7 +1009,7 @@ function pick(w){
 const ref=h=>!h?null:h.cell!==undefined?{c:h.cell}:{id:h.id};
 const byId=id=>G.E.find(e=>e.id===id&&(e.hp>0||e.kind==='res'));
 const resolve=r=>!r?null:r.c!==undefined?(NAV[r.c]===1?woodObj(r.c):null):byId(r.id)||null;
-function act(a){ if (NET && !NET.host){ NET.send('act',a); return; } runAct(ME,a); }
+function act(a){ if (NET && !NET.host){ NET.send('act',{t:ME,a}); return; } runAct(ME,a); }
 function runAct(team,a){
   if (!G||G.over||!a||typeof a.a!=='string') return;
   const mine=ids=>(Array.isArray(ids)?ids:[]).map(byId).filter(e=>e&&e.kind==='unit'&&e.team===team);
@@ -1007,7 +1035,7 @@ function runAct(team,a){
     case 'stop': for (const u of mine(a.ids)){ u.state='idle'; u.target=null; u.home={x:u.x,y:u.y}; } break;
     case 'stance': { const ns=a.s==='def'?'def':'atk'; for (const u of mine(a.ids)){ u.stance=ns; u.home={x:u.x,y:u.y}; } G.team[team].stance=ns; break; }
     case 'prio': { const h=resolve(a.h); if (h&&h.kind==='res') h.prio=!h.prio; break; }
-    case 'pause': if (NET&&NET.host){ G.paused=!G.paused; $('bPause').textContent=G.paused?'▶':'II'; toast(G.paused?'Tu rival pausó el juego':'Continúa'); } break;
+    case 'pause': if (NET&&NET.host){ G.paused=!G.paused; $('bPause').textContent=G.paused?'▶':'II'; toast(G.paused?TC_NAME[team]+' pausó el juego':'Continúa'); } break;
   }
   if (team===ME) renderTray();
 }
@@ -1174,7 +1202,8 @@ $('bPause').onclick=()=>{ if (!G||G.over) return; if (NET&&!NET.host){ act({a:'p
 function hud(){
   const T=G.team[ME]; $('rF').textContent=Math.floor(T.res.food); $('rW').textContent=Math.floor(T.res.wood); $('rG').textContent=Math.floor(T.res.gold);
   const pop=units(ME).length, cap=capOf(ME); $('rP').textContent=pop+'/'+cap; $('rP').style.color=pop>=cap?'var(--red)':'';
-  const s=Math.floor(G.t); $('ageL').textContent=(T.age>=3?'Hierro':'Bronce')+' · '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  const s=Math.floor(G.t); let rl=''; const R=G.relic; if (R&&R.owner>=0){ const left=Math.max(0,Math.ceil(RELIC.win-R.held)); rl=' · Altar: '+TC_NAME[R.owner]+' '+Math.floor(left/60)+':'+String(left%60).padStart(2,'0'); }
+  $('ageL').textContent=(T.age>=3?'Hierro':'Bronce')+' · '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+rl; $('ageL').style.color=R&&R.owner>=0?tcol(R.owner):'';
 }
 
 /* ---------- Online 1v1 (website only): Supabase Realtime broadcast. The host's browser runs the game and sends
@@ -1184,34 +1213,49 @@ const ONLINE_OK=location.protocol==='https:'&&!/claude(usercontent)?\.(ai|com)$/
 const UTYPES=Object.keys(UT), BTYPES=Object.keys(BT), STATES=['idle','move','attack','flee','board'], JOBI=[null,'food','wood','gold','build'];
 function loadScript(src){ return new Promise((res,rej)=>{ if (window.supabase) return res(); const t=document.createElement('script'); t.src=src; t.onload=res; t.onerror=()=>rej(new Error('script')); document.head.appendChild(t); }); }
 function netClose(){ if (!NET) return; try { NET.ch.unsubscribe(); NET.sb.removeAllChannels(); } catch(e){} clearInterval(NET.hello); NET=null; }
+const PID=Math.random().toString(36).slice(2,8), JOINT=Date.now(); // this browser tab in the room (stays the same when it reconnects)
 async function netOpen(code,host,civ,onState){
   netClose(); await loadScript('vendor/supabase-2.118.0.js');
   const sb=supabase.createClient(NETCFG.url,NETCFG.key,{auth:{persistSession:false},realtime:{params:{eventsPerSecond:40}}});
-  const ch=sb.channel('mitos-'+code,{config:{broadcast:{self:false,ack:false},presence:{key:(host?'host-':'guest-')+Math.random().toString(36).slice(2,8)}}});
-  NET={sb,ch,host,code,civ,sentCl:0,gotCl:0,beams:[],texts:[],deaths:[],acc:0,needFull:true,started:false,rival:false,last:0};
+  const ch=sb.channel('mitos-'+code,{config:{broadcast:{self:false,ack:false},presence:{key:(host?'host-':'guest-')+PID}}});
+  NET={sb,ch,host,code,civ,sentCl:0,gotCl:0,beams:[],texts:[],deaths:[],acc:0,needFull:true,started:false,last:0,guests:[],map:null,present:new Set(),onState};
   NET.send=(event,payload)=>{ try { ch.send({type:'broadcast',event,payload}); } catch(e){} };
+  const startMsg=()=>NET.start&&NET.send('start',NET.start);
   ch.on('broadcast',{event:'s'},({payload})=>{ if (!NET.host && G && NET.started) applySnap(payload); })
-    .on('broadcast',{event:'act'},({payload})=>{ if (NET.host && G && NET.started) runAct(1,payload); })
+    .on('broadcast',{event:'act'},({payload})=>{ if (!NET.host||!G||!NET.started||!payload) return; const t=payload.t|0; if (t>0 && t<G.N && !G.team[t].ai && !G.team[t].out) runAct(t,payload.a); })
     .on('broadcast',{event:'full'},()=>{ if (NET.host) NET.needFull=true; })
     .on('broadcast',{event:'toast'},({payload})=>{ if (!NET.host && payload && typeof payload.m==='string') toast(payload.m.slice(0,160)); })
-    .on('broadcast',{event:'hello'},({payload})=>{ if (NET.host && !NET.started && payload && CIV[payload.civ]){ NET.started=true; const civs=[NET.civ,payload.civ]; NET.send('start',{civs}); newGame(NET.civ,false,{host:true,civs}); } })
-    .on('broadcast',{event:'start'},({payload})=>{ if (!NET.host && !NET.started && payload && Array.isArray(payload.civs) && payload.civs.every(c=>CIV[c])){ NET.started=true; clearInterval(NET.hello); newGame(payload.civs[1],false,{host:false,civs:payload.civs}); } })
-    .on('broadcast',{event:'end'},({payload})=>{ if (!NET.host && G && !G.over && payload){ G.stats={kills:payload.kills|0,lost:payload.lost|0}; endGame(payload.win===ME); } })
-    .on('presence',{event:'sync'},()=>{ const st=ch.presenceState(), keys=Object.keys(st), other=keys.some(k=>k.startsWith(host?'guest-':'host-'));
-      // the guest says its civilization in presence too, so the match starts even if the first hello was missed
-      if (host && !NET.started){ const gk=keys.find(k=>k.startsWith('guest-')), gp=gk&&st[gk]&&st[gk][0]; if (gp&&CIV[gp.civ]){ NET.started=true; const civs=[NET.civ,gp.civ]; NET.send('start',{civs}); newGame(NET.civ,false,{host:true,civs}); return; } }
-      if (NET.rival && !other && G && !G.over && NET.started){ toast('Tu rival se desconectó'); if (NET.host){ G.paused=true; $('bPause').textContent='▶'; } }
-      if (!NET.rival && other && G && NET.started) toast('Tu rival está conectado');
-      NET.rival=other; onState&&onState(other); });
+    .on('broadcast',{event:'hello'},({payload})=>{ if (NET.host && NET.started && payload && NET.map && NET.map[payload.pid]!==undefined) startMsg(); })
+    .on('broadcast',{event:'start'},({payload})=>{ if (NET.host||NET.started||!payload||!Array.isArray(payload.civs)||!payload.civs.every(c=>CIV[c])||!payload.map) return;
+      const me=payload.map[PID]; if (me===undefined){ NET.late=true; onState&&onState(NET.guests); return; }
+      NET.started=true; clearInterval(NET.hello); newGame(payload.civs[me],false,{host:false,civs:payload.civs,ai:payload.ai,me}); })
+    .on('broadcast',{event:'out'},({payload})=>{ if (NET.host||!G||!payload) return; const t=payload.team|0; if (G.team[t]) G.team[t].out=true; if (t===ME){ toast('Tu Centro urbano cayó: quedas fuera. Puedes seguir mirando la partida.'); sfx('lose'); } else if (G.team[t]) notify(ME,'¡'+TC_NAME[t]+' fue derrotado!'); })
+    .on('broadcast',{event:'end'},({payload})=>{ if (!NET.host && G && !G.over && payload){ G.relicWin=!!payload.relic; endGame(payload.win===ME); } })
+    .on('presence',{event:'sync'},()=>{ const st=ch.presenceState(), keys=Object.keys(st);
+      NET.guests=keys.filter(k=>k.startsWith('guest-')).map(k=>({pid:k.slice(6),civ:(st[k][0]||{}).civ,t:(st[k][0]||{}).t||0})).filter(g=>CIV[g.civ]).sort((a,b)=>a.t-b.t);
+      const now=new Set(keys.map(k=>k.replace(/^(host|guest)-/,''))), hostOn=keys.some(k=>k.startsWith('host-'));
+      if (G && NET.started && !G.over){
+        if (NET.map) for (const [pid,slot] of Object.entries(NET.map)){ if (NET.present.has(pid)&&!now.has(pid)) toast(TC_NAME[slot]+' se desconectó'); if (!NET.present.has(pid)&&now.has(pid)&&NET.present.size) toast(TC_NAME[slot]+' volvió'); }
+        if (!host && NET.hostOn && !hostOn) toast('El anfitrión se desconectó: la partida sigue cuando vuelva');
+        if (!host && !NET.hostOn && hostOn && NET.present.size) toast('El anfitrión volvió');
+      }
+      NET.present=now; NET.hostOn=hostOn; onState&&onState(NET.guests); });
   await new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error('sin respuesta del servidor')),20000); ch.subscribe(st=>{ if (st==='SUBSCRIBED'){ clearTimeout(to); res(); } else if (st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED'){ clearTimeout(to); rej(new Error(st)); } }); });
-  await ch.track({role:host?'host':'guest',civ});
-  if (!host){ const hi=()=>NET&&!NET.started&&NET.send('hello',{civ}); hi(); NET.hello=setInterval(hi,1200); }
+  await ch.track({role:host?'host':'guest',civ,t:JOINT});
+  if (!host){ const hi=()=>NET&&!NET.started&&NET.send('hello',{pid:PID,civ}); hi(); NET.hello=setInterval(hi,1500); }
+}
+function netStart(total){ // host: friends in the order they joined take slots 1..k, computers fill the rest
+  if (!NET||!NET.host||NET.started) return; const gs=NET.guests.slice(0,7), N=clamp(Math.max(total,gs.length+1),2,8), keys=Object.keys(CIV);
+  const civs=[NET.civ], ai=[false], map={}; gs.forEach((g,i)=>{ civs.push(g.civ); ai.push(false); map[g.pid]=i+1; });
+  while (civs.length<N){ civs.push(keys[Math.floor(Math.random()*keys.length)]); ai.push(true); }
+  NET.map=map; NET.start={civs,ai,map}; NET.started=true; NET.send('start',NET.start); let k=0; const rs=setInterval(()=>{ if (++k>4||!NET) return clearInterval(rs); NET.send('start',NET.start); },900);
+  newGame(NET.civ,false,{host:true,civs,ai,me:0});
 }
 document.addEventListener('visibilitychange',async()=>{
   if (document.hidden||!NET) return; const st=NET.ch&&NET.ch.state;
   if (st==='joined'){ if (!NET.host&&NET.started) NET.send('full',{}); return; }
   const {code,host,civ,started}=NET, keep=NET; toast('Reconectando…');
-  try { await netOpen(code,host,civ); NET.started=started; if (!host&&started){ NET.got=keep.got; NET.gotCl=keep.gotCl; NET.send('full',{}); } toast('Conectado de nuevo'); }
+  try { const {map,start}=keep; await netOpen(code,host,civ,keep.onState); NET.started=started; NET.map=map; NET.start=start; if (!host&&started){ NET.got=keep.got; NET.gotCl=keep.gotCl; NET.send('full',{}); } toast('Conectado de nuevo'); }
   catch(e){ toast('No se pudo reconectar: revisa tu internet'); }
 });
 function snap(full){
@@ -1223,14 +1267,14 @@ function snap(full){
   }
   const from=full?0:NET.sentCl, cl=G.cleared.slice(from).map(q=>cellOf(q.x,q.y)); NET.sentCl=G.cleared.length;
   return {t:Math.round(G.t*100)/100,u,b,r,cl,cf:from,pz:G.paused?1:0,
-    T:G.team.map(t=>[Math.floor(t.res.food),Math.floor(t.res.wood),Math.floor(t.res.gold),t.age,t.ageUp?1:0,t.assist?1:0,t.stance==='def'?1:0,JOBS.map(k=>Math.round(t.plan[k]))]),
+    T:G.team.map(t=>[Math.floor(t.res.food),Math.floor(t.res.wood),Math.floor(t.res.gold),t.age,t.ageUp?1:0,t.assist?1:0,t.stance==='def'?1:0,JOBS.map(k=>Math.round(t.plan[k])),t.out?1:0]),
     p:G.projs.slice(0,60).map(q=>[Math.round(q.x),Math.round(q.y),Math.round(q.t.x),Math.round(q.t.y-12),q.spd]),
-    bm:NET.beams.splice(0),tx:NET.texts.splice(0),dd:NET.deaths.splice(0)};
+    rl:G.relic?[G.relic.owner,G.relic.cap,Math.round(G.relic.prog*100),Math.round(G.relic.held)]:0,bm:NET.beams.splice(0),tx:NET.texts.splice(0),dd:NET.deaths.splice(0)};
 }
 function applySnap(s){
   if (!s||!Array.isArray(s.u)) return; const now=performance.now(), first=!NET.got; NET.got=true;
-  G.t=+s.t||G.t; G.paused=!!s.pz; $('bPause').textContent=G.paused?'▶':'II';
-  if (Array.isArray(s.T)) s.T.forEach((v,i)=>{ const t=G.team[i]; if (!t||!Array.isArray(v)) return; t.res={food:v[0],wood:v[1],gold:v[2]}; t.age=v[3]; t.ageUp=!!v[4]; if (i!==ME||$('sheet').hidden) t.assist=!!v[5]; t.stance=v[6]?'def':'atk'; if (Array.isArray(v[7])&&$('sheet').hidden) JOBS.forEach((k,j)=>t.plan[k]=v[7][j]); });
+  G.t=+s.t||G.t; G.paused=!!s.pz; if (Array.isArray(s.rl)&&G.relic){ const R=G.relic, was=R.owner; R.owner=s.rl[0]; R.cap=s.rl[1]; R.prog=s.rl[2]/100; R.held=s.rl[3]; if (was!==R.owner&&R.owner>=0) notify(ME,R.owner===ME?'¡Tomaste el Altar de los Mitos!':'¡'+TC_NAME[R.owner]+' tomó el Altar de los Mitos!'); } $('bPause').textContent=G.paused?'▶':'II';
+  if (Array.isArray(s.T)) s.T.forEach((v,i)=>{ const t=G.team[i]; if (!t||!Array.isArray(v)) return; t.res={food:v[0],wood:v[1],gold:v[2]}; t.age=v[3]; t.ageUp=!!v[4]; if (i!==ME||$('sheet').hidden) t.assist=!!v[5]; t.stance=v[6]?'def':'atk'; if (Array.isArray(v[7])&&$('sheet').hidden) JOBS.forEach((k,j)=>t.plan[k]=v[7][j]); t.out=!!v[8]; });
   // wood clearings arrive as a growing list; ask for the whole list if we missed a piece
   if (s.cf>NET.gotCl) NET.send('full',{}); else { for (let i=NET.gotCl-s.cf;i<s.cl.length;i++){ const c=s.cl[i]; if (c>=0&&NAV[c]===1){ const q=cellXY(c); NAV[c]=0; G.cleared.push({x:q.x,y:q.y,a:0,k:Math.random()}); } } NET.gotCl=Math.max(NET.gotCl,s.cf+s.cl.length); EDGES=null; }
   const old=new Map(G.E.map(e=>[e.id,e])), E=[]; let bchg=false;
@@ -1265,21 +1309,27 @@ function guestFrame(dt){ // smooth movement between snapshots and keep animation
   if (!G.paused) G.t+=dt;
 }
 function showOnline(code){
-  const s=$('screen'); s.hidden=false; let civ='imperio';
-  s.innerHTML=`<div class="wrap"><h1 class="logo">En línea</h1><p class="sub">Partida 1 contra 1 con un amigo</p>
+  const s=$('screen'); s.hidden=false; let civ='imperio', total=Math.max(2,PLAYERS);
+  s.innerHTML=`<div class="wrap"><h1 class="logo">En línea</h1><p class="sub">Hasta 8 jugadores en el mapa Gran Río · amigos y computadoras</p>
     <div class="civs" id="ocivs">${Object.entries(CIV).map(([k,c])=>`<button class="civb${k===civ?' tutb':''}" data-oc="${k}"><img alt="" src="${IMG['ic-'+(c.p||'')+'spear'].src}"><span><b>${c.n}</b><small>${c.d}</small></span></button>`).join('')}</div>
-    <div class="card" id="ostat">${code?`Código de la partida: <b>${code}</b>. Elige tu civilización y toca Unirme.`:'Elige tu civilización. Luego crea una partida y pasa el código a tu amigo, o únete con su código.'}</div>
+    <div class="card" id="ostat">${code?`Código de la partida: <b>${code}</b>. Elige tu civilización y toca Unirme.`:'Elige tu civilización. Luego crea una partida y pasa el enlace a tus amigos, o únete con un código.'}</div>
+    <div class="card" id="olist" hidden></div>
     <div class="orow"><button class="play" id="ohost">${code?'Unirme':'Crear partida'}</button>${code?'':`<input id="ocode" maxlength="5" placeholder="CÓDIGO" aria-label="Código de la partida" autocomplete="off"><button class="play alt" id="ojoin">Unirme</button>`}</div>
     <button class="civb" id="oback"><span><b>Volver</b></span></button></div>`;
   for (const el of s.querySelectorAll('[data-oc]')) el.onclick=()=>{ civ=el.dataset.oc; for (const o of s.querySelectorAll('[data-oc]')) o.classList.toggle('tutb',o===el); };
   const stat=m=>$('ostat').innerHTML=m;
+  const list=(gs,host)=>{ const L=$('olist'); if (!L) return; L.hidden=false; const n=host?Math.max(total,gs.length+1):gs.length+1;
+    const rows=[`<li><b style="color:${tcol(0)}">${TC_NAME[0]}</b> · ${host?'Tú':'Anfitrión'} (${CIV[NET.host?NET.civ:'imperio']&&host?CIV[NET.civ].n:'…'})</li>`].concat(gs.slice(0,7).map((g,i)=>`<li><b style="color:${tcol(i+1)}">${TC_NAME[i+1]}</b> · ${!host&&g.pid===PID?'Tú':'Amigo '+(i+1)} (${CIV[g.civ].n})</li>`));
+    for (let i=gs.length+1;i<n;i++) rows.push(`<li><b style="color:${tcol(i)}">${TC_NAME[i]}</b> · Computadora</li>`);
+    L.innerHTML=`<b>Jugadores (${n})</b><ul>${rows.join('')}</ul>`+(host?`<div class="pls">${[2,3,4,5,6,7,8].map(k=>`<button class="plb${k===n?' on':''}" data-ot="${k}"${k<gs.length+1?' disabled':''}>${k}</button>`).join('')}<small>total de jugadores: los lugares sin amigo los juega la computadora</small></div><button class="play" id="ostart"${gs.length?'':' disabled'}>Empezar partida</button>${gs.length?'':'<small style="display:block;margin-top:4px">Espera a que entre al menos un amigo.</small>'}`:`<small>Esperando a que el anfitrión empiece la partida…</small>`);
+    if (host){ for (const el of L.querySelectorAll('[data-ot]')) el.onclick=()=>{ total=+el.dataset.ot; list(NET.guests,true); }; const st=$('ostart'); if (st) st.onclick=()=>netStart(total); } };
   const join=async c=>{ c=(c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if (c.length<4){ stat('Escribe el código de 4 letras que te pasó tu amigo.'); return; }
-    stat('Conectando…'); try { await netOpen(c,false,civ); stat('Conectado. Esperando a que tu amigo tenga abierta la página del juego… Si él cambió de app, pídele que vuelva a Mitos.'); }
+    stat('Conectando…'); try { await netOpen(c,false,civ,gs=>{ if (NET&&NET.late){ stat('Esa partida ya empezó sin ti. Pide a tu amigo que cree otra.'); return; } list(gs,false); }); stat('Conectado. Si el anfitrión cambió de app, pídele que vuelva a Mitos.'); }
     catch(e){ stat('No se pudo conectar ('+e.message+'). Revisa tu internet y el código. <button class="civb" id="oretry"><span><b>Reintentar</b></span></button>'); $('oretry').onclick=()=>join(c); } };
   $('ohost').onclick=async()=>{ audioOn(); if (MOBILE) goFull(); if (code) return join(code);
     const c=Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random()*24)]).join(''), link=location.origin+location.pathname+'?p='+c;
-    stat('Conectando…'); try { await netOpen(c,true,civ,on=>{ if (on&&!NET.started) stat('¡Tu amigo entró! Empezando…'); });
-      stat(`Código: <b style="font-size:20px;letter-spacing:.15em">${c}</b><br>Pásale este enlace a tu amigo: <b id="olink" style="user-select:all;word-break:break-all">${link}</b><br><span class="orow" style="margin-top:6px">${navigator.share?'<button class="civb tutb" id="oshare"><span><b>Compartir (WhatsApp…)</b></span></button>':''}<button class="civb" id="ocopy"><span><b>Copiar enlace</b></span></button></span>Esperando a tu amigo… Después de compartir, <b>vuelve a esta pantalla</b>: la partida empieza cuando tu amigo entre.`);
+    stat('Conectando…'); try { await netOpen(c,true,civ,gs=>list(gs,true)); list([],true);
+      stat(`Código: <b style="font-size:20px;letter-spacing:.15em">${c}</b><br>Pásale este enlace a tus amigos: <b id="olink" style="user-select:all;word-break:break-all">${link}</b><br><span class="orow" style="margin-top:6px">${navigator.share?'<button class="civb tutb" id="oshare"><span><b>Compartir (WhatsApp…)</b></span></button>':''}<button class="civb" id="ocopy"><span><b>Copiar enlace</b></span></button></span>Después de compartir, <b>vuelve a esta pantalla</b>. Cuando tus amigos aparezcan en la lista, toca <b>Empezar partida</b>.`);
       $('ocopy').onclick=()=>{ navigator.clipboard?.writeText(link).then(()=>toast('Enlace copiado'),()=>toast('Mantén presionado el enlace para copiarlo')); };
       if ($('oshare')) $('oshare').onclick=()=>{ navigator.share({title:'Mitos',text:'¡Juguemos Mitos! Entra con este enlace (código '+c+'):',url:link}).catch(()=>{}); };
     } catch(e){ stat('No se pudo crear la partida ('+e.message+'). Revisa tu internet. <button class="civb" id="oretry"><span><b>Reintentar</b></span></button>'); $('oretry').onclick=()=>$('ohost').click(); } };
@@ -1304,7 +1354,7 @@ function showStart(){
   const s=$('screen'); s.style.setProperty('--bg',`url("${IMG.key.src}")`); s.hidden=false;
   s.innerHTML=`<div class="wrap"><h1 class="logo">Mitos</h1><p class="sub">Mapa Gran Río · elige cuántos jugadores y tu civilización</p>
     <div class="pls" role="group" aria-label="Jugadores">${[2,3,4,5,6,7,8].map(n=>`<button class="plb${n===PLAYERS?' on':''}" data-pl="${n}">${n}</button>`).join('')}<small>jugadores (tú + ${PLAYERS-1} ${PLAYERS===2?'computadora':'computadoras'}, todos contra todos)</small></div>
-    ${ONLINE_OK?`<button class="civb tutb" id="onGo"><span><b>Jugar en línea</b><small>1 contra 1 con un amigo, cada uno en su celular o computadora.</small></span></button>`:''}
+    ${ONLINE_OK?`<button class="civb tutb" id="onGo"><span><b>Jugar en línea</b><small>Hasta 8 jugadores: tus amigos, cada uno en su celular o computadora, y la computadora en los lugares que sobren.</small></span></button>`:''}
     ${fullTip()}
     <button class="civb tutb" id="tutGo"><span><b>Tutorial</b><small>Aprende a jugar paso a paso con el Imperio Áureo. El enemigo no ataca hasta que termines.</small></span></button>
     <div class="civs">${Object.entries(CIV).map(([k,c])=>`<button class="civb" data-civ="${k}"><img alt="" src="${IMG['ic-'+(c.p||'')+'spear'].src}"><span><b>${c.n}</b><small>${c.d}</small></span></button>`).join('')}</div>
@@ -1312,7 +1362,7 @@ function showStart(){
       <li><b>Un dedo</b> mueve el mapa, <b>dos dedos</b> hacen zoom. <b>Toca</b> una tropa y luego <b>toca el mapa</b> para mandarla; <b>doble toque</b> elige todas las de ese tipo.</li>
       <li>Tus aldeanos trabajan solos según el <b>Plan</b>. Construye <b>torres</b>, <b>murallas</b> con <b>puertas</b>, un <b>templo</b> para sacerdotes con poderes y un <b>muelle</b> junto al río para pescar y tener galeras. </li>
       ${matchMedia('(pointer:fine)').matches?`<li><b>En computadora:</b> <b>arrastra</b> para mover el mapa (en el trackpad, desliza con dos dedos), clic para elegir (Shift suma), <b>Shift + arrastrar</b> o el botón Área para encerrar tropas, <b>clic derecho</b> para mandar, rueda o pellizco para zoom, flechas o WASD también mueven el mapa. Atajos: <b>B</b> construir, <b>P</b> plan, <b>H</b> ciudad, <b>Q</b> aldeanos sin trabajo, <b>1-4</b> grupos, <b>Espacio</b> pausa, <b>M</b> silencio, <b>Esc</b> cancelar.</li>`:''}
-      <li>En la <b>Edad del Hierro</b> tus soldados y edificios mejoran y aparecen tropas nuevas. El mapa empieza <b>oculto</b>: explora para ver. Si cae tu <b>Centro urbano</b> quedas fuera; gana el último en pie. A las <b>islas</b> se llega en barco de transporte.</li>
+      <li>En la <b>Edad del Hierro</b> tus soldados y edificios mejoran y aparecen tropas nuevas. El mapa empieza <b>oculto</b>: explora para ver. Si cae tu <b>Centro urbano</b> quedas fuera; gana el último en pie. A las <b>islas</b> se llega en barco de transporte. En las ruinas del centro está el <b>Altar de los Mitos</b>: quien lo tome gana oro, y si lo mantiene 8 minutos gana la partida.</li>
     </ul></div></div>`;
   if ($('fsGo')) $('fsGo').onclick=goFull; for (const el of s.querySelectorAll('[data-civ]')) el.onclick=()=>{ if (MOBILE) goFull(); newGame(el.dataset.civ,false,null,PLAYERS); };
   for (const el of s.querySelectorAll('[data-pl]')) el.onclick=()=>{ PLAYERS=+el.dataset.pl; try { localStorage.setItem('mitos-players',PLAYERS); } catch(e){} showStart(); }; $('tutGo').onclick=()=>newGame('imperio',true); if ($('onGo')) $('onGo').onclick=()=>showOnline(); resize();
@@ -1320,7 +1370,7 @@ function showStart(){
 function endGame(won){
   G.over=true; sfx(won?'win':'lose');
   setTimeout(()=>{ const s=$('screen'); s.hidden=false; const t=Math.floor(G.t);
-    s.innerHTML=`<div class="wrap"><h1 class="logo" style="color:${won?'#f7dfa4':'#ff8a7a'}">${won?'Victoria':'Derrota'}</h1><p class="sub">${won?'Destruiste el Centro urbano rival':'Tu Centro urbano cayó'} · ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</p>
+    s.innerHTML=`<div class="wrap"><h1 class="logo" style="color:${won?'#f7dfa4':'#ff8a7a'}">${won?'Victoria':'Derrota'}</h1><p class="sub">${G.relicWin?(won?'Mantuviste el Altar de los Mitos':'Otro jugador mantuvo el Altar de los Mitos'):won?(G.N>2?'Eres el último en pie':'Destruiste el Centro urbano rival'):'Tu Centro urbano cayó'} · ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</p>
       <div class="stats"><div><small>Enemigos</small>${G.stats.kills}</div><div><small>Perdidos</small>${G.stats.lost}</div><div><small>Edad</small>${G.team[ME].age>=3?'Hierro':'Bronce'}</div></div>
       <button class="play" id="go">Jugar otra vez</button></div>`;
     $('go').onclick=()=>{ netClose(); showStart(); }; resize(); },1200);
@@ -1332,7 +1382,7 @@ function loop(now){
   const dt=Math.min(.05,(now-last)/1000); last=now;
   $('rotate').hidden = stayV || !G || G.over || SW>=SH;
   if (G){ keyPan(dt); if (NET&&!NET.host&&NET.started) guestFrame(dt); else if (!G.paused&&!G.over) update(dt);
-    if (NET&&NET.host&&NET.started&&!G.over){ NET.acc+=dt; if (NET.acc>=.125){ NET.acc=0; NET.send('s',snap(NET.needFull)); NET.needFull=false; } } draw(); hud(); trayT-=dt; if (trayT<=0){ trayT=.5; renderTray(true); tutTick(); } }
+    if (NET&&NET.host&&NET.started&&!G.over){ NET.acc+=dt; if (NET.acc>=(G.E.length>420?.2:.125)){ NET.acc=0; NET.send('s',snap(NET.needFull)); NET.needFull=false; } } draw(); hud(); trayT-=dt; if (trayT<=0){ trayT=.5; renderTray(true); tutTick(); } }
   requestAnimationFrame(loop);
 }
 resize(); ready.then(()=>{ prepArt(); for (const t in SHEET) buildAnim(t); const pc=new URLSearchParams(location.search).get('p'); if (pc&&ONLINE_OK) showOnline(pc.toUpperCase().slice(0,5)); else showStart(); requestAnimationFrame(loop); });

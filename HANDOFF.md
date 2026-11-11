@@ -182,8 +182,35 @@ Read this first. It summarizes the project so far so a new conversation can cont
     - It reuses the galley art for now.
   - Not done yet:
     - The computer does not use transports or settle islands.
-    - Online for more than 2 players.
     - Its own art for the transport boat.
+- Online up to 8, bridges, Altar of the Myths, sharper map (2026-11-11, second pass):
+  - Online lobby:
+    - The host creates a room and friends join with the link; the lobby lists everyone with their colour.
+    - The host picks the total number of players (2-8); computers fill the free slots. "Empezar partida"
+      (`netStart`) assigns host = slot 0 and friends in join order.
+    - Presence keys use a stable per-tab id (`PID`) so a reconnect keeps the slot. `start` carries
+      `{civs, ai, map: pid->slot}` and is resent a few times and on a late `hello`.
+    - Guests send `act` as `{t: slot, a}`.
+    - Elimination is broadcast as `out`. An eliminated human keeps watching (the host keeps simulating);
+      `end` closes the match for all.
+    - Snapshots slow to 5 per second above 420 entities.
+    - Tested with 3 emulated phones plus 1 computer slot.
+  - Bridges:
+    - The painted stony fords were replaced by bridge sprites: `bridge-h` for the top and bottom crossings,
+      `bridge-v` for the left and right.
+    - Only the deck band is walkable (`BRIDGES[].band`, cells = 3); the rest of the old ford is water, and
+      boats pass under.
+  - Altar of the Myths (`RELIC`, centre of the ruins, sprite `relic.webp`):
+    - The only team with units within 200 captures it in 20 s.
+    - The owner earns 1.2 gold/s and wins after holding it 8 minutes. Everyone is warned at capture and with
+      2 minutes left; the time left shows in the top bar.
+    - It is synced in snapshots (`rl`).
+  - Nav grid cleaned: thin or isolated open pockets inside forest (not roads, not gold) became forest, so troops
+    no longer walk through trees.
+  - Map tiles:
+    - Computers with a big screen load an 8K set (`map8hd-ij`, 4x2); phones keep the lighter 5.7K set, now
+      lightly sharpened.
+- Online for more than 2 players: done (see above).
 - User feedback still open: the game is hard to read and play; asked to improve graphics.
 - Agreed next steps:
   1. Done: unit animations (procedural from the sprites).
