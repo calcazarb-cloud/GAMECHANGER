@@ -319,11 +319,9 @@ function newGame(civ,tut,net){ audioOn(); sndBtn(); ME=net&&!net.host?1:0; if (!
   if (!net || net.host){
   // resources
   NAV.set(NAV0); DYN.fill(0); WOOD.fill(0); WOODOBJ.clear(); EDGES=null; G.cleared=[]; for (let c=0;c<NW*NH;c++) if (NAV[c]===1) WOOD[c]=70;
-  for (const [x,y] of [[225,82],[265,598],[995,112],[1220,590]]) addRes('gold',x,y,1400);
+  for (const [x,y] of [[225,82],[265,598],[995,112],[1220,590]]) addRes('gold',x,y,3000); // was 1400: ran out too fast
   { const pts=[]; for (let c=0;c<NW*NH;c++){ if (NAV[c]!==2) continue; const x=(c%NW+.5)*NC, y=((c/NW|0)+.5)*NC; if (y<120||y>WH-120) continue; let deep=true; for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if (NAV[c+dy*NW+dx]!==2) deep=false; if (deep && pts.every(q=>Math.hypot(q[0]-x,q[1]-y)>210)) pts.push([x,y]); }
     for (const [x,y] of pts) addRes('fish',x/K,y/K,450); }
-  // logging trail from the east meadow down to the bottom-right gold (the forest sealed it off from that base)
-  for (let c=0;c<NW*NH;c++){ const p=cellXY(c); if (NAV[c]===1 && p.x>2410&&p.x<2480 && p.y>990&&p.y<1150) clearCell(c); }
   layoutBase(0,190*K,345*K); layoutBase(1,1150*K,345*K);
   for (const team of [0,1]){
     const tc=G.E.find(e=>e.kind==='bld'&&e.type==='tc'&&e.team===team), dir=team?-1:1;
@@ -410,7 +408,7 @@ function nearestNode(v,rtype){
 function layoutBase(team,cx,cy){
   // the town grows on open meadow: every building looks for free grass near where it belongs
   const dir=team?-1:1; addBld('tc',team,cx,cy,true);
-  const spot=(type,px,py,maxD)=>{ let best=null,bd=1e9; for (let d=0;d<=(maxD||300);d+=14) for (let a=0;a<6.28;a+=.3){ const x=px+Math.cos(a)*d, y=py+Math.sin(a)*d*.85; if (!canPlace(type,x,y,team)) continue; const s=d+Math.hypot(x-cx,y-cy)*.15; if (s<bd){ bd=s; best={x,y}; } } return best; };
+  const spot=(type,px,py,maxD)=>{ let best=null,bd=1e9; for (let d=0;d<=(maxD||300);d+=14) for (let a=0;a<6.28;a+=.3){ const x=px+Math.cos(a)*d, y=py+Math.sin(a)*d*.85; if (!canPlace(type,x,y,team)) continue; if (type==='mine'){ const P=findPath(cx+dir*90,cy,x,y,type==='mine'?60:40,team,false); if (!P||P.partial||P.pts.length>70) continue; } const s=d+Math.hypot(x-cx,y-cy)*.15; if (s<bd){ bd=s; best={x,y}; } } return best; };
   const put=(type,px,py,maxD)=>{ const p=spot(type,px,py,maxD); if (p) addBld(type,team,p.x,p.y,true); return p; };
   put('house',cx-dir*40,cy-135); put('house',cx+dir*95,cy-120); put('farm',cx+dir*10,cy+130);
   const ec=nearEdge(cx,cy); if (ec!==null){ const p=cellXY(ec); put('lumber',cx+(p.x-cx)*.8,cy+(p.y-cy)*.8,220); }
