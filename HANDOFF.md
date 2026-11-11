@@ -43,7 +43,7 @@ Read this first. It summarizes the project so far so a new conversation can cont
   shaman speeds up nearby troops), Reino de las Arenas (khopesh guard, war chariot, desert archer has more range,
   farms give +25% food, Sun Priest burns a group with a beam). Battering ram for everyone (only hits buildings).
   New Temple building trains the priest. Art keys: civ prefix `e-` / `a-` (Imperio has none), `3` = Iron Age.
-- Map (2026-11-04): new sharp 4K painted map `assets/map-4k.webp` (same layout: river with two fords), minimap
+- Map (2026-11-04, replaced 2026-11-11 by Gran Río): sharp 4K painted map `assets/map-4k.webp` (same layout: river with two fords), minimap
   `map-mini.jpg`; the navigation grid was re-traced from it (source copy in `concept-art/mapa-4k.jpg`).
 - Readability fixes (2026-11-04): attack and work animations slowed down (attack 0.8 s, hit lands on the strike
   frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
@@ -138,6 +138,52 @@ Read this first. It summarizes the project so far so a new conversation can cont
 - Online robustness (2026-11-06): the guest also puts its civ in presence so the host starts even if a hello was
   missed (e.g. the host was in WhatsApp sharing the link); on returning to the page, a dropped channel reconnects
   and the guest asks for a full snapshot; lobby errors show the reason and a Reintentar button.
+- Gran Río map, up to 8 players, fog of war, transport boats (2026-11-11):
+  - Map:
+    - Layout (Carlos chose option B, doubled for 8 players): two wide rivers cross in a round central lake.
+    - Islands: a big central island (ruins, 2 gold) and four small islands with gold. They can only be reached by
+      boat.
+    - Land: four land quadrants with two home meadows each.
+    - Fords: four shallow stony fords at the map edges link the quadrants.
+    - 18 gold mines (`GOLDS`) with 3000 each; eight home slots (`SLOTS`).
+  - Art:
+    - Painted by Higgsfield from a layout sketch (`concept-art/mapa-8-plano.png`, raw output
+      `concept-art/mapa-8-jugadores.png`).
+    - Upscaled per quadrant, seams blended, then cut into 3x2 tiles (`assets/map8-ij.webp`, 1920x1620 each;
+      only on-screen tiles are drawn) plus `map8-mini.jpg`.
+    - World is 5376x3024 (`WW`/`WH`). The nav grid is 336x189, traced by colour from the art: water, dark
+      forest, ford rectangles, a water ring cut around the top island. The old valley map and its assets were
+      removed.
+  - Players:
+    - The start screen picks 2-8 players (`PLAYERS`, saved in localStorage): you plus computers, free-for-all.
+    - Each slot has a colour (`TC_COL`, `TC_NAME`) used for unit rings, banners, bars and the minimap. Sprite
+      glow is still blue for yours and red for every rival.
+    - `G.team[i]` carries `ai`, `out` and `slot`.
+    - `aiTick(me)` serves any AI team: it attacks the nearest rival town (sometimes the second nearest),
+      defends against any rival nearby and builds toward the map centre.
+    - Losing your Town Center eliminates you (`eliminate`): the rest of that town crumbles. The last player
+      standing wins.
+    - Online is still 1v1 (slots 0 and 1, opposite corners).
+  - Performance:
+    - Spatial buckets (`buildSpatial`, `nearList`, 128 px) are used by unit separation, the building push and
+      `enemyNear`. Per-frame target counts (`TGTN`) replace O(n²) filters.
+    - Drawing culls off-screen objects.
+    - 8 players at about 300 units: 13.6 ms per frame down to 2 ms (headless).
+  - Fog of war (`FOG`, per cell: 0 unseen, 1 explored, 2 in sight):
+    - Recomputed every 0.2 s from your units and buildings (`sightOf`), blurred twice, drawn as one scaled
+      canvas.
+    - Rival units show only in sight; rival buildings stay as remembered once spotted.
+    - Picking and the minimap respect the fog. Everything is revealed when you are out or the game ends.
+  - Transport boat (`transport`, at the dock, 110 wood, carries 8):
+    - To board: select troops and tap your boat; they walk to the shore next to it and climb in (`updBoard`,
+      `u.inBoat`).
+    - To land: select the boat and tap land; it sails to the nearest water and unloads (`unloadBoat`).
+    - Riders stay in `G.E`, hidden and skipped, so population still counts them. They die if the boat sinks.
+    - It reuses the galley art for now.
+  - Not done yet:
+    - The computer does not use transports or settle islands.
+    - Online for more than 2 players.
+    - Its own art for the transport boat.
 - User feedback still open: the game is hard to read and play; asked to improve graphics.
 - Agreed next steps:
   1. Done: unit animations (procedural from the sprites).
