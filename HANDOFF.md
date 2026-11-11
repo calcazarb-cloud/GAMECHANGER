@@ -49,8 +49,10 @@ Read this first. It summarizes the project so far so a new conversation can cont
   frame); units only get a small size boost when zoomed far out (`usc`); buildings exported at about 3.6x their
   on-map width so they stay sharp.
 - Higgsfield: 28 credits left (medium 1k image = 0.5, high 4K map = 4.25).
-- Computer play (2026-11-04): left click selects (Shift adds), drag to box-select, right click orders (or sets the
-  rally point / cancels placement), wheel zoom, arrows/WASD or screen edge to pan. Shortcuts: B build, P plan,
+- Computer play (2026-11-04, revised 2026-11-11): left click selects (Shift adds), left-drag pans the map (like on
+  phones), Shift+drag or the Área button box-selects, right click orders (or sets the rally point / cancels
+  placement). Trackpad two-finger swipe pans, pinch (ctrl+wheel) or mouse wheel zooms, arrows/WASD pan. No edge
+  scrolling: on a Mac/laptop it moved the map whenever the mouse went to the side menus. Shortcuts: B build, P plan,
   H city, Q idle villagers, 1-4 groups, Space pause, Esc cancel. UI scales up on big screens; the controls are listed
   on the start screen only on devices with a mouse. Phone controls are unchanged.
 - Added (2026-11-04, second round):

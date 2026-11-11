@@ -846,7 +846,7 @@ cv.addEventListener('pointermove',e=>{
     G.cam.x-=(mx-pinch.mx)/G.cam.z; G.cam.y-=(my-pinch.my)/G.cam.z; pinch={d,mx,my}; return; }
   if (!drag) return;
   if (drag.mode==='pan'){ G.cam.x=drag.cx-(sx-drag.sx)/G.cam.z; G.cam.y=drag.cy-(sy-drag.sy)/G.cam.z; return; }
-  if (drag.mode==='pending' && Math.hypot(sx-drag.sx,sy-drag.sy)>10){ if (G.place) drag.mode='ghost'; else if (e.pointerType==='mouse' || G.selMode) drag.mode='box'; else { drag.mode='pan'; drag.cx=G.cam.x+(sx-drag.sx)/G.cam.z; drag.cy=G.cam.y+(sy-drag.sy)/G.cam.z; } }
+  if (drag.mode==='pending' && Math.hypot(sx-drag.sx,sy-drag.sy)>10){ if (G.place) drag.mode='ghost'; else if (G.selMode || e.shiftKey) drag.mode='box'; else { drag.mode='pan'; drag.cx=G.cam.x+(sx-drag.sx)/G.cam.z; drag.cy=G.cam.y+(sy-drag.sy)/G.cam.z; } }
   if (drag.mode==='box') drag.w1=toWorld(sx,sy);
   if (drag.mode==='ghost'){ const w=toWorld(sx,sy); G.place.x=w.x; G.place.y=w.y-40/G.cam.z; }
 });
@@ -862,7 +862,10 @@ const endPtr=e=>{
   drag=null;
 };
 cv.addEventListener('pointerup',endPtr); cv.addEventListener('pointercancel',endPtr);
-cv.addEventListener('wheel',e=>{ e.preventDefault(); const r=$('app').getBoundingClientRect(); const before=toWorld(e.clientX-r.left,e.clientY-r.top); G.cam.z*=e.deltaY<0?1.12:.89; clampCam(); const after=toWorld(e.clientX-r.left,e.clientY-r.top); G.cam.x+=before.x-after.x; G.cam.y+=before.y-after.y; },{passive:false});
+cv.addEventListener('wheel',e=>{ e.preventDefault(); if (!G) return; const r=$('app').getBoundingClientRect();
+  const pad=!e.ctrlKey && (Math.abs(e.deltaX)>0.5 || (e.deltaMode===0 && Math.abs(e.deltaY)<40)); // trackpad two-finger swipe
+  if (pad){ G.cam.x+=e.deltaX/G.cam.z; G.cam.y+=e.deltaY/G.cam.z; return; }
+  const before=toWorld(e.clientX-r.left,e.clientY-r.top); const k=e.ctrlKey?Math.exp(-e.deltaY*.01):(e.deltaY<0?1.12:.89); G.cam.z*=k; clampCam(); const after=toWorld(e.clientX-r.left,e.clientY-r.top); G.cam.x+=before.x-after.x; G.cam.y+=before.y-after.y; },{passive:false});
 const keys={}; addEventListener('keydown',e=>{ const k=e.key.toLowerCase(); keys[k]=true;
   if (!G||G.over||e.target.tagName==='INPUT'&&e.target.type!=='range') return;
   if (k==='escape'){ if (!$('sheet').hidden) $('sheet').hidden=true; else { G.place=null; G.sel=[]; G.selB=null; rebuildDyn(); } renderTray(); return; }
@@ -876,7 +879,8 @@ cv.addEventListener('pointermove',e=>{ if (e.pointerType!=='mouse'||!G) return; 
   const h=pick(toWorld(mouse.x,mouse.y)); cv.style.cursor=h&&h.team===ME?'pointer':h&&h.team===1-ME&&G.sel.length?'crosshair':'default'; });
 addEventListener('blur',()=>{ mouse.in=false; for (const k in keys) keys[k]=false; }); addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 function keyPan(dt){ const s=520*dt/G.cam.z;
-  if (mouse.in && !drag && document.hasFocus()){ const E=14, tr=$('tray').getBoundingClientRect(), app=$('app').getBoundingClientRect(), right=tr.width&&tr.left>app.left+SW/2?tr.left-app.left:SW; if (mouse.x<E) G.cam.x-=s; if (mouse.x>right-E) G.cam.x+=s; if (mouse.y<E) G.cam.y-=s; if (mouse.y>SH-E) G.cam.y+=s; } if (keys.a||keys.arrowleft) G.cam.x-=s; if (keys.d||keys.arrowright) G.cam.x+=s; if (keys.w||keys.arrowup) G.cam.y-=s; if (keys.s||keys.arrowdown) G.cam.y+=s; }
+  // no edge scrolling: on laptops it fought with reaching the menu; drag, two-finger swipe, arrows or WASD move the map
+  if (keys.a||keys.arrowleft) G.cam.x-=s; if (keys.d||keys.arrowright) G.cam.x+=s; if (keys.w||keys.arrowup) G.cam.y-=s; if (keys.s||keys.arrowdown) G.cam.y+=s; }
 
 function pick(w){
   const tol=10/G.cam.z; let best=null,bd=1e9;
@@ -1028,7 +1032,7 @@ function renderTray(soft){
   on('cancelB',()=>{ act({a:'cancelB',id:G.selB.id}); G.selB=null; renderTray(); });
   on('desel',()=>{ G.sel=[]; renderTray(); });
   on('plan',openPlan); on('build',openBuild);
-  on('area',()=>{ G.selMode=!G.selMode; toast(G.selMode?'Arrastra un dedo para encerrar tropas en un recuadro':'Modo área desactivado'); renderTray(); });
+  on('area',()=>{ G.selMode=!G.selMode; toast(G.selMode?'Arrastra para encerrar tropas en un recuadro':'Modo área desactivado'); renderTray(); });
   on('plan2',()=>{ act({a:'plan2',ids:G.sel.map(u=>u.id)}); toast('Aldeanos devueltos al plan económico'); G.sel=[]; renderTray(); });
   on('retreat',()=>act({a:'retreat',ids:G.sel.map(u=>u.id)}));
   on('stop',()=>act({a:'stop',ids:G.sel.map(u=>u.id)}));
@@ -1217,7 +1221,7 @@ function showStart(){
     <div class="card"><ul>
       <li><b>Un dedo</b> mueve el mapa, <b>dos dedos</b> hacen zoom. <b>Toca</b> una tropa y luego <b>toca el mapa</b> para mandarla; <b>doble toque</b> elige todas las de ese tipo.</li>
       <li>Tus aldeanos trabajan solos según el <b>Plan</b>. Construye <b>torres</b>, <b>murallas</b> con <b>puertas</b>, un <b>templo</b> para sacerdotes con poderes y un <b>muelle</b> junto al río para pescar y tener galeras. </li>
-      ${matchMedia('(pointer:fine)').matches?`<li><b>En computadora:</b> clic para elegir (Shift suma), arrastra para encerrar tropas, <b>clic derecho</b> para mandar, rueda para zoom, mueve el mapa con flechas, WASD o el borde de la pantalla. Atajos: <b>B</b> construir, <b>P</b> plan, <b>H</b> ciudad, <b>Q</b> aldeanos sin trabajo, <b>1-4</b> grupos, <b>Espacio</b> pausa, <b>M</b> silencio, <b>Esc</b> cancelar.</li>`:''}
+      ${matchMedia('(pointer:fine)').matches?`<li><b>En computadora:</b> <b>arrastra</b> para mover el mapa (en el trackpad, desliza con dos dedos), clic para elegir (Shift suma), <b>Shift + arrastrar</b> o el botón Área para encerrar tropas, <b>clic derecho</b> para mandar, rueda o pellizco para zoom, flechas o WASD también mueven el mapa. Atajos: <b>B</b> construir, <b>P</b> plan, <b>H</b> ciudad, <b>Q</b> aldeanos sin trabajo, <b>1-4</b> grupos, <b>Espacio</b> pausa, <b>M</b> silencio, <b>Esc</b> cancelar.</li>`:''}
       <li>En la <b>Edad del Hierro</b> tus soldados y edificios mejoran y aparecen tropas nuevas. Gana quien destruya el <b>Centro urbano</b> rival.</li>
     </ul></div></div>`;
   if ($('fsGo')) $('fsGo').onclick=goFull; for (const el of s.querySelectorAll('[data-civ]')) el.onclick=()=>{ if (MOBILE) goFull(); newGame(el.dataset.civ); }; $('tutGo').onclick=()=>newGame('imperio',true); if ($('onGo')) $('onGo').onclick=()=>showOnline(); resize();
