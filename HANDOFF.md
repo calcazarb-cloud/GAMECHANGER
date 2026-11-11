@@ -57,7 +57,8 @@ Read this first. It summarizes the project so far so a new conversation can cont
   - The camera can scroll the map edges clear of the right-hand menu on computers (`sideUI()` in `clampCam`).
     Before, the menu covered the east edge and the bottom-right gold.
   - At game start a logging trail is cleared (`clearCell`) from the east meadow down to the bottom-right gold. The
-    painted forest had sealed it off from the east base: about 170 path cells, now 31.
+    painted forest had sealed it off from the east base: about 170 path cells, now 31. The painted grass gap
+    south of the east meadow down to the bottom road was traced as forest; it is now open (in `NAV0`).
   - Units get stuck less:
     - idle units step aside for walking ones (weighted separation);
     - a unit that barely moves for 1.2 s follows the grid path without cutting corners and slips through the crowd
